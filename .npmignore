@@ -1,0 +1,5 @@
+.vscode
+.env
+.prettierrc
+.eslintrc
+.eslintignore
