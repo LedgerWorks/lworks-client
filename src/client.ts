@@ -17,9 +17,7 @@ function getToken(network: Network): string | undefined {
 
   const fallbackToken = process.env.LWORKS_TOKEN;
 
-  const configuredAccessToken = getAccessToken() ?? undefined;
-
-  return networkToken ?? fallbackToken ?? configuredAccessToken;
+  return networkToken ?? fallbackToken ?? getAccessToken() ?? undefined;
 }
 
 function timeElapsed(startedAt: number): number {
