@@ -121,8 +121,8 @@ export async function callMirror<T>(
   }
 
   const configuredNetwork = getNetwork();
-  if (configuredNetwork && endpoint) {
-    return get<T>(configuredNetwork, endpoint);
+  if (configuredNetwork && networkOrEndpoint) {
+    return get<T>(configuredNetwork, networkOrEndpoint);
   }
 
   throw new Error("Unexpected invocation");
