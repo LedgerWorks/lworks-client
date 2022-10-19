@@ -33,7 +33,7 @@ export function lookup<E extends NumericEnum>(someEnum: E, v: number): E[keyof E
 export function lookup<E extends StringEnum>(someEnum: E, v: string): E[keyof E] | undefined;
 export function lookup<E extends AllTheEnums>(
   someEnum: E,
-  v: string | number
+  v: string | number | undefined
 ): E[keyof E] | undefined {
   if (typeof v === "string") {
     return stringLookup(someEnum, v);
