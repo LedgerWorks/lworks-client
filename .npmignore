@@ -3,4 +3,9 @@
 .prettierrc
 .eslintrc
 .eslintignore
+.gitignore
+tsconfig.json
+tsconfig.eslint.json
 examples
+src/generated/openapi.yml
+src/generated/README.md

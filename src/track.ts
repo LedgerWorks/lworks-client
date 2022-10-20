@@ -1,6 +1,8 @@
-import crypto from "node:crypto";
-import fs from "node:fs";
-import path from "node:path";
+// Ideally these would all be `node:` prefixed to ensure there isn't an npm collision
+// but doing so was causing downstream consumption issues.
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 import retry from "async-retry";
 import Mixpanel from "mixpanel";
