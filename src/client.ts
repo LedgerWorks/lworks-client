@@ -116,8 +116,8 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
 export async function callMirror<T>(endpoint: string): Promise<T>;
 /**
  * Call the mirror the the specified network and endpoint
- * @param network "mainnet" | "testnet"
  * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
+ * @param options An object to optionally specify the network and access credentials
  */
 export async function callMirror<T>(endpoint: string, options: MirrorOptions): Promise<T>;
 export async function callMirror<T>(endpoint: string, options?: MirrorOptions): Promise<T> {

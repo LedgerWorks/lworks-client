@@ -17,7 +17,7 @@ export function decodeBase64Message(messageContainer: HasMessage): string {
 }
 
 /**
- * Get the base64-decoded string message a message container
+ * JSON parse the the base64 encoded message within a message container
  * @param messageContainer A container object with a base64'ed message property
  */
 export function parseBase64Message<T>(messageContainer: HasMessage): T {
@@ -71,6 +71,13 @@ async function getAllMessages({
   return messages.sort((a, b) => a.sequence_number - b.sequence_number);
 }
 
+/**
+ * Gets all HCS Messages from a given topic. This will automatically handle all paging and will
+ * return the messages in ascending order based on their sequence number. It will not do any parsing
+ * of the messages (ie base64 decoding)
+ * @param options Object which must specify the topic ID to parse and optionally the network and
+ * access credentials to use.
+ */
 export async function getAllHCSMessages({
   network = getNetwork(),
   accessToken,
@@ -84,6 +91,12 @@ export async function getAllHCSMessages({
   return getAllMessages({ network, topicId, accessToken });
 }
 
+/**
+ * Get and base 64 decode a single HCS Message by topic ID and sequence number. This will assemble
+ * a message that spans multiple transactions/sequence numbers.
+ * @param options Object which must specify the topic ID and sequence number to parse this can
+ * optionally include the network and access credentials to use.
+ */
 export async function getCompleteHCSMessageBySequenceNumber({
   network = getNetwork(),
   accessToken,
