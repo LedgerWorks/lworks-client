@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "rimraf ./dist",
     "build:types": "tsc",
+    "prebuild:ts": "npx typedoc",
     "build:ts": "esbuild src/index.ts --bundle --platform=node --target=node16 --outfile=dist/index.js --external:./node_modules/*",
     "build": "npm-run-all build:types",
     "start": "node dist/index.js",

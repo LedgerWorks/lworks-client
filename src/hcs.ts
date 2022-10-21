@@ -25,29 +25,43 @@ export function parseBase64Message<T>(messageContainer: HasMessage): T {
   return JSON.parse(decodedAsString) as T;
 }
 
+function withAccessToken({ network, accessToken }: { accessToken?: string; network: Network }) {
+  return { network, ...(accessToken ? { accessToken } : undefined) };
+}
+
 function getMessage({
   network,
   topicId,
   sequenceNumber,
+  accessToken,
 }: {
   network: Network;
   topicId: string;
   sequenceNumber: number;
+  accessToken?: string;
 }) {
   return callMirror<HCSTopicMessage>(
-    network,
-    `/api/v1/topics/${topicId}/messages/${sequenceNumber}`
+    `/api/v1/topics/${topicId}/messages/${sequenceNumber}`,
+    withAccessToken({ network, accessToken })
   );
 }
 
-async function getAllMessages({ network, topicId }: { network: Network; topicId: string }) {
+async function getAllMessages({
+  network,
+  topicId,
+  accessToken,
+}: {
+  network: Network;
+  topicId: string;
+  accessToken?: string;
+}) {
   const messages: Array<HCSTopicMessage> = [];
   let next = "";
   do {
     // eslint-disable-next-line no-await-in-loop
     const results = await callMirror<HCSTopicMessagesResponse>(
-      network,
-      next || `/api/v1/topics/${topicId}/messages`
+      next || `/api/v1/topics/${topicId}/messages`,
+      withAccessToken({ network, accessToken })
     );
     if (results.messages) {
       messages.push(...results.messages);
@@ -59,26 +73,30 @@ async function getAllMessages({ network, topicId }: { network: Network; topicId:
 
 export async function getAllHCSMessages({
   network = getNetwork(),
+  accessToken,
   topicId,
 }: {
   network?: Network | null;
+  accessToken?: string;
   topicId: string;
 }): ReturnType<typeof getAllMessages> {
   invariant(network, "Network not correctly configured or passed");
-  return getAllMessages({ network, topicId });
+  return getAllMessages({ network, topicId, accessToken });
 }
 
 export async function getCompleteHCSMessageBySequenceNumber({
   network = getNetwork(),
+  accessToken,
   topicId,
   sequenceNumber,
 }: {
   network?: Network | null;
+  accessToken?: string;
   topicId: string;
   sequenceNumber: number;
 }) {
   invariant(network, "Network not correctly configured or passed");
-  const hcsResult = await getMessage({ topicId, sequenceNumber, network });
+  const hcsResult = await getMessage({ topicId, sequenceNumber, network, accessToken });
   if (!hcsResult || !hcsResult.chunk_info) {
     return null;
   }

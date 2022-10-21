@@ -24,14 +24,22 @@ function timeElapsed(startedAt: number): number {
   return Date.now() - startedAt;
 }
 
-async function get<T>(network: Network, endpoint: string): Promise<T> {
-  const startAt = Date.now();
-  const networkStack = network.toString();
-  let attempts = 0;
-  const baseUrl = NetworkHostMap[network];
-  const accessToken = getToken(network);
+type MirrorOptions = {
+  network: Network | "mainnet" | "testnet";
+  token?: string;
+};
+type GetMirrorOptions = Omit<MirrorOptions, "network"> & {
+  network: Network;
+};
 
-  invariant(accessToken, `Missing access token for ${network}`);
+async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
+  const startAt = Date.now();
+  const networkStack = options.network.toString();
+  let attempts = 0;
+  const baseUrl = NetworkHostMap[options.network];
+  const accessToken = options.token ?? getToken(options.network);
+
+  invariant(accessToken, `Missing access token for ${options.network}`);
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -111,18 +119,15 @@ export async function callMirror<T>(endpoint: string): Promise<T>;
  * @param network "mainnet" | "testnet"
  * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
  */
-export async function callMirror<T>(network: Network, endpoint: string): Promise<T>;
-export async function callMirror<T>(
-  networkOrEndpoint: string | Network,
-  endpoint?: string
-): Promise<T> {
-  if (typeof endpoint === "string") {
-    return get<T>(knownLookup(Network, networkOrEndpoint), endpoint);
+export async function callMirror<T>(endpoint: string, options: MirrorOptions): Promise<T>;
+export async function callMirror<T>(endpoint: string, options?: MirrorOptions): Promise<T> {
+  if (typeof options !== "undefined") {
+    return get<T>(endpoint, { ...options, network: knownLookup(Network, options.network) });
   }
 
   const configuredNetwork = getNetwork();
-  if (configuredNetwork && networkOrEndpoint) {
-    return get<T>(configuredNetwork, networkOrEndpoint);
+  if (configuredNetwork && endpoint) {
+    return get<T>(endpoint, { network: configuredNetwork });
   }
 
   throw new Error("Unexpected invocation");

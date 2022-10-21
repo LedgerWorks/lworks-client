@@ -14,5 +14,11 @@
   ],
   "include": [
     "src/**/*.ts"
-  ]
+  ],
+  "typedocOptions": {
+    "entryPoints": [
+      "src/index.ts"
+    ],
+    "out": "docs"
+  }
 }
