@@ -26,7 +26,7 @@ function timeElapsed(startedAt: number): number {
 
 type MirrorOptions = {
   network: Network | "mainnet" | "testnet";
-  token?: string;
+  accessToken?: string;
 };
 type GetMirrorOptions = Omit<MirrorOptions, "network"> & {
   network: Network;
@@ -37,7 +37,7 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
   const networkStack = options.network.toString();
   let attempts = 0;
   const baseUrl = NetworkHostMap[options.network];
-  const accessToken = options.token ?? getToken(options.network);
+  const accessToken = options.accessToken ?? getToken(options.network);
 
   invariant(accessToken, `Missing access token for ${options.network}`);
 
