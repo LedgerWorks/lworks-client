@@ -1,8 +1,6 @@
 // Ideally these would all be `node:` prefixed to ensure there isn't an npm collision
 // but doing so was causing downstream consumption issues.
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
 
 import retry from "async-retry";
 import Mixpanel from "mixpanel";
@@ -11,9 +9,7 @@ import { getDisabledTracking } from "./config";
 
 const superProps: Record<string, string | number | Date | boolean | undefined> = {
   environment: process.env.ENVIRONMENT,
-  libraryVersion: JSON.parse(
-    fs.readFileSync(path.join(path.resolve(__dirname, ".."), "package.json"), "utf8")
-  ).version,
+  libraryVersion: "0.3.0-beta.2",
 };
 
 let mixpanel: Mixpanel.Mixpanel | null = null;
