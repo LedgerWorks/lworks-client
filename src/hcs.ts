@@ -1,7 +1,7 @@
 import invariant from "tiny-invariant";
 
-import { HCSTopicMessage, HCSTopicMessagesResponse } from "./api-types";
-import { callMirror } from "./client";
+import { HCSTopicMessage, HCSTopicMessagesResponse } from "./mirror-api-types";
+import { callMirror } from "./mirror-client";
 import { getNetwork } from "./config";
 import { Network } from "./networks";
 

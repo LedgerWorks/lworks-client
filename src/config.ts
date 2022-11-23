@@ -1,5 +1,7 @@
 import { Network } from "./networks";
 
+export const libraryVersion = "0.3.0-beta.3";
+
 type Config = {
   disableTracking: boolean;
   network: null | Network;
@@ -43,7 +45,7 @@ export function enableTracking() {
  * Assign default network used when calling `callMirror` with only an endpoint
  * @param network mainnet|testnet
  */
-export function setNetwork(network: Network) {
+export function setNetwork(network: Network | null) {
   config.network = network;
 }
 
