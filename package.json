@@ -1,12 +1,13 @@
 {
   "name": "lworks-client",
-  "version": "0.3.0-beta.4",
+  "version": "0.3.0-beta.7",
   "description": "",
   "main": "dist/index.js",
   "repository": {
     "url": "https://github.com/LedgerWorks/lworks-client"
   },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "prebuild": "rimraf ./dist",
     "build:types": "tsc",
     "prebuild:ts": "npx typedoc",
