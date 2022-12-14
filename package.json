@@ -8,7 +8,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build",
-    "prebuild": "rimraf ./dist",
+    "prebuild": "rimraf ./dist && node ./scripts/update-library-version.js",
     "build:types": "tsc",
     "prebuild:ts": "npx typedoc",
     "build:ts": "esbuild src/index.ts --bundle --platform=node --target=node16 --outfile=dist/index.js --external:./node_modules/*",

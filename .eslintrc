@@ -4,11 +4,8 @@
   "parserOptions": {
     "project": "./tsconfig.eslint.json"
   },
-  "plugins": [
-    "import",
-    "@typescript-eslint",
-    "sonarjs"
-  ],
+  "ignorePatterns": "scripts/",
+  "plugins": ["import", "@typescript-eslint", "sonarjs"],
   "extends": [
     "airbnb-base",
     "airbnb-typescript/base",
@@ -30,10 +27,7 @@
   },
   "settings": {
     "import/parsers": {
-      "@typescript-eslint/parser": [
-        ".ts",
-        ".tsx"
-      ]
+      "@typescript-eslint/parser": [".ts", ".tsx"]
     },
     "import/resolver": {
       "typescript": {
