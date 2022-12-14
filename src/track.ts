@@ -5,11 +5,11 @@ import crypto from "crypto";
 import retry from "async-retry";
 import Mixpanel from "mixpanel";
 
-import { getDisabledTracking } from "./config";
+import { getDisabledTracking, libraryVersion } from "./config";
 
 const superProps: Record<string, string | number | Date | boolean | undefined> = {
   environment: process.env.ENVIRONMENT,
-  libraryVersion: "0.3.0-beta.2",
+  libraryVersion,
 };
 
 let mixpanel: Mixpanel.Mixpanel | null = null;

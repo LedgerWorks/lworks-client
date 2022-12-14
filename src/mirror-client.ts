@@ -5,24 +5,12 @@ import retry from "async-retry";
 import { Network, NetworkHostMap } from "./networks";
 import { track } from "./track";
 import { knownLookup } from "./enums";
-import { getAccessToken, getNetwork } from "./config";
+import { getNetwork, libraryVersion } from "./config";
+import { getToken, timeElapsed } from "./client-helpers";
+import { baseLogger } from "./utils/logger";
 
+const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
-
-function getToken(network: Network): string | undefined {
-  const networkToken =
-    network === Network.Testnet
-      ? process.env.LWORKS_TESTNET_TOKEN
-      : process.env.LWORKS_MAINNET_TOKEN;
-
-  const fallbackToken = process.env.LWORKS_TOKEN;
-
-  return networkToken ?? fallbackToken ?? getAccessToken() ?? undefined;
-}
-
-function timeElapsed(startedAt: number): number {
-  return Date.now() - startedAt;
-}
 
 type MirrorOptions = {
   network: Network | "mainnet" | "testnet";
@@ -45,12 +33,14 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
   const parsedUrl = new URL(url);
   const searchParams = new URLSearchParams(parsedUrl.search);
   const queryParams = Object.fromEntries(searchParams.entries());
+  logger.trace({ url, baseUrl }, "Mirror call");
   try {
     return await retry<T>(
       async () => {
         attempts = +1;
         const resp = await fetch(url, {
           headers: {
+            "user-agent": `lworks-client/${libraryVersion}`,
             "Content-Type": "application/json",
             Authorization: accessToken,
           },
@@ -122,11 +112,13 @@ export async function callMirror<T>(endpoint: string): Promise<T>;
 export async function callMirror<T>(endpoint: string, options: MirrorOptions): Promise<T>;
 export async function callMirror<T>(endpoint: string, options?: MirrorOptions): Promise<T> {
   if (typeof options !== "undefined") {
+    logger.trace("Using provided options");
     return get<T>(endpoint, { ...options, network: knownLookup(Network, options.network) });
   }
 
   const configuredNetwork = getNetwork();
   if (configuredNetwork && endpoint) {
+    logger.trace("Falling back to global config");
     return get<T>(endpoint, { network: configuredNetwork });
   }
 
