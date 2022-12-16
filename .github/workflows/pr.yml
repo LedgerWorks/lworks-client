@@ -1,6 +1,8 @@
 name: Node PR
 on:
   pull_request:
+  push:
+    branches: main
 
 jobs:
   test:
