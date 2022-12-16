@@ -15,9 +15,9 @@ npm install lworks-client
 Once your access token is configured, you can call the mirror providing a network and endpoint (Endpoint documentation can be found [on the Hedera public mirror](https://mainnet-public.mirrornode.hedera.com/api/v1/docs/))
 
 ```js
-const { callMirror } = require("lworks-client");
+const { callMirror, MirrorResponse } = require("lworks-client");
 
-callMirror("mainnet", "/api/v1/transactions?limit=100")
+callMirror<MirrorResponse.Schemas["TransactionsResponse"]>("mainnet", "/api/v1/transactions?limit=100")
   .then((resp) => {
     console.log(resp);
     // {
@@ -132,7 +132,6 @@ import { callMirror, Network, setNetwork } from "lworks-client";
 setNetwork(Network.Mainnet); // OR setNetwork("mainnet");
 callMirror("/api/v1/transactions?limit=100");
 ```
-
 
 ## Access Token Configuration
 
