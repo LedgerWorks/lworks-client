@@ -1,6 +1,6 @@
 import { Network } from "./networks";
 
-export const libraryVersion = "1.3.0-beta.0";
+export const libraryVersion = "1.0.0-beta.0";
 
 type Config = {
   disableTracking: boolean;
