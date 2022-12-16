@@ -3,7 +3,7 @@ import { knownLookup } from "./enums";
 import { Network } from "./networks";
 import { baseLogger } from "./utils/logger";
 
-export function getToken(network: Network): string | undefined {
+function getToken(network: Network): string | undefined {
   const networkToken =
     network === Network.Testnet
       ? process.env.LWORKS_TESTNET_TOKEN
@@ -26,6 +26,17 @@ export function getToken(network: Network): string | undefined {
   return tokenValue;
 }
 
+export function ensureAccessToken(network: Network, options?: { accessToken?: string }) {
+  const accessToken = options?.accessToken ?? getToken(network);
+  if (!accessToken) {
+    throw new Error(
+      "AccessToken is not configured. Configure accessToken globally with 'configure', set the environment variable corresponding to network, or pass in options on the request."
+    );
+  }
+
+  return { accessToken };
+}
+
 export function ensureNetwork(options?: { network?: Network | "mainnet" | "testnet" }) {
   if (typeof options !== "undefined" && options.network) {
     return {
@@ -38,7 +49,9 @@ export function ensureNetwork(options?: { network?: Network | "mainnet" | "testn
       network: configuredNetwork,
     };
   }
-  throw new Error("Unable to determine network to use");
+  throw new Error(
+    "Network is not configured. Configure network globally with 'configure' or pass in options on the request."
+  );
 }
 
 export function timeElapsed(startedAt: number): number {

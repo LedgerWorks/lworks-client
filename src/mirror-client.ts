@@ -3,9 +3,8 @@ import retry from "async-retry";
 
 import { Network, NetworkHostMap } from "./networks";
 import { track } from "./track";
-import { knownLookup } from "./enums";
-import { getNetwork, libraryVersion } from "./config";
-import { getToken, timeElapsed } from "./client-helpers";
+import { libraryVersion } from "./config";
+import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
 import { baseLogger } from "./utils/logger";
 
 const logger = baseLogger.child({ client: "mirror" });
@@ -106,16 +105,8 @@ export async function callMirror<T>(endpoint: string, options: MirrorOptions = {
     throw new Error("Endpoint is required");
   }
 
-  const network = options.network ? knownLookup(Network, options.network) : getNetwork();
-  if (!network) {
-    throw new Error(`Network is not configured. Configured network globally or pass in options.`);
-  }
+  const { network } = ensureNetwork(options);
+  const { accessToken } = ensureAccessToken(network, options);
 
-  const accessToken = options.accessToken ?? getToken(network);
-  if (!accessToken) {
-    throw new Error(
-      `AccessToken is not configured. Configured accessToken globally or pass in options.`
-    );
-  }
   return get<T>(endpoint, { accessToken, network });
 }

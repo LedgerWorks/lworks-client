@@ -3,7 +3,7 @@ import retry from "async-retry";
 
 import { PaginatedRuleResponse, StreamsRule, StreamsRuleType } from "./sentinel-types";
 import { libraryVersion } from "./config";
-import { ensureNetwork, getToken, timeElapsed } from "./client-helpers";
+import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
 import { Network, NetworkHostMapForSentinel } from "./networks";
 import { track } from "./track";
 import { baseLogger } from "./utils/logger";
@@ -56,7 +56,7 @@ type DeleteRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   method: "DELETE";
 };
 
-type CallSentinelOptions =
+type CallSentinelConfig =
   | GetRuleSentinelConfig
   | PutRuleSentinelConfig
   | PostRuleSentinelConfig
@@ -64,19 +64,13 @@ type CallSentinelOptions =
 
 async function callSentinelApi<TResponse = unknown>(
   endpoint: string,
-  options: CallSentinelOptions
+  options: CallSentinelConfig
 ): Promise<{ data: TResponse }> {
   const startAt = Date.now();
+  const { accessToken } = ensureAccessToken(options.network, options);
   const networkStack = options.network.toString();
   let attempts = 0;
   const baseUrl = NetworkHostMapForSentinel[options.network];
-  const accessToken = options.accessToken ?? getToken(options.network);
-
-  if (!accessToken) {
-    throw new Error(
-      `AccessToken is not configured. Configured accessToken globally or pass in options.`
-    );
-  }
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
