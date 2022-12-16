@@ -1,5 +1,4 @@
 import fetch, { Response } from "node-fetch";
-import invariant from "tiny-invariant";
 import retry from "async-retry";
 
 import { PaginatedRuleResponse, StreamsRule, StreamsRuleType } from "./sentinel-types";
@@ -34,34 +33,34 @@ async function parseErrorMessage(response: Response): Promise<string | null> {
 }
 
 type SentinelOptions = {
-  network: Network | "mainnet" | "testnet";
+  network?: Network | "mainnet" | "testnet";
   accessToken?: string;
 };
 
-type GetRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type GetRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "GET";
 };
-type PutRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type PutRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "PUT";
   body: unknown;
 };
-type PostRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type PostRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "POST";
   body: unknown;
 };
-type DeleteRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type DeleteRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "DELETE";
 };
 
 type CallSentinelOptions =
-  | GetRuleSentinelOptions
-  | PutRuleSentinelOptions
-  | PostRuleSentinelOptions
-  | DeleteRuleSentinelOptions;
+  | GetRuleSentinelConfig
+  | PutRuleSentinelConfig
+  | PostRuleSentinelConfig
+  | DeleteRuleSentinelConfig;
 
 async function callSentinelApi<TResponse = unknown>(
   endpoint: string,
@@ -73,7 +72,11 @@ async function callSentinelApi<TResponse = unknown>(
   const baseUrl = NetworkHostMapForSentinel[options.network];
   const accessToken = options.accessToken ?? getToken(options.network);
 
-  invariant(accessToken, `Missing access token for ${options.network}`);
+  if (!accessToken) {
+    throw new Error(
+      `AccessToken is not configured. Configured accessToken globally or pass in options.`
+    );
+  }
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -191,21 +194,16 @@ export type StreamsRuleUpdate = Pick<StreamsRule, StreamsRuleUpdateFields>;
 export async function findRule(
   ruleType: StreamsRuleType,
   predicateValue: string,
-  options?: SentinelOptions & { name?: string }
+  name: string,
+  options?: SentinelOptions
 ): Promise<StreamsRule | undefined> {
   const withNetwork = ensureNetwork(options);
   const contextualLogger = logger.child({
     network: withNetwork.network,
     ruleType,
     predicateValue,
-    name: options?.name,
+    name,
   });
-  if (!options?.name) {
-    logger.warn(
-      "Multiple rules can exist for a given type and predicate value, a name must be provided to disambiguate"
-    );
-    return undefined;
-  }
 
   contextualLogger.debug(
     `Searching for rule of type ${ruleType} with predicate value ${predicateValue} on ${withNetwork.network}`
@@ -219,7 +217,7 @@ export async function findRule(
 
   const matchingRules = response.data.rules;
   logger.trace({ matchingRules }, `Found ${matchingRules.length} rules matching predicate`);
-  const matchByName = matchingRules.find((x) => x.ruleName === options.name);
+  const matchByName = matchingRules.find((x) => x.ruleName === name);
   logger.trace({ matchByName }, `Match by name: ${matchByName?.ruleId ?? "No match"}`);
   return matchByName;
 }
@@ -261,20 +259,20 @@ export async function deleteRuleById(
 
 export async function upsertRule(
   rule: StreamsRuleUpdate,
-  options?: SentinelOptions & { ruleId?: string }
+  options?: SentinelOptions & { ruleId?: string; deduplicateRuleName?: boolean }
 ): Promise<StreamsRule> {
   const withNetwork = ensureNetwork(options);
-  const existingRuleById = options?.ruleId
-    ? await getRuleById(options.ruleId, { ...options, ...withNetwork })
-    : undefined;
+  let existingRule: StreamsRule | undefined;
+  if (options?.ruleId) {
+    existingRule = await getRuleById(options.ruleId, { ...options, ...withNetwork });
+  }
 
-  const existingRule =
-    existingRuleById ??
-    (await findRule(rule.ruleType, rule.predicateValue, {
+  if (!existingRule && options?.deduplicateRuleName && rule.ruleName) {
+    existingRule = await findRule(rule.ruleType, rule.predicateValue, rule.ruleName, {
       ...options,
       ...withNetwork,
-      name: rule.ruleName,
-    }));
+    });
+  }
 
   const { endpoint, method } = existingRule
     ? { endpoint: `/api/v1/rules/${existingRule.ruleId}`, method: "PUT" as const }

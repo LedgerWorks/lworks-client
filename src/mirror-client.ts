@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import invariant from "tiny-invariant";
 import retry from "async-retry";
 
 import { Network, NetworkHostMap } from "./networks";
@@ -12,22 +11,20 @@ import { baseLogger } from "./utils/logger";
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
 
-type MirrorOptions = {
-  network: Network | "mainnet" | "testnet";
-  accessToken?: string;
-};
-type GetMirrorOptions = Omit<MirrorOptions, "network"> & {
+type MirrorConfig = {
   network: Network;
+  accessToken: string;
 };
 
-async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
-  const startAt = Date.now();
-  const networkStack = options.network.toString();
-  let attempts = 0;
-  const baseUrl = NetworkHostMap[options.network];
-  const accessToken = options.accessToken ?? getToken(options.network);
+export type MirrorOptions = Partial<
+  Omit<MirrorConfig, "network"> & { network: Network | "mainnet" | "testnet" }
+>;
 
-  invariant(accessToken, `Missing access token for ${options.network}`);
+async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
+  const startAt = Date.now();
+  const { network, accessToken } = config;
+  let attempts = 0;
+  const baseUrl = NetworkHostMap[config.network];
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -62,7 +59,7 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
             pathname: parsedUrl.pathname,
             queryParams,
             endpoint,
-            networkStack,
+            networkStack: network,
             attempts,
             httpStatus: resp.status,
             errorResponseMessage,
@@ -77,7 +74,7 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
           pathname: parsedUrl.pathname,
           queryParams,
           endpoint,
-          networkStack,
+          networkStack: network,
           attempts,
           httpStatus: resp.status,
         });
@@ -93,34 +90,32 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
       pathname: parsedUrl.pathname,
       queryParams,
       endpoint,
-      networkStack,
+      networkStack: network,
     });
     throw err;
   }
 }
 
 /**
- * Call the mirror with the configured network
- * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
- */
-export async function callMirror<T>(endpoint: string): Promise<T>;
-/**
  * Call the mirror the the specified network and endpoint
  * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
  * @param options An object to optionally specify the network and access credentials
  */
-export async function callMirror<T>(endpoint: string, options: MirrorOptions): Promise<T>;
-export async function callMirror<T>(endpoint: string, options?: MirrorOptions): Promise<T> {
-  if (typeof options !== "undefined") {
-    logger.trace("Using provided options");
-    return get<T>(endpoint, { ...options, network: knownLookup(Network, options.network) });
+export async function callMirror<T>(endpoint: string, options: MirrorOptions = {}): Promise<T> {
+  if (!endpoint) {
+    throw new Error("Endpoint is required");
   }
 
-  const configuredNetwork = getNetwork();
-  if (configuredNetwork && endpoint) {
-    logger.trace("Falling back to global config");
-    return get<T>(endpoint, { network: configuredNetwork });
+  const network = options.network ? knownLookup(Network, options.network) : getNetwork();
+  if (!network) {
+    throw new Error(`Network is not configured. Configured network globally or pass in options.`);
   }
 
-  throw new Error("Unexpected invocation");
+  const accessToken = options.accessToken ?? getToken(network);
+  if (!accessToken) {
+    throw new Error(
+      `AccessToken is not configured. Configured accessToken globally or pass in options.`
+    );
+  }
+  return get<T>(endpoint, { accessToken, network });
 }

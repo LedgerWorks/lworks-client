@@ -26,8 +26,8 @@ export function getToken(network: Network): string | undefined {
   return tokenValue;
 }
 
-export function ensureNetwork(options?: { network: Network | "mainnet" | "testnet" }) {
-  if (typeof options !== "undefined") {
+export function ensureNetwork(options?: { network?: Network | "mainnet" | "testnet" }) {
+  if (typeof options !== "undefined" && options.network) {
     return {
       network: knownLookup(Network, options.network),
     };

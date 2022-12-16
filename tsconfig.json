@@ -6,19 +6,12 @@
     "outDir": "dist/",
     "noEmit": false,
     "declaration": true,
+    "baseUrl": "."
   },
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts",
-    "**/__test__/**/*.ts"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ],
+  "exclude": ["node_modules", "**/*.test.ts", "**/__test__/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "typedocOptions": {
-    "entryPoints": [
-      "src/index.ts"
-    ],
+    "entryPoints": ["src/index.ts"],
     "out": "docs"
   }
 }
