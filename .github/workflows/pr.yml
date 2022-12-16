@@ -1,8 +1,6 @@
 name: Node PR
 on:
   pull_request:
-    paths:
-      - */**
 
 jobs:
   test:
