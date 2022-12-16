@@ -1,6 +1,6 @@
 {
   "name": "lworks-client",
-  "version": "1.0.0-based",
+  "version": "1.0.0-beta.5",
   "description": "",
   "main": "dist/index.js",
   "repository": {
