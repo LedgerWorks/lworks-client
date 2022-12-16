@@ -26,6 +26,10 @@ jobs:
         run: npm run lint
 
       - name: build
+        env:
+          LWORKS_TESTNET_TOKEN: ${{ secrets.LWORKS_TESTNET_TOKEN }}
+          LWORKS_MAINNET_TOKEN: ${{ secrets.LWORKS_MAINNET_TOKEN }}
+          LWORKS_TOKEN: ${{ secrets.LWORKS_TOKEN }}
         run: npm run build
 
       - name: Check no changes
