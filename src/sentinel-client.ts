@@ -37,6 +37,17 @@ type SentinelOptions = {
   accessToken?: string;
 };
 
+type SentinelUpsertOptions = SentinelOptions & {
+  /**
+   * Looks up rule by id before saving to update existing record
+   */
+  ruleId?: string;
+  /**
+   * Looks up rule by name and predicate value before saving to update existing record
+   */
+  deduplicateRuleName?: boolean;
+};
+
 type GetRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "GET";
@@ -253,7 +264,7 @@ export async function deleteRuleById(
 
 export async function upsertRule(
   rule: StreamsRuleUpdate,
-  options?: SentinelOptions & { ruleId?: string; deduplicateRuleName?: boolean }
+  options?: SentinelUpsertOptions
 ): Promise<StreamsRule> {
   const withNetwork = ensureNetwork(options);
   let existingRule: StreamsRule | undefined;
