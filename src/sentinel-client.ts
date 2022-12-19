@@ -75,13 +75,13 @@ type CallSentinelConfig =
 
 async function callSentinelApi<TResponse = unknown>(
   endpoint: string,
-  options: CallSentinelConfig
+  config: CallSentinelConfig
 ): Promise<{ data: TResponse }> {
   const startAt = Date.now();
-  const { accessToken } = ensureAccessToken(options.network, options);
-  const networkStack = options.network.toString();
+  const { accessToken } = ensureAccessToken(config.network, config);
+  const networkStack = config.network.toString();
   let attempts = 0;
-  const baseUrl = NetworkHostMapForSentinel[options.network];
+  const baseUrl = NetworkHostMapForSentinel[config.network];
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -92,15 +92,15 @@ async function callSentinelApi<TResponse = unknown>(
       async () => {
         attempts = +1;
         const resp = await fetch(url, {
-          method: options.method,
+          method: config.method,
           headers: {
             "user-agent": `lworks-client/${libraryVersion}`,
             "Content-Type": "application/json",
             Authorization: accessToken,
           },
           body:
-            options.method === "PUT" || options.method === "POST"
-              ? JSON.stringify(options.body)
+            config.method === "PUT" || config.method === "POST"
+              ? JSON.stringify(config.body)
               : undefined,
         });
 
@@ -108,7 +108,7 @@ async function callSentinelApi<TResponse = unknown>(
           const errorMessage = await parseErrorMessage(resp);
           logger.trace(
             {
-              method: options.method,
+              method: config.method,
               networkStack,
               attempts,
               httpStatus: resp.status,
@@ -119,7 +119,7 @@ async function callSentinelApi<TResponse = unknown>(
 
           track(trackedEventName, accessToken, {
             status: "failed",
-            method: options.method,
+            method: config.method,
             timeElapsed: timeElapsed(startAt),
             url,
             pathname: parsedUrl.pathname,
@@ -136,7 +136,7 @@ async function callSentinelApi<TResponse = unknown>(
         const responseBody = await resp.json();
         logger.trace(
           {
-            method: options.method,
+            method: config.method,
             networkStack,
             attempts,
             httpStatus: resp.status,

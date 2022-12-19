@@ -22,6 +22,8 @@ export type MirrorOptions = Partial<
 async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
   const startAt = Date.now();
   const { network, accessToken } = config;
+  const networkStack = network.toString();
+
   let attempts = 0;
   const baseUrl = NetworkHostMap[config.network];
 
@@ -58,7 +60,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             pathname: parsedUrl.pathname,
             queryParams,
             endpoint,
-            networkStack: network,
+            networkStack,
             attempts,
             httpStatus: resp.status,
             errorResponseMessage,
@@ -73,7 +75,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
           pathname: parsedUrl.pathname,
           queryParams,
           endpoint,
-          networkStack: network,
+          networkStack,
           attempts,
           httpStatus: resp.status,
         });
@@ -89,7 +91,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
       pathname: parsedUrl.pathname,
       queryParams,
       endpoint,
-      networkStack: network,
+      networkStack,
     });
     throw err;
   }
