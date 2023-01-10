@@ -1,33 +1,31 @@
 import fetch from "node-fetch";
-import invariant from "tiny-invariant";
 import retry from "async-retry";
 
 import { Network, NetworkHostMap } from "./networks";
 import { track } from "./track";
-import { knownLookup } from "./enums";
-import { getNetwork, libraryVersion } from "./config";
-import { getToken, timeElapsed } from "./client-helpers";
+import { libraryVersion } from "./config";
+import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
 import { baseLogger } from "./utils/logger";
 
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
 
-type MirrorOptions = {
-  network: Network | "mainnet" | "testnet";
-  accessToken?: string;
-};
-type GetMirrorOptions = Omit<MirrorOptions, "network"> & {
+type MirrorConfig = {
   network: Network;
+  accessToken: string;
 };
 
-async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
-  const startAt = Date.now();
-  const networkStack = options.network.toString();
-  let attempts = 0;
-  const baseUrl = NetworkHostMap[options.network];
-  const accessToken = options.accessToken ?? getToken(options.network);
+export type MirrorOptions = Partial<
+  Omit<MirrorConfig, "network"> & { network: Network | "mainnet" | "testnet" }
+>;
 
-  invariant(accessToken, `Missing access token for ${options.network}`);
+async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
+  const startAt = Date.now();
+  const { network, accessToken } = config;
+  const networkStack = network.toString();
+
+  let attempts = 0;
+  const baseUrl = NetworkHostMap[config.network];
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -100,27 +98,17 @@ async function get<T>(endpoint: string, options: GetMirrorOptions): Promise<T> {
 }
 
 /**
- * Call the mirror with the configured network
- * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
- */
-export async function callMirror<T>(endpoint: string): Promise<T>;
-/**
  * Call the mirror the the specified network and endpoint
  * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
  * @param options An object to optionally specify the network and access credentials
  */
-export async function callMirror<T>(endpoint: string, options: MirrorOptions): Promise<T>;
-export async function callMirror<T>(endpoint: string, options?: MirrorOptions): Promise<T> {
-  if (typeof options !== "undefined") {
-    logger.trace("Using provided options");
-    return get<T>(endpoint, { ...options, network: knownLookup(Network, options.network) });
+export async function callMirror<T>(endpoint: string, options: MirrorOptions = {}): Promise<T> {
+  if (!endpoint) {
+    throw new Error("Endpoint is required");
   }
 
-  const configuredNetwork = getNetwork();
-  if (configuredNetwork && endpoint) {
-    logger.trace("Falling back to global config");
-    return get<T>(endpoint, { network: configuredNetwork });
-  }
+  const { network } = ensureNetwork(options);
+  const { accessToken } = ensureAccessToken(network, options);
 
-  throw new Error("Unexpected invocation");
+  return get<T>(endpoint, { accessToken, network });
 }

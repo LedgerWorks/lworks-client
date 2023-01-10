@@ -1,0 +1,38 @@
+name: Node PR
+on:
+  pull_request:
+  push:
+    branches: main
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+
+      - name: Get Node Version
+        run: echo "NODE_VERSION=$(<.nvmrc)" >> $GITHUB_ENV
+
+      - uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: ci
+        run: npm ci
+
+      - name: lint
+        run: npm run lint
+
+      - name: build
+        env:
+          LWORKS_TESTNET_TOKEN: ${{ secrets.LWORKS_TESTNET_TOKEN }}
+          LWORKS_MAINNET_TOKEN: ${{ secrets.LWORKS_MAINNET_TOKEN }}
+          LWORKS_TOKEN: ${{ secrets.LWORKS_TESTNET_TOKEN }}
+        run: npm run build
+
+      - name: Check no changes
+        run: git diff --exit-code

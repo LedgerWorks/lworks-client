@@ -4,6 +4,7 @@ export enum StreamsRuleType {
   TokenBurnsByTokenId = 2,
   TokenTransfersByTokenId = 3,
   ContractCallsByContractId = 4,
+  AccountActivityByAccount = 6,
 }
 
 export type StreamsRule = {

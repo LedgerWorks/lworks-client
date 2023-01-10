@@ -1,6 +1,6 @@
 {
   "name": "lworks-client",
-  "version": "0.3.0-beta.7",
+  "version": "1.0.0-beta.7",
   "description": "",
   "main": "dist/index.js",
   "repository": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "prepublishOnly": "npm run build",
-    "prebuild": "rimraf ./dist && node ./scripts/update-library-version.js",
+    "prebuild": "rimraf ./dist && npm test",
     "build:types": "tsc",
     "prebuild:ts": "npx typedoc",
     "build:ts": "esbuild src/index.ts --bundle --platform=node --target=node16 --outfile=dist/index.js --external:./node_modules/*",
@@ -16,6 +16,7 @@
     "start": "node dist/index.js",
     "lint": "eslint --ext .ts ./src && prettier --check ./src",
     "lint:fix": "npm run lint -- --fix",
+    "pretest": "node ./scripts/update-library-version.js",
     "test": "jest"
   },
   "author": "",

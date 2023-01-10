@@ -3,37 +3,45 @@
  * Do not make direct changes to the file.
  */
 
-export interface paths {
+
+export type paths = {
   "/api/v1/accounts": {
-    /** Returns a list of all account entity items on the network. */
+    /**
+     * List account entities on network 
+     * @description Returns a list of all account entity items on the network.
+     */
     get: operations["listAccounts"];
   };
   "/api/v1/accounts/{idOrAliasOrEvmAddress}": {
-    /** Return the account transactions and balance information given an account alias, an account id, or an evm address */
+    /**
+     * Get account by alias, id, or evm address 
+     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address
+     */
     get: operations["getAccountByIdOrAliasOrEvmAddress"];
   };
   "/api/v1/accounts/{idOrAliasOrEvmAddress}/nfts": {
     /**
-     * Returns information for all non-fungible tokens for an account.
-     *
+     * Get nfts for an account info 
+     * @description Returns information for all non-fungible tokens for an account.
+     * 
      * ## Ordering
      * When considering NFTs, their order is governed by a combination of their numerical **token.Id** and **serialnumber** values, with **token.id** being the parent column.
      * A serialnumbers value governs its order within the given token.id
-     *
+     * 
      * In that regard, if a user acquired a set of NFTs in the order (2-2, 2-4 1-5, 1-1, 1-3, 3-3, 3-4), the following layouts illustrate the ordering expectations for ownership listing
      * 1. **All NFTs in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
      * 2. **All NFTs in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3, 1-1
      * 3. **NFTs above 1-1 in ASC order**: 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
      * 4. **NFTs below 3-3 in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4
      * 5. **NFTs between 1-3 and 3-3 inclusive in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3
-     *
+     * 
      * Note: The default order for this API is currently DESC
-     *
+     * 
      * ## Filtering
      * When filtering there are some restrictions enforced to ensure correctness and scalability.
-     *
+     * 
      * **The table below defines the restrictions and support for the NFT ownership endpoint**
-     *
+     * 
      * | Query Param   | Comparison Operator | Support | Description           | Example |
      * | ------------- | ------------------- | ------- | --------------------- | ------- |
      * | token.id      | eq                  | Y       | Single occurrence only. | ?token.id=X |
@@ -48,31 +56,35 @@ export interface paths {
      * |               | ne                  | N       | | |
      * |               | lt(e)               | Y       | | ?spender.id=lt:Z |
      * |               | gt(e)               | Y       | | ?spender.id=gt:Z |
-     *
+     * 
      * Note: When searching across a range for individual NFTs a **serialnumber** with an additional **token.id** query filter must be provided.
      * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
      */
     get: operations["listNftByAccountId"];
   };
   "/api/v1/accounts/{idOrAliasOrEvmAddress}/allowances/crypto": {
-    /** Returns information for all crypto allowances for an account. */
+    /**
+     * Get crypto allowances for an account info 
+     * @description Returns information for all crypto allowances for an account.
+     */
     get: operations["listCryptoAllowancesByAccountId"];
   };
   "/api/v1/accounts/{idOrAliasOrEvmAddress}/allowances/tokens": {
     /**
-     * Returns information for fungible token allowances for an account.
-     *
+     * Get fungible token allowances for an account 
+     * @description Returns information for fungible token allowances for an account.
+     * 
      * ## Ordering
      * The order is governed by a combination of the spender id and the token id values, with spender id being the parent column.
      * The token id value governs its order within the given spender id.
-     *
+     * 
      * Note: The default order for this API is currently ASC
-     *
+     * 
      * ## Filtering
      * When filtering there are some restrictions enforced to ensure correctness and scalability.
-     *
+     * 
      * **The table below defines the restrictions and support for the token allowances endpoint**
-     *
+     * 
      * | Query Param   | Comparison Operator | Support | Description           | Example |
      * | ------------- | ------------------- | ------- | --------------------- | ------- |
      * | spender.id    | eq                  | Y       | Single occurrence only. | ?spender.id=X |
@@ -83,68 +95,99 @@ export interface paths {
      * |               | ne                  | N       | | |
      * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of an **lte** or **eq** **spender.id** query | ?spender.id=lte:X&token.id=lt:Y |
      * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of an **gte** or **eq** **spender.id** query | ?spender.id=gte:X&token.id=gt:Y |
-     *
+     * 
      * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
      */
     get: operations["listTokenAllowancesByAccountId"];
   };
   "/api/v1/balances": {
-    /** Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts. */
+    /**
+     * List account balances 
+     * @description Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts.
+     */
     get: operations["listAccountBalances"];
   };
   "/api/v1/blocks": {
-    /** Returns a list of blocks on the network. */
+    /**
+     * List blocks 
+     * @description Returns a list of blocks on the network.
+     */
     get: operations["listBlocks"];
   };
   "/api/v1/blocks/{hashOrNumber}": {
-    /** Returns the block information by given hash or number. */
+    /**
+     * Get block by hash or number 
+     * @description Returns the block information by given hash or number.
+     */
     get: operations["getByHashOrNumber"];
   };
   "/api/v1/contracts": {
-    /** Returns a list of all contract entity items on the network. */
+    /**
+     * List contract entities on network 
+     * @description Returns a list of all contract entity items on the network.
+     */
     get: operations["listContracts"];
   };
   "/api/v1/contracts/{contractIdOrAddress}": {
-    /** Return the contract information given an id */
+    /**
+     * Get contract by id 
+     * @description Return the contract information given an id
+     */
     get: operations["getContractById"];
   };
   "/api/v1/contracts/{contractIdOrAddress}/results": {
-    /** Returns a list of all ContractResults for a contract's function executions. */
+    /**
+     * List contract results from a contract on the network 
+     * @description Returns a list of all ContractResults for a contract's function executions.
+     */
     get: operations["listContractResults"];
   };
   "/api/v1/contracts/{contractIdOrAddress}/results/{timestamp}": {
-    /** Returns a single ContractResult for a contract's function executions at a specific timestamp. */
+    /**
+     * Get the contract result from a contract on the network executed at a given timestamp 
+     * @description Returns a single ContractResult for a contract's function executions at a specific timestamp.
+     */
     get: operations["getContractResultByIdAndTimestamp"];
   };
   "/api/v1/contracts/results": {
-    /** Returns a list of all ContractResults for all contract's function executions. */
+    /**
+     * List contract results from all contracts on the network 
+     * @description Returns a list of all ContractResults for all contract's function executions.
+     */
     get: operations["listAllContractsResults"];
   };
   "/api/v1/contracts/results/{transactionIdOrHash}": {
-    /** Returns a single ContractResult for a contract's function executions for a given transactionId or ethereum transaction hash. */
+    /**
+     * Get the contract result from a contract on the network for a given transactionId or ethereum transaction hash 
+     * @description Returns a single ContractResult for a contract's function executions for a given transactionId or ethereum transaction hash.
+     */
     get: operations["getContractResultByTransactionIdOrHash"];
   };
   "/api/v1/contracts/results/{transactionIdOrHash}/actions": {
-    /** Returns a list of ContractActions for a contract's function executions for a given transactionId or ethereum transaction hash. */
+    /**
+     * Get the contract actions from a contract on the network for a given transactionId or ethereum transaction hash 
+     * @description Returns a list of ContractActions for a contract's function executions for a given transactionId or ethereum transaction hash.
+     */
     get: operations["getContractActionsByTransactionIdOrHash"];
   };
   "/api/v1/contracts/{contractIdOrAddress}/results/logs": {
     /**
-     * Search the logs of a specific contract across multiple contract calls. Chained logs are not
+     * List contract logs from a contract on the network 
+     * @description Search the logs of a specific contract across multiple contract calls. Chained logs are not
      * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
      * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
      * and span a time range of at most seven days.
-     *
+     * 
      * ## Ordering
      * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
-     *
+     * 
      * Note: The default order for this API is currently DESC
-     *
+     * 
      * ## Filtering
      * When filtering there are some restrictions enforced to ensure correctness and scalability.
-     *
+     * 
      * **The table below defines the restrictions and support for the token allowances endpoint**
-     *
+     * 
      * | Query Param   | Comparison Operator | Support | Description           | Example |
      * | ------------- | ------------------- | ------- | --------------------- | ------- |
      * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
@@ -155,29 +198,30 @@ export interface paths {
      * |               | ne                  | N       | | |
      * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
      * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
-     *
-     *
+     * 
+     * 
      * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
      */
     get: operations["listContractLogs"];
   };
   "/api/v1/contracts/results/logs": {
     /**
-     * Search the logs across many contracts with multiple contract calls. Chained logs are not
+     * List contracts logs across many contracts on the network 
+     * @description Search the logs across many contracts with multiple contract calls. Chained logs are not
      * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
      * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
      * and span a time range of at most seven days.
-     *
+     * 
      * ## Ordering
      * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
-     *
+     * 
      * Note: The default order for this API is currently DESC
-     *
+     * 
      * ## Filtering
      * When filtering there are some restrictions enforced to ensure correctness and scalability.
-     *
+     * 
      * **The table below defines the restrictions and support for the token allowances endpoint**
-     *
+     * 
      * | Query Param   | Comparison Operator | Support | Description           | Example |
      * | ------------- | ------------------- | ------- | --------------------- | ------- |
      * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
@@ -188,91 +232,150 @@ export interface paths {
      * |               | ne                  | N       | | |
      * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
      * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
-     *
-     *
+     * 
+     * 
      * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
      */
     get: operations["listContractsLogs"];
   };
   "/api/v1/network/exchangerate": {
-    /** Returns the network's exchange rate, current and next. */
+    /**
+     * Get the network exchange rate to estimate costs 
+     * @description Returns the network's exchange rate, current and next.
+     */
     get: operations["getNetworkExchangeRate"];
   };
   "/api/v1/network/fees": {
-    /** Returns the estimated gas in tinybars per each transaction type. Default order is ASC. Currently only `ContractCall`, `ContractCreate` and `EthereumTransaction` transaction types are supported. */
+    /**
+     * Get the network fees 
+     * @description Returns the estimated gas in tinybars per each transaction type. Default order is ASC. Currently only `ContractCall`, `ContractCreate` and `EthereumTransaction` transaction types are supported.
+     */
     get: operations["getNetworkFees"];
   };
   "/api/v1/network/nodes": {
-    /** Returns the network's list of nodes used in consensus */
+    /**
+     * Get the network address book nodes 
+     * @description Returns the network's list of nodes used in consensus
+     */
     get: operations["getNetworkNodes"];
   };
   "/api/v1/network/stake": {
-    /** Returns the network's current stake information. */
+    /**
+     * Get network stake information 
+     * @description Returns the network's current stake information.
+     */
     get: operations["getNetworkStake"];
   };
   "/api/v1/network/supply": {
-    /** Returns the network's released supply of hbars */
+    /**
+     * Get the network supply 
+     * @description Returns the network's released supply of hbars
+     */
     get: operations["getNetworkSupply"];
   };
   "/api/v1/schedules": {
-    /** Lists schedules on the network that govern the execution logic of scheduled transactions. This includes executed and non executed schedules. */
+    /**
+     * List schedules entities 
+     * @description Lists schedules on the network that govern the execution logic of scheduled transactions. This includes executed and non executed schedules.
+     */
     get: operations["listSchedules"];
   };
   "/api/v1/schedules/{scheduleId}": {
-    /** Returns schedule information based on the given schedule id */
+    /**
+     * Get schedule by id 
+     * @description Returns schedule information based on the given schedule id
+     */
     get: operations["getScheduleById"];
   };
   "/api/v1/transactions": {
-    /** Lists transactions on the network. This includes successful and unsuccessful transactions. */
+    /**
+     * List transactions 
+     * @description Lists transactions on the network. This includes successful and unsuccessful transactions.
+     */
     get: operations["listTransactions"];
   };
   "/api/v1/transactions/{transactionId}": {
-    /** Returns transaction information based on the given transaction id */
+    /**
+     * Get transaction by id 
+     * @description Returns transaction information based on the given transaction id
+     */
     get: operations["getTransactionById"];
   };
   "/api/v1/transactions/{transactionId}/stateproof": {
-    /** Returns the  contents of the address book file, signature files, and record file that can be used to validate the transaction occurred on the Hedera network given transaction id. */
+    /**
+     * Get stateproof information 
+     * @description Returns the  contents of the address book file, signature files, and record file that can be used to validate the transaction occurred on the Hedera network given transaction id.
+     */
     get: operations["getStateproofInfo"];
   };
   "/api/v1/topics/{topicId}/messages": {
-    /** Returns the list of topic messages for the given topic id. */
+    /**
+     * List topic messages by id 
+     * @description Returns the list of topic messages for the given topic id.
+     */
     get: operations["listTopicMessagesById"];
   };
   "/api/v1/topics/{topicId}/messages/{sequenceNumber}": {
-    /** Returns a single topic message the given topic id and sequence number. */
+    /**
+     * Get topic message by id and sequence number 
+     * @description Returns a single topic message the given topic id and sequence number.
+     */
     get: operations["getTopicMessageByIdAndSequenceNumber"];
   };
   "/api/v1/topics/messages/{timestamp}": {
-    /** Returns a topic message the given the consensusTimestamp. */
+    /**
+     * Get topic message by consensusTimestamp 
+     * @description Returns a topic message the given the consensusTimestamp.
+     */
     get: operations["getTopicMessagesByConsensusTimestamp"];
   };
   "/api/v1/tokens": {
-    /** Returns a list of tokens on the network. */
+    /**
+     * List tokens 
+     * @description Returns a list of tokens on the network.
+     */
     get: operations["listTokens"];
   };
   "/api/v1/tokens/{tokenId}": {
-    /** Returns token entity information given the id */
+    /**
+     * Get token by id 
+     * @description Returns token entity information given the id
+     */
     get: operations["getTokenById"];
   };
   "/api/v1/tokens/{tokenId}/balances": {
-    /** Returns a list of token balances given the id. This represents the Token supply distribution across the network */
+    /**
+     * List token balances 
+     * @description Returns a list of token balances given the id. This represents the Token supply distribution across the network
+     */
     get: operations["listTokenBalancesById"];
   };
   "/api/v1/tokens/{tokenId}/nfts": {
-    /** Returns a list of non-fungible tokens */
+    /**
+     * List nfts 
+     * @description Returns a list of non-fungible tokens
+     */
     get: operations["listNfts"];
   };
   "/api/v1/tokens/{tokenId}/nfts/{serialNumber}": {
-    /** Returns information for a non-fungible token */
+    /**
+     * Get nft info 
+     * @description Returns information for a non-fungible token
+     */
     get: operations["listNftBySerialnumber"];
   };
   "/api/v1/tokens/{tokenId}/nfts/{serialNumber}/transactions": {
-    /** Returns a list of transactions for a given non-fungible token */
+    /**
+     * Get an nfts transction history 
+     * @description Returns a list of transactions for a given non-fungible token
+     */
     get: operations["listNftTransactions"];
   };
-}
+};
 
-export interface components {
+export type webhooks = Record<string, never>;
+
+export type components = {
   schemas: {
     /** @description Account alias in the format of 'shard.realm.alias', 'realm.alias', or 'alias'. 'alias' is the RFC4648 no-padding base32 encoded string of the account's alias. */
     AccountAlias: string;
@@ -282,8 +385,8 @@ export interface components {
     };
     Allowance: {
       /**
-       * Format: int64
-       * @description The granted amount of the spender's allowance.
+       * Format: int64 
+       * @description The granted amount of the spender's allowance. 
        * @example 100
        */
       amount_granted?: number;
@@ -293,17 +396,17 @@ export interface components {
     };
     BalancesResponse: {
       timestamp?: components["schemas"]["TimestampNullable"];
-      balances?: components["schemas"]["AccountBalance"][];
+      balances?: (components["schemas"]["AccountBalance"])[];
       links?: components["schemas"]["Links"];
     };
-    ContractResponse: components["schemas"]["Contract"] & {
+    ContractResponse: components["schemas"]["Contract"] & ({
       /**
-       * Format: binary
-       * @description The contract bytecode in hex
+       * Format: binary 
+       * @description The contract bytecode in hex 
        * @example 0x01021a1fdc9b
        */
       bytecode?: string | null;
-    };
+    });
     ContractsResponse: {
       contracts?: components["schemas"]["Contracts"];
       links?: components["schemas"]["Links"];
@@ -344,13 +447,13 @@ export interface components {
     };
     NetworkSupplyResponse: {
       /**
-       * @description The network's released supply of hbars in tinybars
+       * @description The network's released supply of hbars in tinybars 
        * @example 3999999999999999949
        */
       released_supply?: string;
-      timestamp?: components["schemas"]["Timestamp"] & unknown;
+      timestamp?: components["schemas"]["Timestamp"] & Record<string, never>;
       /**
-       * @description The network's total supply of hbars in tinybars
+       * @description The network's total supply of hbars in tinybars 
        * @example 5000000000000000000
        */
       total_supply?: string;
@@ -380,14 +483,16 @@ export interface components {
      */
     StateProofResponseFull: {
       /** @description The network address book valid at the time of the transaction */
-      address_books: string[];
+      address_books: (string)[];
       /**
-       * Format: byte
+       * Format: byte 
        * @description The content of the record file the transaction belongs to
        */
       record_file: string;
       /** @description The nodes' signature files for the record file */
-      signature_files: { [key: string]: string };
+      signature_files: {
+        [key: string]: string | undefined;
+      };
     };
     /**
      * @example {
@@ -420,43 +525,45 @@ export interface components {
      */
     StateProofResponseCompact: {
       /** @description The network address book valid at the time of the transaction */
-      address_books: string[];
+      address_books: (string)[];
       /** @description The record file the transaction belongs to, in compact format */
       record_file: {
         /**
-         * Format: byte
+         * Format: byte 
          * @description The record file head
          */
         head: string;
         /**
-         * Format: byte
+         * Format: byte 
          * @description The start running hash object
          */
         start_running_hash_object: string;
         /**
-         * Format: byte
+         * Format: byte 
          * @description THe end running hash object
          */
         end_running_hash_object: string;
         /** @description The hashes of the transactions before the transaction in query, in consensus timestamp ascending order */
-        hashes_before: string[];
+        hashes_before: (string)[];
         /** @description The hashes of the transactions after the transaction in query, in consensus timestamp ascending order */
-        hashes_after: string[];
+        hashes_after: (string)[];
         /**
-         * Format: byte
+         * Format: byte 
          * @description The record stream object of the transaction in query
          */
         record_stream_object: string;
         /**
-         * Format: byte
+         * Format: byte 
          * @description The block number, in base64 encoding. Only present if version is 6
          */
         block_number: string | null;
       };
       /** @description The nodes' signature files for the record file */
-      signature_files: { [key: string]: string };
+      signature_files: {
+        [key: string]: string | undefined;
+      };
       /**
-       * Format: int32
+       * Format: int32 
        * @description The record file format version, either 5 or 6
        */
       version: number;
@@ -535,21 +642,21 @@ export interface components {
       max_automatic_token_associations: number | null;
       memo: string | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The pending reward in tinybars the account will receive in the next reward payout. Note the value is updated
        * at the end of each staking period and there may be delay to reflect the changes in the past staking period.
        */
       pending_reward?: number;
       receiver_sig_required: boolean | null;
-      staked_account_id: components["schemas"]["EntityId"] & unknown;
+      staked_account_id: components["schemas"]["EntityId"] & Record<string, never>;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The id of the node to which this account is staking
        */
       staked_node_id: number | null;
-      stake_period_start: components["schemas"]["TimestampNullable"] & unknown;
+      stake_period_start: components["schemas"]["TimestampNullable"] & Record<string, never>;
     };
-    Accounts: components["schemas"]["AccountInfo"][];
+    Accounts: (components["schemas"]["AccountInfo"])[];
     /**
      * @example {
      *   "account": "0.15.10",
@@ -566,14 +673,14 @@ export interface components {
       account: components["schemas"]["EntityId"];
       /** Format: int64 */
       balance: number;
-      tokens: components["schemas"]["TokenBalance"][];
+      tokens: (components["schemas"]["TokenBalance"])[];
     };
     AccountBalanceTransactions: components["schemas"]["AccountInfo"] & {
       transactions: components["schemas"]["Transactions"];
       links: components["schemas"]["Links"];
     };
     /**
-     * @description RFC4648 no-padding base32 encoded account alias
+     * @description RFC4648 no-padding base32 encoded account alias 
      * @example HIQQEXWKW53RKN4W6XXC4Q232SYNZ3SZANVZZSUME5B5PRGXL663UAQA
      */
     Alias: string | null;
@@ -589,30 +696,30 @@ export interface components {
      *   ]
      * }
      */
-    Balance: {
+    Balance: ({
       timestamp: components["schemas"]["TimestampNullable"];
       /** Format: int64 */
       balance: number | null;
-      tokens: {
-        token_id?: components["schemas"]["EntityId"];
-        /** Format: int64 */
-        balance?: number;
-      }[];
-    } | null;
+      tokens: ({
+          token_id?: components["schemas"]["EntityId"];
+          /** Format: int64 */
+          balance?: number;
+        })[];
+    }) | null;
     /**
-     * Format: binary
+     * Format: binary 
      * @example 0x549358c4c2e573e02410ef7b5a5ffa5f36dd7398
      */
     Bloom: string | null;
     ChunkInfo: {
       initial_transaction_id?: components["schemas"]["TransactionId"];
       /**
-       * Format: int32
+       * Format: int32 
        * @example 1
        */
       number?: number;
       /**
-       * Format: int32
+       * Format: int32 
        * @example 2
        */
       total?: number;
@@ -621,7 +728,7 @@ export interface components {
       admin_key?: components["schemas"]["Key"];
       auto_renew_account?: components["schemas"]["EntityId"];
       /**
-       * Format: int64
+       * Format: int64 
        * @example 7776000
        */
       auto_renew_period?: number | null;
@@ -641,342 +748,335 @@ export interface components {
       proxy_account_id?: components["schemas"]["EntityId"];
       timestamp?: components["schemas"]["TimestampRange"];
     };
-    Contracts: components["schemas"]["Contract"][];
-    ContractLog: components["schemas"]["ContractResultLog"] & {
+    Contracts: (components["schemas"]["Contract"])[];
+    ContractLog: components["schemas"]["ContractResultLog"] & ({
       /**
-       * @description The hex encoded block (record file chain) hash
+       * @description The hex encoded block (record file chain) hash 
        * @example 0x553f9311833391c0a3b2f9ed64540a89f2190a511986cd94889f1c0cf7fa63e898b1c6730f14a61755d1fb4ca05fb073
        */
       block_hash?: string;
       /**
-       * Format: int64
-       * @description The block number. Since Hedera does not have the native concept of blocks, this counts the number of record files seen since the mirror node's configured start date. This can vary between mirror nodes that use different start dates.
+       * Format: int64 
+       * @description The block number. Since Hedera does not have the native concept of blocks, this counts the number of record files seen since the mirror node's configured start date. This can vary between mirror nodes that use different start dates. 
        * @example 10
        */
       block_number?: number;
-      root_contract_id?: components["schemas"]["EntityId"] & unknown;
+      root_contract_id?: components["schemas"]["EntityId"] & Record<string, never>;
       timestamp?: components["schemas"]["Timestamp"];
       /**
-       * @description A hex encoded transaction hash
+       * @description A hex encoded transaction hash 
        * @example 0x397022d1e5baeb89d0ab66e6bf602640610e6fb7e55d78638db861e2c6339aa9
        */
       transaction_hash?: string;
       /**
-       * Format: int32
-       * @description The position of the transaction in the block
+       * Format: int32 
+       * @description The position of the transaction in the block 
        * @example 1
        */
       transaction_index?: number | null;
-    };
+    });
     /**
-     * @description A list of hex encoded topics associated with this log event
+     * @description A list of hex encoded topics associated with this log event 
      * @example [
      *   "0xf4757a49b326036464bec6fe419a4ae38c8a02ce3e68bf0809674f6aab8ad300"
      * ]
      */
-    ContractLogTopics: string[];
+    ContractLogTopics: (string)[];
     ContractAction: {
       /**
-       * Format: int32
-       * @description The nesting depth of the call
+       * Format: int32 
+       * @description The nesting depth of the call 
        * @example 1
        */
       call_depth?: number;
       /**
-       * @description The type of the call operation
-       * @example CALL
+       * @description The type of the call operation 
+       * @example CALL 
        * @enum {string}
        */
-      call_operation_type?:
-        | "CALL"
-        | "CALLCODE"
-        | "CREATE"
-        | "CREATE2"
-        | "DELEGATECALL"
-        | "STATICCALL"
-        | "UNKNOWN";
+      call_operation_type?: "CALL" | "CALLCODE" | "CREATE" | "CREATE2" | "DELEGATECALL" | "STATICCALL" | "UNKNOWN";
       /**
-       * @description The type of the call
-       * @example CALL
+       * @description The type of the call 
+       * @example CALL 
        * @enum {string}
        */
       call_type?: "NO_ACTION" | "CALL" | "CREATE" | "PRECOMPILE" | "SYSTEM";
       caller?: components["schemas"]["EntityId"];
       /**
-       * @description The entity type of the caller
-       * @example ACCOUNT
+       * @description The entity type of the caller 
+       * @example ACCOUNT 
        * @enum {string}
        */
       caller_type?: "ACCOUNT" | "CONTRACT";
       /**
-       * @description The EVM address of the caller
+       * @description The EVM address of the caller 
        * @example 0x0000000000000000000000000000000000000065
        */
       from?: string;
       /**
-       * Format: int64
-       * @description Gas cost in tinybars
+       * Format: int64 
+       * @description Gas cost in tinybars 
        * @example 50000
        */
       gas?: number;
       /**
-       * Format: int64
-       * @description Gas used in tinybars
+       * Format: int64 
+       * @description Gas used in tinybars 
        * @example 50000
        */
       gas_used?: number;
       /**
-       * Format: int32
-       * @description The position of the action within the ordered list of actions
+       * Format: int32 
+       * @description The position of the action within the ordered list of actions 
        * @example 0
        */
       index?: number;
       /**
-       * @description The hex encoded input data
+       * @description The hex encoded input data 
        * @example 0x123456
        */
       input?: string | null;
       recipient?: components["schemas"]["EntityId"];
       /**
-       * @description The entity type of the recipient
-       * @example ACCOUNT
+       * @description The entity type of the recipient 
+       * @example ACCOUNT 
        * @enum {string|null}
        */
-      recipient_type?: ("ACCOUNT" | "CONTRACT") | null;
+      recipient_type?: "ACCOUNT" | "CONTRACT" | null;
       /**
-       * @description The hex encoded result data
+       * @description The hex encoded result data 
        * @example 0x123456
        */
       result_data?: string | null;
       /**
-       * @description The type of the result data
-       * @example OUTPUT
+       * @description The type of the result data 
+       * @example OUTPUT 
        * @enum {string}
        */
       result_data_type?: "OUTPUT" | "REVERT_REASON" | "ERROR";
       timestamp?: components["schemas"]["Timestamp"];
       to?: components["schemas"]["EvmAddressNullable"];
       /**
-       * Format: int64
-       * @description The value of the transaction in tinybars
+       * Format: int64 
+       * @description The value of the transaction in tinybars 
        * @example 50000
        */
       value?: number;
     };
     ContractResult: {
       /**
-       * Format: int64
-       * @description The number of tinybars sent to the function
+       * Format: int64 
+       * @description The number of tinybars sent to the function 
        * @example 10
        */
       amount?: number | null;
-      bloom?: components["schemas"]["Bloom"] & unknown;
+      bloom?: components["schemas"]["Bloom"] & Record<string, never>;
       /**
-       * @description The hex encoded result returned by the function
+       * @description The hex encoded result returned by the function 
        * @example 0x2b048531b38d2882e86044bc972e940ee0a01938
        */
       call_result?: string | null;
       contract_id?: components["schemas"]["EntityId"];
       /** @description The network's released supply of hbars in tinybars */
-      created_contract_ids?: components["schemas"]["EntityId"][] | null;
+      created_contract_ids?: (components["schemas"]["EntityId"])[] | null;
       /**
-       * @description The message when an error occurs during smart contract execution
+       * @description The message when an error occurs during smart contract execution 
        * @example Out of gas
        */
       error_message?: string | null;
       from?: components["schemas"]["EvmAddress"];
       /**
-       * @description The hex encoded parameters passed to the function
+       * @description The hex encoded parameters passed to the function 
        * @example 0xbb9f02dc6f0e3289f57a1f33b71c73aa8548ab8b
        */
       function_parameters?: string | null;
       /**
-       * Format: int64
-       * @description The maximum units of gas allowed for contract execution
+       * Format: int64 
+       * @description The maximum units of gas allowed for contract execution 
        * @example 100000
        */
       gas_limit?: number;
       /**
-       * Format: int64
-       * @description The units of gas used to execute contract
+       * Format: int64 
+       * @description The units of gas used to execute contract 
        * @example 1000
        */
       gas_used?: number | null;
       /**
-       * @description A hex encoded 32 byte hash and it is only populated for Ethereum transaction case
+       * @description A hex encoded 32 byte hash and it is only populated for Ethereum transaction case 
        * @example 0xfebbaa29c513d124a6377246ea3506ad917d740c21a88f61a1c55ba338fc2bb1
        */
       hash?: string;
       /**
-       * @description The result of the transaction
+       * @description The result of the transaction 
        * @example SUCCESS
        */
       result?: string;
       /**
-       * @description The status of the transaction, 0x1 for a SUCCESS transaction and 0x0 for all else
+       * @description The status of the transaction, 0x1 for a SUCCESS transaction and 0x0 for all else 
        * @example 1
        */
       status?: string;
       timestamp?: components["schemas"]["Timestamp"];
       to?: components["schemas"]["EvmAddressNullable"];
     };
-    ContractResultDetails: components["schemas"]["ContractResult"] & {
+    ContractResultDetails: components["schemas"]["ContractResult"] & ({
       /**
-       * @description The hex encoded access_list of the wrapped ethereum transaction
+       * @description The hex encoded access_list of the wrapped ethereum transaction 
        * @example 0xabcd
        */
       access_list?: string | null;
       /**
-       * Format: int64
-       * @description The total amount of gas used in the block
+       * Format: int64 
+       * @description The total amount of gas used in the block 
        * @example 2000
        */
       block_gas_used?: number | null;
       /**
-       * @description The hex encoded block (record file chain) hash
+       * @description The hex encoded block (record file chain) hash 
        * @example 0x6ceecd8bb224da491
        */
       block_hash?: string | null;
       /**
-       * Format: int64
-       * @description The block number. Since Hedera does not have the native concept of blocks, this counts the number of record files seen since the mirror node's configured start date. This can vary between mirror nodes that use different start dates.
+       * Format: int64 
+       * @description The block number. Since Hedera does not have the native concept of blocks, this counts the number of record files seen since the mirror node's configured start date. This can vary between mirror nodes that use different start dates. 
        * @example 10
        */
       block_number?: number | null;
       /**
-       * @description The hex encoded chain_id of the wrapped ethereum transaction
+       * @description The hex encoded chain_id of the wrapped ethereum transaction 
        * @example 0x0127
        */
       chain_id?: string | null;
       /**
-       * @description The hex encoded initcode of a failed contract create transaction
+       * @description The hex encoded initcode of a failed contract create transaction 
        * @example 0x856739
        */
       failed_initcode?: string;
       /**
-       * @description The hex encoded gas_price of the wrapped ethereum transaction
+       * @description The hex encoded gas_price of the wrapped ethereum transaction 
        * @example 0x4a817c800
        */
       gas_price?: string | null;
       /**
-       * @description The hex encoded transaction hash
+       * @description The hex encoded transaction hash 
        * @example 0x3531396130303866616264653464
        */
       hash?: string;
       logs?: components["schemas"]["ContractResultLogs"];
       /**
-       * @description The hex encoded max_fee_per_gas of the wrapped ethereum transaction
+       * @description The hex encoded max_fee_per_gas of the wrapped ethereum transaction 
        * @example 0x5
        */
       max_fee_per_gas?: string | null;
       /**
-       * @description The hex encoded max_priority_fee_per_gas of the wrapped ethereum transaction
+       * @description The hex encoded max_priority_fee_per_gas of the wrapped ethereum transaction 
        * @example 0x100
        */
       max_priority_fee_per_gas?: string | null;
       /**
-       * Format: int64
-       * @description The nonce of the wrapped ethereum transaction
+       * Format: int64 
+       * @description The nonce of the wrapped ethereum transaction 
        * @example 1
        */
       nonce?: number | null;
       /**
-       * @description The hex encoded signature_r of the wrapped ethereum transaction
+       * @description The hex encoded signature_r of the wrapped ethereum transaction 
        * @example 0xd693b532a80fed6392b428604171fb32fdbf953728a3a7ecc7d4062b1652c043
        */
       r?: string | null;
       /**
-       * @description The hex encoded signature_s of the wrapped ethereum transaction
+       * @description The hex encoded signature_s of the wrapped ethereum transaction 
        * @example 0x24e9c602ac800b983b035700a14b23f78a253ab762deab5dc27e3555a750b355
        */
       s?: string | null;
       state_changes?: components["schemas"]["ContractResultStateChanges"];
       /**
-       * Format: int64
-       * @description The position of the transaction in the block
+       * Format: int64 
+       * @description The position of the transaction in the block 
        * @example 1
        */
       transaction_index?: number | null;
       /**
-       * @description The type of the wrapped ethereum transaction, 0 (Pre-Eip1559) or 2 (Post-Eip1559)
+       * @description The type of the wrapped ethereum transaction, 0 (Pre-Eip1559) or 2 (Post-Eip1559) 
        * @example 2
        */
       type?: number | null;
       /**
-       * @description The recovery_id of the wrapped ethereum transaction
+       * @description The recovery_id of the wrapped ethereum transaction 
        * @example 1
        */
       v?: number | null;
-    };
+    });
     ContractResultLog: {
       /**
-       * @description The hex encoded EVM address of the contract
+       * @description The hex encoded EVM address of the contract 
        * @example 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
        */
       address?: string;
-      bloom?: components["schemas"]["Bloom"] & unknown;
+      bloom?: components["schemas"]["Bloom"] & Record<string, never>;
       contract_id?: components["schemas"]["EntityId"];
       /**
-       * @description The hex encoded data of the contract log
+       * @description The hex encoded data of the contract log 
        * @example 0x00000000000000000000000000000000000000000000000000000000000000fa
        */
       data?: string | null;
       /**
-       * @description The index of the contract log in the chain of logs for an execution
+       * @description The index of the contract log in the chain of logs for an execution 
        * @example 0
        */
       index?: number;
       topics?: components["schemas"]["ContractLogTopics"];
     };
-    ContractResultLogs: components["schemas"]["ContractResultLog"][];
+    ContractResultLogs: (components["schemas"]["ContractResultLog"])[];
     ContractResultStateChange: {
       address?: components["schemas"]["EvmAddress"];
       contract_id?: components["schemas"]["EntityId"];
       /**
-       * Format: binary
-       * @description The hex encoded storage slot changed.
+       * Format: binary 
+       * @description The hex encoded storage slot changed. 
        * @example 0x00000000000000000000000000000000000000000000000000000000000000fa
        */
       slot?: string;
       /**
-       * Format: binary
-       * @description The hex encoded value read from the storage slot.
+       * Format: binary 
+       * @description The hex encoded value read from the storage slot. 
        * @example 0x97c1fc0a6ed5551bc831571325e9bdb365d06803100dc20648640ba24ce69750
        */
       value_read?: string;
       /**
-       * Format: binary
-       * @description The hex encoded value written to the slot. `null` implies no value written.
+       * Format: binary 
+       * @description The hex encoded value written to the slot. `null` implies no value written. 
        * @example 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925
        */
       value_written?: string | null;
     };
-    ContractResultStateChanges: components["schemas"]["ContractResultStateChange"][];
-    ContractResults: components["schemas"]["ContractResult"][];
-    ContractActions: components["schemas"]["ContractAction"][];
-    ContractLogs: components["schemas"]["ContractLog"][];
+    ContractResultStateChanges: (components["schemas"]["ContractResultStateChange"])[];
+    ContractResults: (components["schemas"]["ContractResult"])[];
+    ContractActions: (components["schemas"]["ContractAction"])[];
+    ContractLogs: (components["schemas"]["ContractLog"])[];
     CustomFees: {
       created_timestamp?: components["schemas"]["Timestamp"];
-      fixed_fees?: components["schemas"]["FixedFee"][];
-      fractional_fees?: components["schemas"]["FractionalFee"][];
-      royalty_fees?: components["schemas"]["RoyaltyFee"][];
+      fixed_fees?: (components["schemas"]["FixedFee"])[];
+      fractional_fees?: (components["schemas"]["FractionalFee"])[];
+      royalty_fees?: (components["schemas"]["RoyaltyFee"])[];
     };
     CryptoAllowance: components["schemas"]["Allowance"] & {
       /** @description The granted amount of the spender's allowance in tinybars. */
-      amount_granted?: unknown;
+      amount_granted?: Record<string, never>;
     };
-    CryptoAllowances: components["schemas"]["CryptoAllowance"][];
+    CryptoAllowances: (components["schemas"]["CryptoAllowance"])[];
     /**
-     * @description Network entity ID in the format of `shard.realm.num`
+     * @description Network entity ID in the format of `shard.realm.num` 
      * @example 0.1.2
      */
     EntityId: string | null;
     EntityIdQuery: string;
     Error: {
       _status?: {
-        messages?: {
-          message?: string;
-        }[];
+        messages?: ({
+            message?: string;
+          })[];
       };
     };
     /** @description A hex encoded hedera transaction hash. */
@@ -984,41 +1084,41 @@ export interface components {
     /** @description A hex encoded ethereum transaction hash. */
     EthereumHash: string;
     /**
-     * Format: int64
+     * Format: int64 
      * @description A positive number.
      */
     PositiveNumber: number;
     /**
-     * Format: binary
-     * @description A network entity encoded as an EVM address in hex.
+     * Format: binary 
+     * @description A network entity encoded as an EVM address in hex. 
      * @example 0000000000000000000000000000000000001f41
      */
     EvmAddress: string;
     /**
-     * Format: binary
-     * @description A network entity encoded as an EVM address in hex.
+     * Format: binary 
+     * @description A network entity encoded as an EVM address in hex. 
      * @example 0x0000000000000000000000000000000000001f41
      */
     EvmAddressWithShardRealm: string;
     /**
-     * Format: binary
-     * @description A network entity encoded as an EVM address in hex.
+     * Format: binary 
+     * @description A network entity encoded as an EVM address in hex. 
      * @example 0x0000000000000000000000000000000000001f41
      */
     EvmAddressNullable: string | null;
     ExchangeRate: {
       /**
-       * Format: int32
+       * Format: int32 
        * @example 596987
        */
       cent_equivalent?: number;
       /**
-       * Format: int64
+       * Format: int64 
        * @example 1649689200
        */
       expiration_time?: number;
       /**
-       * Format: int32
+       * Format: int32 
        * @example 30000
        */
       hbar_equivalent?: number;
@@ -1027,7 +1127,7 @@ export interface components {
       /** @example false */
       all_collectors_are_exempt?: boolean;
       /**
-       * Format: int64
+       * Format: int64 
        * @example 100
        */
       amount?: number;
@@ -1039,12 +1139,12 @@ export interface components {
       all_collectors_are_exempt?: boolean;
       amount?: {
         /**
-         * Format: int64
+         * Format: int64 
          * @example 12
          */
         numerator?: number;
         /**
-         * Format: int64
+         * Format: int64 
          * @example 29
          */
         denominator?: number;
@@ -1052,12 +1152,12 @@ export interface components {
       collector_account_id?: components["schemas"]["EntityId"];
       denominating_token_id?: components["schemas"]["EntityId"];
       /**
-       * Format: int64
+       * Format: int64 
        * @example 120
        */
       maximum?: number | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @example 30
        */
       minimum?: number;
@@ -1069,12 +1169,12 @@ export interface components {
       all_collectors_are_exempt?: boolean;
       amount?: {
         /**
-         * Format: int64
+         * Format: int64 
          * @example 15
          */
         numerator?: number;
         /**
-         * Format: int64
+         * Format: int64 
          * @example 37
          */
         denominator?: number;
@@ -1082,22 +1182,22 @@ export interface components {
       collector_account_id?: components["schemas"]["EntityId"];
       fallback_fee?: {
         /**
-         * Format: int64
+         * Format: int64 
          * @example 100
          */
         amount?: number;
         denominating_token_id?: components["schemas"]["EntityId"];
       };
     };
-    Key: {
+    Key: ({
       /**
-       * @example ProtobufEncoded
+       * @example ProtobufEncoded 
        * @enum {string}
        */
       _type?: "ECDSA_SECP256K1" | "ED25519" | "ProtobufEncoded";
       /** @example 10101 */
       key?: string;
-    } | null;
+    }) | null;
     Links: {
       /** @example /api/v1/transactions?timestamp=lt:1657598275.517984411 */
       next?: string | null;
@@ -1138,20 +1238,20 @@ export interface components {
       description: string | null;
       file_id: components["schemas"]["EntityId"];
       /**
-       * Format: int64
+       * Format: int64 
        * @description The maximum stake (rewarded or not rewarded) this node can have as consensus weight
        */
       max_stake: number | null;
       /** @description memo */
       memo: string | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The minimum stake (rewarded or not rewarded) this node must reach before having non-zero consensus weight
        */
       min_stake: number | null;
       node_account_id: components["schemas"]["EntityId"];
       /**
-       * Format: int64
+       * Format: int64 
        * @description An identifier for the node
        */
       node_id: number;
@@ -1160,43 +1260,42 @@ export interface components {
       /** @description hex encoded X509 RSA public key used to verify stream file signature */
       public_key: string | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The total tinybars earned by this node per whole hbar in the last staking period
        */
       reward_rate_start: number | null;
       service_endpoints: components["schemas"]["ServiceEndpoints"];
       /**
-       * Format: int64
+       * Format: int64 
        * @description The node consensus weight at the beginning of the staking period
        */
       stake: number | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The sum (balance + stakedToMe) for all accounts staked to this node with declineReward=true at the
        * beginning of the staking period
        */
       stake_not_rewarded: number | null;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The sum (balance + staked) for all accounts staked to the node that are not declining rewards at the
        * beginning of the staking period
        */
       stake_rewarded: number | null;
-      staking_period: components["schemas"]["TimestampRange"] &
-        (unknown | null);
+      staking_period: components["schemas"]["TimestampRange"] & (Record<string, unknown> | null);
       timestamp: components["schemas"]["TimestampRange"];
     };
-    NetworkNodes: components["schemas"]["NetworkNode"][];
+    NetworkNodes: (components["schemas"]["NetworkNode"])[];
     NetworkFee: {
       /**
-       * Format: int64
+       * Format: int64 
        * @description gas cost in tinybars
        */
       gas?: number;
       /** @description type of the transaction */
       transaction_type?: string;
     };
-    NetworkFees: components["schemas"]["NetworkFee"][];
+    NetworkFees: (components["schemas"]["NetworkFee"])[];
     /**
      * @example {
      *   "max_staking_reward_rate_per_hbar": "17808,",
@@ -1215,43 +1314,43 @@ export interface components {
      */
     NetworkStake: {
       /**
-       * Format: int64
+       * Format: int64 
        * @description The maximum reward rate, in tinybars per whole hbar, that any account can receive in a day
        */
       max_staking_reward_rate_per_hbar: number;
       /**
-       * Format: float
+       * Format: float 
        * @description The fraction between zero and one of the network and service fees paid to the node reward account 0.0.801
        */
       node_reward_fee_fraction: number;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The total amount staked to the network in tinybars the start of the current staking period
        */
       stake_total: number;
-      staking_period: components["schemas"]["TimestampRange"] & unknown;
+      staking_period: components["schemas"]["TimestampRange"] & Record<string, never>;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The number of minutes in a staking period
        */
       staking_period_duration: number;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The number of staking periods for which the reward is stored for each node
        */
       staking_periods_stored: number;
       /**
-       * Format: float
+       * Format: float 
        * @description The fraction between zero and one of the network and service fees paid to the staking reward account 0.0.800
        */
       staking_reward_fee_fraction: number;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The total number of tinybars to be distributed as staking rewards each period
        */
       staking_reward_rate: number;
       /**
-       * Format: int64
+       * Format: int64 
        * @description The minimum balance of staking reward account 0.0.800 required to active rewards
        */
       staking_start_threshold: number;
@@ -1276,13 +1375,13 @@ export interface components {
       /** @description whether the nft or the token it belongs to has been deleted */
       deleted?: boolean;
       /**
-       * Format: byte
+       * Format: byte 
        * @description base64 encoded binary data
        */
       metadata?: string;
       modified_timestamp?: components["schemas"]["TimestampNullable"];
       /**
-       * Format: int64
+       * Format: int64 
        * @example 1
        */
       serial_number?: number;
@@ -1290,7 +1389,7 @@ export interface components {
       token_id?: components["schemas"]["EntityId"];
     };
     Nfts: {
-      nfts?: components["schemas"]["Nft"][];
+      nfts?: (components["schemas"]["Nft"])[];
       links?: components["schemas"]["Links"];
     };
     /**
@@ -1348,9 +1447,9 @@ export interface components {
         to?: components["schemas"]["TimestampRange"];
       };
     };
-    Blocks: components["schemas"]["Block"][];
+    Blocks: (components["schemas"]["Block"])[];
     NftTransactionHistory: {
-      transactions?: components["schemas"]["NftTransactionTransfer"][];
+      transactions?: (components["schemas"]["NftTransactionTransfer"])[];
       links?: components["schemas"]["Links"];
     };
     Schedule: {
@@ -1365,38 +1464,32 @@ export interface components {
       memo?: string;
       payer_account_id?: components["schemas"]["EntityId"];
       schedule_id?: components["schemas"]["EntityId"];
-      signatures?: components["schemas"]["ScheduleSignature"][];
+      signatures?: (components["schemas"]["ScheduleSignature"])[];
       /**
-       * Format: byte
+       * Format: byte 
        * @example Kd6tvu8=
        */
       transaction_body?: string;
       wait_for_expiry?: boolean;
     };
-    Schedules: components["schemas"]["Schedule"][];
+    Schedules: (components["schemas"]["Schedule"])[];
     ScheduleSignature: {
       consensus_timestmap?: components["schemas"]["Timestamp"];
       /**
-       * Format: byte
+       * Format: byte 
        * @example AAEBAwuqAwzB
        */
       public_key_prefix?: string;
       /**
-       * Format: byte
+       * Format: byte 
        * @example 3q2+7wABAQMLqgMMwQ==
        */
       signature?: string;
       /**
-       * @example ED25519
+       * @example ED25519 
        * @enum {string}
        */
-      type?:
-        | "CONTRACT"
-        | "ED25519"
-        | "RSA_3072"
-        | "ECDSA_384"
-        | "ECDSA_SECP256K1"
-        | "UNKNOWN";
+      type?: "CONTRACT" | "ED25519" | "RSA_3072" | "ECDSA_384" | "ECDSA_SECP256K1" | "UNKNOWN";
     };
     /**
      * @example {
@@ -1409,15 +1502,15 @@ export interface components {
       /** Format: int32 */
       port: number;
     };
-    ServiceEndpoints: components["schemas"]["ServiceEndpoint"][];
+    ServiceEndpoints: (components["schemas"]["ServiceEndpoint"])[];
     /** @example 1586567700.453054000 */
     Timestamp: string;
     /** @example 1586567700.453054000 */
     TimestampNullable: string | null;
     /** @description A timestamp range an entity is valid for */
     TimestampRange: {
-      from?: components["schemas"]["Timestamp"] & unknown;
-      to?: components["schemas"]["TimestampNullable"] & unknown;
+      from?: components["schemas"]["Timestamp"] & Record<string, never>;
+      to?: components["schemas"]["TimestampNullable"] & Record<string, never>;
     };
     /**
      * @example {
@@ -1436,7 +1529,7 @@ export interface components {
     TokenAllowance: components["schemas"]["Allowance"] & {
       token_id?: components["schemas"]["EntityId"];
     };
-    TokenAllowances: components["schemas"]["TokenAllowance"][];
+    TokenAllowances: (components["schemas"]["TokenAllowance"])[];
     /**
      * @example {
      *   "token_id": "0.0.200001",
@@ -1456,16 +1549,16 @@ export interface components {
      *   }
      * ]
      */
-    TokenDistribution: {
-      account: components["schemas"]["EntityId"];
-      /** Format: int64 */
-      balance: number;
-    }[];
+    TokenDistribution: ({
+        account: components["schemas"]["EntityId"];
+        /** Format: int64 */
+        balance: number;
+      })[];
     TokenInfo: {
       admin_key?: components["schemas"]["Key"];
       auto_renew_account?: components["schemas"]["EntityId"];
       /** @example null */
-      auto_renew_period?: unknown | null;
+      auto_renew_period?: Record<string, unknown> | null;
       created_timestamp?: components["schemas"]["Timestamp"];
       /** @example 1000 */
       decimals?: string;
@@ -1488,13 +1581,13 @@ export interface components {
       memo?: string;
       pause_key?: components["schemas"]["Key"];
       /**
-       * @example UNPAUSED
+       * @example UNPAUSED 
        * @enum {string}
        */
       pause_status?: "NOT_APPLICABLE" | "PAUSED" | "UNPAUSED";
       supply_key?: components["schemas"]["Key"];
       /**
-       * @example INFINITE
+       * @example INFINITE 
        * @enum {string}
        */
       supply_type?: "FINITE" | "INFINITE";
@@ -1505,63 +1598,17 @@ export interface components {
       total_supply?: string;
       treasury_account_id?: components["schemas"]["EntityId"];
       /**
-       * @example FUNGIBLE_COMMON
+       * @example FUNGIBLE_COMMON 
        * @enum {string}
        */
       type?: "FUNGIBLE_COMMON" | "NON_FUNGIBLE_UNIQUE";
       wipe_key?: components["schemas"]["Key"];
       custom_fees?: components["schemas"]["CustomFees"];
     };
-    LogTopicQueryParam: string[];
+    LogTopicQueryParam: (string)[];
     /** @enum {string} */
-    TransactionTypes:
-      | "CONSENSUSCREATETOPIC"
-      | "CONSENSUSDELETETOPIC"
-      | "CONSENSUSSUBMITMESSAGE"
-      | "CONSENSUSUPDATETOPIC"
-      | "CONTRACTCALL"
-      | "CONTRACTCREATEINSTANCE"
-      | "CONTRACTDELETEINSTANCE"
-      | "CONTRACTUPDATEINSTANCE"
-      | "CRYPTOADDLIVEHASH"
-      | "CRYPTOAPPROVEALLOWANCE"
-      | "CRYPTOCREATEACCOUNT"
-      | "CRYPTODELETE"
-      | "CRYPTODELETEALLOWANCE"
-      | "CRYPTODELETELIVEHASH"
-      | "CRYPTOTRANSFER"
-      | "CRYPTOUPDATEACCOUNT"
-      | "ETHEREUMTRANSACTION"
-      | "FILEAPPEND"
-      | "FILECREATE"
-      | "FILEDELETE"
-      | "FILEUPDATE"
-      | "FREEZE"
-      | "NODESTAKEUPDATE"
-      | "SCHEDULECREATE"
-      | "SCHEDULEDELETE"
-      | "SCHEDULESIGN"
-      | "SYSTEMDELETE"
-      | "SYSTEMUNDELETE"
-      | "TOKENASSOCIATE"
-      | "TOKENBURN"
-      | "TOKENCREATION"
-      | "TOKENDELETION"
-      | "TOKENDISSOCIATE"
-      | "TOKENFEESCHEDULEUPDATE"
-      | "TOKENFREEZE"
-      | "TOKENGRANTKYC"
-      | "TOKENMINT"
-      | "TOKENPAUSE"
-      | "TOKENREVOKEKYC"
-      | "TOKENUNFREEZE"
-      | "TOKENUNPAUSE"
-      | "TOKENUPDATE"
-      | "TOKENWIPE"
-      | "UNCHECKEDSUBMIT"
-      | "UNKNOWN"
-      | "UTILPRNG";
-    Tokens: components["schemas"]["Token"][];
+    TransactionTypes: "CONSENSUSCREATETOPIC" | "CONSENSUSDELETETOPIC" | "CONSENSUSSUBMITMESSAGE" | "CONSENSUSUPDATETOPIC" | "CONTRACTCALL" | "CONTRACTCREATEINSTANCE" | "CONTRACTDELETEINSTANCE" | "CONTRACTUPDATEINSTANCE" | "CRYPTOADDLIVEHASH" | "CRYPTOAPPROVEALLOWANCE" | "CRYPTOCREATEACCOUNT" | "CRYPTODELETE" | "CRYPTODELETEALLOWANCE" | "CRYPTODELETELIVEHASH" | "CRYPTOTRANSFER" | "CRYPTOUPDATEACCOUNT" | "ETHEREUMTRANSACTION" | "FILEAPPEND" | "FILECREATE" | "FILEDELETE" | "FILEUPDATE" | "FREEZE" | "NODESTAKEUPDATE" | "SCHEDULECREATE" | "SCHEDULEDELETE" | "SCHEDULESIGN" | "SYSTEMDELETE" | "SYSTEMUNDELETE" | "TOKENASSOCIATE" | "TOKENBURN" | "TOKENCREATION" | "TOKENDELETION" | "TOKENDISSOCIATE" | "TOKENFEESCHEDULEUPDATE" | "TOKENFREEZE" | "TOKENGRANTKYC" | "TOKENMINT" | "TOKENPAUSE" | "TOKENREVOKEKYC" | "TOKENUNFREEZE" | "TOKENUNPAUSE" | "TOKENUPDATE" | "TOKENWIPE" | "UNCHECKEDSUBMIT" | "UNKNOWN" | "UTILPRNG";
+    Tokens: (components["schemas"]["Token"])[];
     /**
      * @example {
      *   "chunk_info": {
@@ -1593,7 +1640,7 @@ export interface components {
       sequence_number: number;
       topic_id: components["schemas"]["EntityId"];
     };
-    TopicMessages: components["schemas"]["TopicMessage"][];
+    TopicMessages: (components["schemas"]["TopicMessage"])[];
     /**
      * @example {
      *   "bytes": null,
@@ -1661,22 +1708,22 @@ export interface components {
       parent_consensus_timestamp?: components["schemas"]["TimestampNullable"];
       result?: string;
       scheduled?: boolean;
-      token_transfers?: {
-        token_id: components["schemas"]["EntityId"];
-        account: components["schemas"]["EntityId"];
-        /** Format: int64 */
-        amount: number;
-        is_approval?: boolean;
-      }[];
+      token_transfers?: ({
+          token_id: components["schemas"]["EntityId"];
+          account: components["schemas"]["EntityId"];
+          /** Format: int64 */
+          amount: number;
+          is_approval?: boolean;
+        })[];
       /** Format: byte */
       transaction_hash?: string;
       transaction_id?: string;
-      transfers?: {
-        account: components["schemas"]["EntityId"];
-        /** Format: int64 */
-        amount: number;
-        is_approval?: boolean;
-      }[];
+      transfers?: ({
+          account: components["schemas"]["EntityId"];
+          /** Format: int64 */
+          amount: number;
+          is_approval?: boolean;
+        })[];
       valid_duration_seconds?: string;
       valid_start_timestamp?: components["schemas"]["Timestamp"];
     };
@@ -1759,27 +1806,27 @@ export interface components {
      * }
      */
     TransactionDetail: components["schemas"]["Transaction"] & {
-      assessed_custom_fees?: {
-        /** Format: int64 */
-        amount?: number;
-        collector_account_id?: components["schemas"]["EntityId"];
-        effective_payer_account_ids?: components["schemas"]["EntityId"][];
-        token_id?: components["schemas"]["EntityId"];
-      }[];
-      nft_transfers?: {
-        is_approval?: boolean;
-        receiver_account_id?: components["schemas"]["EntityId"];
-        sender_account_id?: components["schemas"]["EntityId"];
-        /** Format: int64 */
-        serial_number: number;
-        token_id: components["schemas"]["EntityId"];
-      }[];
+      assessed_custom_fees?: ({
+          /** Format: int64 */
+          amount?: number;
+          collector_account_id?: components["schemas"]["EntityId"];
+          effective_payer_account_ids?: (components["schemas"]["EntityId"])[];
+          token_id?: components["schemas"]["EntityId"];
+        })[];
+      nft_transfers?: ({
+          is_approval?: boolean;
+          receiver_account_id?: components["schemas"]["EntityId"];
+          sender_account_id?: components["schemas"]["EntityId"];
+          /** Format: int64 */
+          serial_number: number;
+          token_id: components["schemas"]["EntityId"];
+        })[];
     };
-    TransactionDetails: components["schemas"]["TransactionDetail"][];
+    TransactionDetails: (components["schemas"]["TransactionDetail"])[];
     TransactionId: {
       account_id?: components["schemas"]["EntityId"];
       /**
-       * Format: int32
+       * Format: int32 
        * @example 0
        */
       nonce?: number | null;
@@ -1789,34 +1836,34 @@ export interface components {
     };
     /** @description A transaction id in string format. */
     TransactionIdStr: string;
-    Transactions: components["schemas"]["Transaction"][];
+    Transactions: (components["schemas"]["Transaction"])[];
   };
   responses: {
-    /** Not Found */
+    /** @description Not Found */
     NotFoundError: {
       content: {
         "application/json": components["schemas"]["Error"];
       };
     };
-    /** Topic Not Found */
+    /** @description Topic Not Found */
     TopicNotFound: {
       content: {
         "application/json": components["schemas"]["Error"];
       };
     };
-    /** Transaction Not Found */
+    /** @description Transaction Not Found */
     TransactionNotFound: {
       content: {
         "application/json": components["schemas"]["Error"];
       };
     };
-    /** Invalid parameter */
+    /** @description Invalid parameter */
     InvalidParameterError: {
       content: {
         "application/json": components["schemas"]["Error"];
       };
     };
-    /** Service Unavailable */
+    /** @description Service Unavailable */
     ServiceUnavailableError: {
       content: {
         "application/json": components["schemas"]["Error"];
@@ -1825,38 +1872,27 @@ export interface components {
   };
   parameters: {
     /** @description Account alias or account id or evm address */
-    accountIdOrAliasOrEvmAddressPathParam:
-      | components["schemas"]["AccountAlias"]
-      | components["schemas"]["EntityId"]
-      | components["schemas"]["EvmAddress"]
-      | components["schemas"]["EvmAddressWithShardRealm"];
+    accountIdOrAliasOrEvmAddressPathParam: components["schemas"]["AccountAlias"] | components["schemas"]["EntityId"] | components["schemas"]["EvmAddress"] | components["schemas"]["EvmAddressWithShardRealm"];
     /** @description The optional balance value to compare against */
     accountBalanceQueryParam: string;
     /** @description The ID of the account to return information for */
     accountIdQueryParam: components["schemas"]["EntityIdQuery"];
     /**
-     * @description The account's public key to compare against
+     * @description The account's public key to compare against 
      * @example 3c3d546321ff6f63d701d2ec5c277095874e19f4a235bee1e6bb19258bf362be
      */
     accountPublicKeyQueryParam: string;
     /**
-     * @description Whether to include balance information or not
+     * @description Whether to include balance information or not 
      * @example true
      */
     balanceQueryParam: boolean;
     /** @description The ID of the smart contract */
-    contractIdQueryParam:
-      | components["schemas"]["EntityIdQuery"]
-      | components["schemas"]["EvmAddressWithShardRealm"];
+    contractIdQueryParam: components["schemas"]["EntityIdQuery"] | components["schemas"]["EvmAddressWithShardRealm"];
     /** @description The ID or hex encoded EVM address associated with this contract. */
-    contractIdPathParam:
-      | components["schemas"]["EntityId"]
-      | components["schemas"]["EvmAddressWithShardRealm"];
+    contractIdPathParam: components["schemas"]["EntityId"] | components["schemas"]["EvmAddressWithShardRealm"];
     /** @description Accepts both eth and hedera hash format or block number */
-    hashOrNumberPathParam:
-      | components["schemas"]["HederaHash"]
-      | components["schemas"]["EthereumHash"]
-      | components["schemas"]["PositiveNumber"];
+    hashOrNumberPathParam: components["schemas"]["HederaHash"] | components["schemas"]["EthereumHash"] | components["schemas"]["PositiveNumber"];
     /** @description Entity id */
     entityIdPathParam: components["schemas"]["EntityId"];
     /** @description The ID of the file entity */
@@ -1868,13 +1904,11 @@ export interface components {
     /** @description Topic id */
     topicIdPathParam: components["schemas"]["EntityId"];
     /** @description Account ID or EVM address executing the contract */
-    fromQueryParam:
-      | components["schemas"]["EntityId"]
-      | components["schemas"]["EvmAddress"];
+    fromQueryParam: components["schemas"]["EntityId"] | components["schemas"]["EvmAddress"];
     /** @description Contract log index */
     logIndexQueryParam: string;
     /**
-     * @description The maximum number of items to return
+     * @description The maximum number of items to return 
      * @example 2
      */
     limitQueryParam: number;
@@ -1883,27 +1917,27 @@ export interface components {
     /** @description The ID of the node */
     nodeIdQueryParam: string;
     /**
-     * @description Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. If not specified, all transactions with specified payer account ID and valid start timestamp match.
+     * @description Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. If not specified, all transactions with specified payer account ID and valid start timestamp match. 
      * @example 0
      */
     nonceQueryParam: number;
     /**
-     * @description Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. Default is 0 when not specified.
+     * @description Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. Default is 0 when not specified. 
      * @example 1
      */
     nonceQueryParamWithDefault: number;
     /**
-     * @description The order in which items are listed
+     * @description The order in which items are listed 
      * @example desc
      */
     orderQueryParam: "asc" | "desc";
     /**
-     * @description The order in which items are listed
+     * @description The order in which items are listed 
      * @example asc
      */
     orderQueryParamDesc: "asc" | "desc";
     /**
-     * @description The public key to compare against
+     * @description The public key to compare against 
      * @example 3c3d546321ff6f63d701d2ec5c277095874e19f4a235bee1e6bb19258bf362be
      */
     publicKeyQueryParam: string;
@@ -1914,16 +1948,16 @@ export interface components {
     /** @description The ID of the schedule to return information for */
     scheduleIdQueryParam: components["schemas"]["EntityIdQuery"];
     /**
-     * @description The nft serial number
+     * @description The nft serial number 
      * @example 1
      */
     serialNumberPathParam: number;
     /** @description The nft serial number (64 bit type). Requires a tokenId value also be populated. */
     serialNumberQueryParam: string;
     /** @description The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-    timestampQueryParam: string[];
+    timestampQueryParam: (string)[];
     /**
-     * @description The timestamp at which the associated transaction reached consensus
+     * @description The timestamp at which the associated transaction reached consensus 
      * @example 1234567890.0000007
      */
     timestampPathParam: string;
@@ -1941,7 +1975,7 @@ export interface components {
     /** @example cryptotransfer */
     transactionTypeQueryParam: components["schemas"]["TransactionTypes"];
     /**
-     * @description Transaction id
+     * @description Transaction id 
      * @example 0.0.10-1234567890-000000000
      */
     transactionIdPathParam: string;
@@ -1954,7 +1988,7 @@ export interface components {
      *   "NON_FUNGIBLE_UNIQUE"
      * ]
      */
-    tokenTypeQueryParam: string[];
+    tokenTypeQueryParam: (string)[];
     /** @description The index of a contract action */
     contractActionsIndexQueryParam: string;
     /** @description The block's number */
@@ -1962,43 +1996,34 @@ export interface components {
     /** @description The block's hash */
     blockHashQueryParam: string;
     /**
-     * @description The transaction index in the block
+     * @description The transaction index in the block 
      * @example 1
      */
     transactionIndexQueryParam: number;
     /**
-     * @description Whether to include child transactions or not
+     * @description Whether to include child transactions or not 
      * @example true
      */
     internalQueryParam: boolean;
     /** @description Transaction Id or a 32 byte hash with optional 0x prefix */
-    transactionIdOrEthHashPathParam:
-      | components["schemas"]["EthereumHash"]
-      | components["schemas"]["TransactionIdStr"];
+    transactionIdOrEthHashPathParam: components["schemas"]["EthereumHash"] | components["schemas"]["TransactionIdStr"];
   };
-}
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
+};
 
-export interface operations {
-  /** Returns a list of all account entity items on the network. */
+export type external = Record<string, never>;
+
+export type operations = {
+
   listAccounts: {
-    parameters: {
-      query: {
-        /** The optional balance value to compare against */
-        "account.balance"?: components["parameters"]["accountBalanceQueryParam"];
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The account's public key to compare against */
-        "account.publickey"?: components["parameters"]["accountPublicKeyQueryParam"];
-        /** Whether to include balance information or not */
-        balance?: components["parameters"]["balanceQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * List account entities on network 
+     * @description Returns a list of all account entity items on the network.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["AccountsResponse"];
@@ -2007,19 +2032,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Return the account transactions and balance information given an account alias, an account id, or an evm address */
   getAccountByIdOrAliasOrEvmAddress: {
-    parameters: {
-      path: {
-        /** Account alias or account id or evm address */
-        idOrAliasOrEvmAddress: components["parameters"]["accountIdOrAliasOrEvmAddressPathParam"];
-      };
-      query: {
-        transactiontype?: components["parameters"]["transactionTypeQueryParam"];
-      };
-    };
+    /**
+     * Get account by alias, id, or evm address 
+     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["AccountBalanceTransactions"];
@@ -2029,66 +2048,49 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /**
-   * Returns information for all non-fungible tokens for an account.
-   *
-   * ## Ordering
-   * When considering NFTs, their order is governed by a combination of their numerical **token.Id** and **serialnumber** values, with **token.id** being the parent column.
-   * A serialnumbers value governs its order within the given token.id
-   *
-   * In that regard, if a user acquired a set of NFTs in the order (2-2, 2-4 1-5, 1-1, 1-3, 3-3, 3-4), the following layouts illustrate the ordering expectations for ownership listing
-   * 1. **All NFTs in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
-   * 2. **All NFTs in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3, 1-1
-   * 3. **NFTs above 1-1 in ASC order**: 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
-   * 4. **NFTs below 3-3 in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4
-   * 5. **NFTs between 1-3 and 3-3 inclusive in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3
-   *
-   * Note: The default order for this API is currently DESC
-   *
-   * ## Filtering
-   * When filtering there are some restrictions enforced to ensure correctness and scalability.
-   *
-   * **The table below defines the restrictions and support for the NFT ownership endpoint**
-   *
-   * | Query Param   | Comparison Operator | Support | Description           | Example |
-   * | ------------- | ------------------- | ------- | --------------------- | ------- |
-   * | token.id      | eq                  | Y       | Single occurrence only. | ?token.id=X |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. | ?token.id=lte:X |
-   * |               | gt(e)               | Y       | Single occurrence only. | ?token.id=gte:X |
-   * | serialnumber  | eq                  | Y       | Single occurrence only. Requires the presence of a **token.id** query | ?serialnumber=Y |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of an **lte** or **eq** **token.id** query | ?token.id=lte:X&serialnumber=lt:Y |
-   * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of an **gte** or **eq** **token.id** query | ?token.id=gte:X&serialnumber=gt:Y |
-   * | spender.id    | eq                  | Y       | | ?spender.id=Z |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | | ?spender.id=lt:Z |
-   * |               | gt(e)               | Y       | | ?spender.id=gt:Z |
-   *
-   * Note: When searching across a range for individual NFTs a **serialnumber** with an additional **token.id** query filter must be provided.
-   * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
-   */
   listNftByAccountId: {
-    parameters: {
-      path: {
-        /** Account alias or account id or evm address */
-        idOrAliasOrEvmAddress: components["parameters"]["accountIdOrAliasOrEvmAddressPathParam"];
-      };
-      query: {
-        /** The ID of the token to return information for */
-        "token.id"?: components["parameters"]["tokenIdQueryParam"];
-        /** The nft serial number (64 bit type). Requires a tokenId value also be populated. */
-        serialnumber?: components["parameters"]["serialNumberQueryParam"];
-        /** The ID of the spender to return information for */
-        "spender.id"?: components["parameters"]["spenderIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-      };
-    };
+    /**
+     * Get nfts for an account info 
+     * @description Returns information for all non-fungible tokens for an account.
+     * 
+     * ## Ordering
+     * When considering NFTs, their order is governed by a combination of their numerical **token.Id** and **serialnumber** values, with **token.id** being the parent column.
+     * A serialnumbers value governs its order within the given token.id
+     * 
+     * In that regard, if a user acquired a set of NFTs in the order (2-2, 2-4 1-5, 1-1, 1-3, 3-3, 3-4), the following layouts illustrate the ordering expectations for ownership listing
+     * 1. **All NFTs in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
+     * 2. **All NFTs in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3, 1-1
+     * 3. **NFTs above 1-1 in ASC order**: 1-3, 1-5, 2-2, 2-4, 3-3, 3-4
+     * 4. **NFTs below 3-3 in ASC order**: 1-1, 1-3, 1-5, 2-2, 2-4
+     * 5. **NFTs between 1-3 and 3-3 inclusive in DESC order**: 3-4, 3-3, 2-4, 2-2, 1-5, 1-3
+     * 
+     * Note: The default order for this API is currently DESC
+     * 
+     * ## Filtering
+     * When filtering there are some restrictions enforced to ensure correctness and scalability.
+     * 
+     * **The table below defines the restrictions and support for the NFT ownership endpoint**
+     * 
+     * | Query Param   | Comparison Operator | Support | Description           | Example |
+     * | ------------- | ------------------- | ------- | --------------------- | ------- |
+     * | token.id      | eq                  | Y       | Single occurrence only. | ?token.id=X |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. | ?token.id=lte:X |
+     * |               | gt(e)               | Y       | Single occurrence only. | ?token.id=gte:X |
+     * | serialnumber  | eq                  | Y       | Single occurrence only. Requires the presence of a **token.id** query | ?serialnumber=Y |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of an **lte** or **eq** **token.id** query | ?token.id=lte:X&serialnumber=lt:Y |
+     * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of an **gte** or **eq** **token.id** query | ?token.id=gte:X&serialnumber=gt:Y |
+     * | spender.id    | eq                  | Y       | | ?spender.id=Z |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | | ?spender.id=lt:Z |
+     * |               | gt(e)               | Y       | | ?spender.id=gt:Z |
+     * 
+     * Note: When searching across a range for individual NFTs a **serialnumber** with an additional **token.id** query filter must be provided.
+     * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["Nfts"];
@@ -2098,24 +2100,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns information for all crypto allowances for an account. */
   listCryptoAllowancesByAccountId: {
-    parameters: {
-      path: {
-        /** Account alias or account id or evm address */
-        idOrAliasOrEvmAddress: components["parameters"]["accountIdOrAliasOrEvmAddressPathParam"];
-      };
-      query: {
-        /** The ID of the spender to return information for */
-        "spender.id"?: components["parameters"]["spenderIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-      };
-    };
+    /**
+     * Get crypto allowances for an account info 
+     * @description Returns information for all crypto allowances for an account.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["CryptoAllowancesResponse"];
@@ -2125,52 +2116,37 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /**
-   * Returns information for fungible token allowances for an account.
-   *
-   * ## Ordering
-   * The order is governed by a combination of the spender id and the token id values, with spender id being the parent column.
-   * The token id value governs its order within the given spender id.
-   *
-   * Note: The default order for this API is currently ASC
-   *
-   * ## Filtering
-   * When filtering there are some restrictions enforced to ensure correctness and scalability.
-   *
-   * **The table below defines the restrictions and support for the token allowances endpoint**
-   *
-   * | Query Param   | Comparison Operator | Support | Description           | Example |
-   * | ------------- | ------------------- | ------- | --------------------- | ------- |
-   * | spender.id    | eq                  | Y       | Single occurrence only. | ?spender.id=X |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. | ?spender.id=lte:X |
-   * |               | gt(e)               | Y       | Single occurrence only. | ?spender.id=gte:X |
-   * | token.id      | eq                  | Y       | Single occurrence only. Requires the presence of a **spender.id** query | ?token.id=lt:Y |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of an **lte** or **eq** **spender.id** query | ?spender.id=lte:X&token.id=lt:Y |
-   * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of an **gte** or **eq** **spender.id** query | ?spender.id=gte:X&token.id=gt:Y |
-   *
-   * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
-   */
   listTokenAllowancesByAccountId: {
-    parameters: {
-      path: {
-        /** Account alias or account id or evm address */
-        idOrAliasOrEvmAddress: components["parameters"]["accountIdOrAliasOrEvmAddressPathParam"];
-      };
-      query: {
-        /** The ID of the spender to return information for */
-        "spender.id"?: components["parameters"]["spenderIdQueryParam"];
-        /** The ID of the token to return information for */
-        "token.id"?: components["parameters"]["tokenIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * Get fungible token allowances for an account 
+     * @description Returns information for fungible token allowances for an account.
+     * 
+     * ## Ordering
+     * The order is governed by a combination of the spender id and the token id values, with spender id being the parent column.
+     * The token id value governs its order within the given spender id.
+     * 
+     * Note: The default order for this API is currently ASC
+     * 
+     * ## Filtering
+     * When filtering there are some restrictions enforced to ensure correctness and scalability.
+     * 
+     * **The table below defines the restrictions and support for the token allowances endpoint**
+     * 
+     * | Query Param   | Comparison Operator | Support | Description           | Example |
+     * | ------------- | ------------------- | ------- | --------------------- | ------- |
+     * | spender.id    | eq                  | Y       | Single occurrence only. | ?spender.id=X |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. | ?spender.id=lte:X |
+     * |               | gt(e)               | Y       | Single occurrence only. | ?spender.id=gte:X |
+     * | token.id      | eq                  | Y       | Single occurrence only. Requires the presence of a **spender.id** query | ?token.id=lt:Y |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of an **lte** or **eq** **spender.id** query | ?spender.id=lte:X&token.id=lt:Y |
+     * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of an **gte** or **eq** **spender.id** query | ?spender.id=gte:X&token.id=gt:Y |
+     * 
+     * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TokenAllowancesResponse"];
@@ -2180,26 +2156,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts. */
   listAccountBalances: {
-    parameters: {
-      query: {
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The optional balance value to compare against */
-        "account.balance"?: components["parameters"]["accountBalanceQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The account's public key to compare against */
-        "account.publickey"?: components["parameters"]["accountPublicKeyQueryParam"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-      };
-    };
+    /**
+     * List account balances 
+     * @description Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["BalancesResponse"];
@@ -2208,22 +2171,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns a list of blocks on the network. */
   listBlocks: {
-    parameters: {
-      query: {
-        /** The block's number */
-        "block.number"?: components["parameters"]["blockNumberQueryParam"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-      };
-    };
+    /**
+     * List blocks 
+     * @description Returns a list of blocks on the network.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["BlocksResponse"];
@@ -2232,16 +2186,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns the block information by given hash or number. */
   getByHashOrNumber: {
-    parameters: {
-      path: {
-        /** Accepts both eth and hedera hash format or block number */
-        hashOrNumber: components["parameters"]["hashOrNumberPathParam"];
-      };
-    };
+    /**
+     * Get block by hash or number 
+     * @description Returns the block information by given hash or number.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["Block"];
@@ -2251,20 +2202,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of all contract entity items on the network. */
   listContracts: {
-    parameters: {
-      query: {
-        /** The ID of the smart contract */
-        "contract.id"?: components["parameters"]["contractIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-      };
-    };
+    /**
+     * List contract entities on network 
+     * @description Returns a list of all contract entity items on the network.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractsResponse"];
@@ -2273,20 +2217,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Return the contract information given an id */
   getContractById: {
-    parameters: {
-      path: {
-        /** The ID or hex encoded EVM address associated with this contract. */
-        contractIdOrAddress: components["parameters"]["contractIdPathParam"];
-      };
-      query: {
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-      };
-    };
+    /**
+     * Get contract by id 
+     * @description Return the contract information given an id
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractResponse"];
@@ -2296,34 +2233,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of all ContractResults for a contract's function executions. */
   listContractResults: {
-    parameters: {
-      path: {
-        /** The ID or hex encoded EVM address associated with this contract. */
-        contractIdOrAddress: components["parameters"]["contractIdPathParam"];
-      };
-      query: {
-        /** Account ID or EVM address executing the contract */
-        from?: components["parameters"]["fromQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The block's number */
-        "block.number"?: components["parameters"]["contractsBlockNumberQueryParam"];
-        /** The block's hash */
-        "block.hash"?: components["parameters"]["blockHashQueryParam"];
-        /** The transaction index in the block */
-        "transaction.index"?: components["parameters"]["transactionIndexQueryParam"];
-        /** Whether to include child transactions or not */
-        internal?: components["parameters"]["internalQueryParam"];
-      };
-    };
+    /**
+     * List contract results from a contract on the network 
+     * @description Returns a list of all ContractResults for a contract's function executions.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractResultsResponse"];
@@ -2332,24 +2248,19 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns a single ContractResult for a contract's function executions at a specific timestamp. */
   getContractResultByIdAndTimestamp: {
-    parameters: {
-      path: {
-        /** The ID or hex encoded EVM address associated with this contract. */
-        contractIdOrAddress: components["parameters"]["contractIdPathParam"];
-        /** The timestamp at which the associated transaction reached consensus */
-        timestamp: components["parameters"]["timestampPathParam"];
-      };
-    };
+    /**
+     * Get the contract result from a contract on the network executed at a given timestamp 
+     * @description Returns a single ContractResult for a contract's function executions at a specific timestamp.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractResultResponse"];
         };
       };
-      /** Partial Content */
+      /** @description Partial Content */
       206: {
         content: {
           "application/json": components["schemas"]["ContractResultResponse"];
@@ -2359,30 +2270,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of all ContractResults for all contract's function executions. */
   listAllContractsResults: {
-    parameters: {
-      query: {
-        /** Account ID or EVM address executing the contract */
-        from?: components["parameters"]["fromQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The block's number */
-        "block.number"?: components["parameters"]["contractsBlockNumberQueryParam"];
-        /** The block's hash */
-        "block.hash"?: components["parameters"]["blockHashQueryParam"];
-        /** The transaction index in the block */
-        "transaction.index"?: components["parameters"]["transactionIndexQueryParam"];
-        /** Whether to include child transactions or not */
-        internal?: components["parameters"]["internalQueryParam"];
-      };
-    };
+    /**
+     * List contract results from all contracts on the network 
+     * @description Returns a list of all ContractResults for all contract's function executions.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractResultsResponse"];
@@ -2391,26 +2285,19 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns a single ContractResult for a contract's function executions for a given transactionId or ethereum transaction hash. */
   getContractResultByTransactionIdOrHash: {
-    parameters: {
-      path: {
-        /** Transaction Id or a 32 byte hash with optional 0x prefix */
-        transactionIdOrHash: components["parameters"]["transactionIdOrEthHashPathParam"];
-      };
-      query: {
-        /** Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. Default is 0 when not specified. */
-        nonce?: components["parameters"]["nonceQueryParamWithDefault"];
-      };
-    };
+    /**
+     * Get the contract result from a contract on the network for a given transactionId or ethereum transaction hash 
+     * @description Returns a single ContractResult for a contract's function executions for a given transactionId or ethereum transaction hash.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractResultResponse"];
         };
       };
-      /** Partial Content */
+      /** @description Partial Content */
       206: {
         content: {
           "application/json": components["schemas"]["ContractResultResponse"];
@@ -2420,24 +2307,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of ContractActions for a contract's function executions for a given transactionId or ethereum transaction hash. */
   getContractActionsByTransactionIdOrHash: {
-    parameters: {
-      path: {
-        /** Transaction Id or a 32 byte hash with optional 0x prefix */
-        transactionIdOrHash: components["parameters"]["transactionIdOrEthHashPathParam"];
-      };
-      query: {
-        /** The index of a contract action */
-        index?: components["parameters"]["contractActionsIndexQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * Get the contract actions from a contract on the network for a given transactionId or ethereum transaction hash 
+     * @description Returns a list of ContractActions for a contract's function executions for a given transactionId or ethereum transaction hash.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractActionsResponse"];
@@ -2447,63 +2323,40 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /**
-   * Search the logs of a specific contract across multiple contract calls. Chained logs are not
-   * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
-   * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
-   * and span a time range of at most seven days.
-   *
-   * ## Ordering
-   * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
-   *
-   * Note: The default order for this API is currently DESC
-   *
-   * ## Filtering
-   * When filtering there are some restrictions enforced to ensure correctness and scalability.
-   *
-   * **The table below defines the restrictions and support for the token allowances endpoint**
-   *
-   * | Query Param   | Comparison Operator | Support | Description           | Example |
-   * | ------------- | ------------------- | ------- | --------------------- | ------- |
-   * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=lte:X |
-   * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=gte:X |
-   * | timestamp     | eq                  | Y       | Single occurrence only. | ?timestamp=Y
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
-   * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
-   *
-   *
-   * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
-   */
   listContractLogs: {
-    parameters: {
-      path: {
-        /** The ID or hex encoded EVM address associated with this contract. */
-        contractIdOrAddress: components["parameters"]["contractIdPathParam"];
-      };
-      query: {
-        /** Contract log index */
-        index?: components["parameters"]["logIndexQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The first topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic0?: components["parameters"]["logTopic0QueryParam"];
-        /** The second topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic1?: components["parameters"]["logTopic1QueryParam"];
-        /** The third topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic2?: components["parameters"]["logTopic2QueryParam"];
-        /** The fourth topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic3?: components["parameters"]["logTopic3QueryParam"];
-      };
-    };
+    /**
+     * List contract logs from a contract on the network 
+     * @description Search the logs of a specific contract across multiple contract calls. Chained logs are not
+     * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
+     * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
+     * and span a time range of at most seven days.
+     * 
+     * ## Ordering
+     * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
+     * 
+     * Note: The default order for this API is currently DESC
+     * 
+     * ## Filtering
+     * When filtering there are some restrictions enforced to ensure correctness and scalability.
+     * 
+     * **The table below defines the restrictions and support for the token allowances endpoint**
+     * 
+     * | Query Param   | Comparison Operator | Support | Description           | Example |
+     * | ------------- | ------------------- | ------- | --------------------- | ------- |
+     * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=lte:X |
+     * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=gte:X |
+     * | timestamp     | eq                  | Y       | Single occurrence only. | ?timestamp=Y
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
+     * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
+     * 
+     * 
+     * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractLogsResponse"];
@@ -2512,59 +2365,40 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /**
-   * Search the logs across many contracts with multiple contract calls. Chained logs are not
-   * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
-   * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
-   * and span a time range of at most seven days.
-   *
-   * ## Ordering
-   * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
-   *
-   * Note: The default order for this API is currently DESC
-   *
-   * ## Filtering
-   * When filtering there are some restrictions enforced to ensure correctness and scalability.
-   *
-   * **The table below defines the restrictions and support for the token allowances endpoint**
-   *
-   * | Query Param   | Comparison Operator | Support | Description           | Example |
-   * | ------------- | ------------------- | ------- | --------------------- | ------- |
-   * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=lte:X |
-   * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=gte:X |
-   * | timestamp     | eq                  | Y       | Single occurrence only. | ?timestamp=Y
-   * |               | ne                  | N       | | |
-   * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
-   * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
-   *
-   *
-   * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
-   */
   listContractsLogs: {
-    parameters: {
-      query: {
-        /** Contract log index */
-        index?: components["parameters"]["logIndexQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The first topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic0?: components["parameters"]["logTopic0QueryParam"];
-        /** The second topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic1?: components["parameters"]["logTopic1QueryParam"];
-        /** The third topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic2?: components["parameters"]["logTopic2QueryParam"];
-        /** The fourth topic associated with a contract log. Requires a timestamp range also be populated. */
-        topic3?: components["parameters"]["logTopic3QueryParam"];
-      };
-    };
+    /**
+     * List contracts logs across many contracts on the network 
+     * @description Search the logs across many contracts with multiple contract calls. Chained logs are not
+     * included but can be found by calling `/api/v1/contracts/{contractId}/results/{timestamp}`
+     * or `/api/v1/contracts/results/{transactionId}`. When searching by topic a timestamp parameter must be supplied
+     * and span a time range of at most seven days.
+     * 
+     * ## Ordering
+     * The order is governed by the combination of timestamp and index values. If the index param is omitted, the order is determined by the timestamp only.
+     * 
+     * Note: The default order for this API is currently DESC
+     * 
+     * ## Filtering
+     * When filtering there are some restrictions enforced to ensure correctness and scalability.
+     * 
+     * **The table below defines the restrictions and support for the token allowances endpoint**
+     * 
+     * | Query Param   | Comparison Operator | Support | Description           | Example |
+     * | ------------- | ------------------- | ------- | --------------------- | ------- |
+     * | index         | eq                  | Y       | Single occurrence only. Requires the presence of timestamp | ?index=X |
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=lte:X |
+     * |               | gt(e)               | Y       | Single occurrence only. Requires the presence of timestamp | ?index=gte:X |
+     * | timestamp     | eq                  | Y       | Single occurrence only. | ?timestamp=Y
+     * |               | ne                  | N       | | |
+     * |               | lt(e)               | Y       | Single occurrence only. Optional second timestamp **gt(e)** | ?timestamp=lte:Y
+     * |               | gt(e)               | Y       | Single occurrence only. Optional second timestamp **lt(e)** | ?timestamp=gte:Y
+     * 
+     * 
+     * Both filters must be a single occurrence of **gt(e)** or **lt(e)** which provide a lower and or upper boundary for search.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["ContractLogsResponse"];
@@ -2573,16 +2407,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns the network's exchange rate, current and next. */
   getNetworkExchangeRate: {
-    parameters: {
-      query: {
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-      };
-    };
+    /**
+     * Get the network exchange rate to estimate costs 
+     * @description Returns the network's exchange rate, current and next.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NetworkExchangeRateSetResponse"];
@@ -2593,18 +2424,13 @@ export interface operations {
       500: components["responses"]["ServiceUnavailableError"];
     };
   };
-  /** Returns the estimated gas in tinybars per each transaction type. Default order is ASC. Currently only `ContractCall`, `ContractCreate` and `EthereumTransaction` transaction types are supported. */
   getNetworkFees: {
-    parameters: {
-      query: {
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * Get the network fees 
+     * @description Returns the estimated gas in tinybars per each transaction type. Default order is ASC. Currently only `ContractCall`, `ContractCreate` and `EthereumTransaction` transaction types are supported.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NetworkFeesResponse"];
@@ -2615,22 +2441,13 @@ export interface operations {
       500: components["responses"]["ServiceUnavailableError"];
     };
   };
-  /** Returns the network's list of nodes used in consensus */
   getNetworkNodes: {
-    parameters: {
-      query: {
-        /** The ID of the file entity */
-        "file.id"?: components["parameters"]["fileIdQueryParam"];
-        /** The ID of the node */
-        "node.id"?: components["parameters"]["nodeIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * Get the network address book nodes 
+     * @description Returns the network's list of nodes used in consensus
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NetworkNodesResponse"];
@@ -2639,10 +2456,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns the network's current stake information. */
   getNetworkStake: {
+    /**
+     * Get network stake information 
+     * @description Returns the network's current stake information.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NetworkStakeResponse"];
@@ -2652,16 +2472,13 @@ export interface operations {
       500: components["responses"]["ServiceUnavailableError"];
     };
   };
-  /** Returns the network's released supply of hbars */
   getNetworkSupply: {
-    parameters: {
-      query: {
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-      };
-    };
+    /**
+     * Get the network supply 
+     * @description Returns the network's released supply of hbars
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NetworkSupplyResponse"];
@@ -2671,22 +2488,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Lists schedules on the network that govern the execution logic of scheduled transactions. This includes executed and non executed schedules. */
   listSchedules: {
-    parameters: {
-      query: {
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-        /** The ID of the schedule to return information for */
-        "schedule.id"?: components["parameters"]["scheduleIdQueryParam"];
-      };
-    };
+    /**
+     * List schedules entities 
+     * @description Lists schedules on the network that govern the execution logic of scheduled transactions. This includes executed and non executed schedules.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["SchedulesResponse"];
@@ -2695,16 +2503,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns schedule information based on the given schedule id */
   getScheduleById: {
-    parameters: {
-      path: {
-        /** Schedule id */
-        scheduleId: components["parameters"]["scheduleIdPathParam"];
-      };
-    };
+    /**
+     * Get schedule by id 
+     * @description Returns schedule information based on the given schedule id
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["Schedule"];
@@ -2714,27 +2519,21 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Lists transactions on the network. This includes successful and unsuccessful transactions. */
   listTransactions: {
-    parameters: {
-      query: {
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        transactiontype?: components["parameters"]["transactionTypeQueryParam"];
-        /** The transaction success type. */
+    /**
+     * List transactions 
+     * @description Lists transactions on the network. This includes successful and unsuccessful transactions.
+     */
+    parameters?: {
+        /** @description The transaction success type. */
+        /** @description The transaction account balance modification type. */
+      query?: {
         result?: "success" | "fail";
-        /** The transaction account balance modification type. */
         type?: "credit" | "debit";
       };
     };
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TransactionsResponse"];
@@ -2743,22 +2542,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns transaction information based on the given transaction id */
   getTransactionById: {
-    parameters: {
-      path: {
-        /** Transaction id */
-        transactionId: components["parameters"]["transactionIdPathParam"];
-      };
-      query: {
-        /** Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. If not specified, all transactions with specified payer account ID and valid start timestamp match. */
-        nonce?: components["parameters"]["nonceQueryParam"];
-        /** Filter transactions by the scheduled flag. If true, return information for the scheduled transaction. If false, return information for the non-scheduled transaction. If not present, return information for all transactions matching transactionId. */
-        scheduled?: components["parameters"]["scheduledQueryParam"];
-      };
-    };
+    /**
+     * Get transaction by id 
+     * @description Returns transaction information based on the given transaction id
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TransactionByIdResponse"];
@@ -2768,27 +2558,16 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns the  contents of the address book file, signature files, and record file that can be used to validate the transaction occurred on the Hedera network given transaction id. */
   getStateproofInfo: {
-    parameters: {
-      path: {
-        /** Transaction id */
-        transactionId: components["parameters"]["transactionIdPathParam"];
-      };
-      query: {
-        /** Filter the query result by the nonce of the transaction. A zero nonce represents user submitted transactions while a non-zero nonce is generated by main nodes. The filter honors the last value. Default is 0 when not specified. */
-        nonce?: components["parameters"]["nonceQueryParamWithDefault"];
-        /** Filter transactions by the scheduled flag. If true, return information for the scheduled transaction. If false, return information for the non-scheduled transaction. */
-        scheduled?: components["parameters"]["scheduledQueryParamWithDefault"];
-      };
-    };
+    /**
+     * Get stateproof information 
+     * @description Returns the  contents of the address book file, signature files, and record file that can be used to validate the transaction occurred on the Hedera network given transaction id.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
-          "application/json":
-            | components["schemas"]["StateProofResponseCompact"]
-            | components["schemas"]["StateProofResponseFull"];
+          "application/json": components["schemas"]["StateProofResponseCompact"] | components["schemas"]["StateProofResponseFull"];
         };
       };
       400: components["responses"]["InvalidParameterError"];
@@ -2796,26 +2575,21 @@ export interface operations {
       502: components["responses"]["ServiceUnavailableError"];
     };
   };
-  /** Returns the list of topic messages for the given topic id. */
   listTopicMessagesById: {
-    parameters: {
-      path: {
-        /** Topic id */
-        topicId: components["parameters"]["topicIdPathParam"];
-      };
-      query: {
+    /**
+     * List topic messages by id 
+     * @description Returns the list of topic messages for the given topic id.
+     */
+    parameters?: {
+        /** @example 2 */
+        /** @example base64 */
+      query?: {
         sequencenumber?: number;
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
         encoding?: string;
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
       };
     };
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TopicMessagesResponse"];
@@ -2825,18 +2599,22 @@ export interface operations {
       404: components["responses"]["TopicNotFound"];
     };
   };
-  /** Returns a single topic message the given topic id and sequence number. */
   getTopicMessageByIdAndSequenceNumber: {
+    /**
+     * Get topic message by id and sequence number 
+     * @description Returns a single topic message the given topic id and sequence number.
+     */
     parameters: {
+        /**
+         * @description Topic message sequence number 
+         * @example 2
+         */
       path: {
-        /** Topic id */
-        topicId: components["parameters"]["topicIdPathParam"];
-        /** Topic message sequence number */
         sequencenumber: number;
       };
     };
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TopicMessagesResponse"];
@@ -2846,16 +2624,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a topic message the given the consensusTimestamp. */
   getTopicMessagesByConsensusTimestamp: {
-    parameters: {
-      path: {
-        /** The timestamp at which the associated transaction reached consensus */
-        timestamp: components["parameters"]["timestampPathParam"];
-      };
-    };
+    /**
+     * Get topic message by consensusTimestamp 
+     * @description Returns a topic message the given the consensusTimestamp.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TopicMessage"];
@@ -2865,25 +2640,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of tokens on the network. */
   listTokens: {
-    parameters: {
-      query: {
-        /** The public key to compare against */
-        publickey?: components["parameters"]["publicKeyQueryParam"];
-        /** The ID of the token to return information for */
-        "token.id"?: components["parameters"]["tokenIdQueryParam"];
-        type?: components["parameters"]["tokenTypeQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-      };
-    };
+    /**
+     * List tokens 
+     * @description Returns a list of tokens on the network.
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TokensResponse"];
@@ -2892,19 +2655,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns token entity information given the id */
   getTokenById: {
-    parameters: {
-      path: {
-        /** Token id */
-        tokenId: components["parameters"]["tokenIdPathParam"];
-      };
-      query: {
-        timestamp?: components["parameters"]["tokenInfoTimestampQueryParam"];
-      };
-    };
+    /**
+     * Get token by id 
+     * @description Returns token entity information given the id
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TokenInfo"];
@@ -2914,30 +2671,13 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of token balances given the id. This represents the Token supply distribution across the network */
   listTokenBalancesById: {
-    parameters: {
-      path: {
-        /** Token id */
-        tokenId: components["parameters"]["tokenIdPathParam"];
-      };
-      query: {
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The optional balance value to compare against */
-        "account.balance"?: components["parameters"]["accountBalanceQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParam"];
-        /** The account's public key to compare against */
-        "account.publickey"?: components["parameters"]["accountPublicKeyQueryParam"];
-        /** The consensus timestamp in seconds.nanoseconds format with an optional comparison operator */
-        timestamp?: components["parameters"]["timestampQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-      };
-    };
+    /**
+     * List token balances 
+     * @description Returns a list of token balances given the id. This represents the Token supply distribution across the network
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["TokenBalancesResponse"];
@@ -2946,24 +2686,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns a list of non-fungible tokens */
   listNfts: {
-    parameters: {
-      path: {
-        /** Token id */
-        tokenId: components["parameters"]["tokenIdPathParam"];
-      };
-      query: {
-        /** The ID of the account to return information for */
-        "account.id"?: components["parameters"]["accountIdQueryParam"];
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-      };
-    };
+    /**
+     * List nfts 
+     * @description Returns a list of non-fungible tokens
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["Nfts"];
@@ -2972,18 +2701,13 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-  /** Returns information for a non-fungible token */
   listNftBySerialnumber: {
-    parameters: {
-      path: {
-        /** Token id */
-        tokenId: components["parameters"]["tokenIdPathParam"];
-        /** The nft serial number */
-        serialNumber: components["parameters"]["serialNumberPathParam"];
-      };
-    };
+    /**
+     * Get nft info 
+     * @description Returns information for a non-fungible token
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["Nft"];
@@ -2993,30 +2717,19 @@ export interface operations {
       404: components["responses"]["NotFoundError"];
     };
   };
-  /** Returns a list of transactions for a given non-fungible token */
   listNftTransactions: {
-    parameters: {
-      path: {
-        /** Token id */
-        tokenId: components["parameters"]["tokenIdPathParam"];
-        /** The nft serial number */
-        serialNumber: components["parameters"]["serialNumberPathParam"];
-      };
-      query: {
-        /** The maximum number of items to return */
-        limit?: components["parameters"]["limitQueryParam"];
-        /** The order in which items are listed */
-        order?: components["parameters"]["orderQueryParamDesc"];
-      };
-    };
+    /**
+     * Get an nfts transction history 
+     * @description Returns a list of transactions for a given non-fungible token
+     */
     responses: {
-      /** OK */
+      /** @description OK */
       200: {
         content: {
           "application/json": components["schemas"]["NftTransactionHistory"];
         };
       };
-      /** Partial Content */
+      /** @description Partial Content */
       206: {
         content: {
           "application/json": components["schemas"]["NftTransactionHistory"];
@@ -3025,6 +2738,4 @@ export interface operations {
       400: components["responses"]["InvalidParameterError"];
     };
   };
-}
-
-export interface external {}
+};

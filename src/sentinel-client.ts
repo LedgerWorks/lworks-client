@@ -1,10 +1,9 @@
 import fetch, { Response } from "node-fetch";
-import invariant from "tiny-invariant";
 import retry from "async-retry";
 
 import { PaginatedRuleResponse, StreamsRule, StreamsRuleType } from "./sentinel-types";
 import { libraryVersion } from "./config";
-import { ensureNetwork, getToken, timeElapsed } from "./client-helpers";
+import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
 import { Network, NetworkHostMapForSentinel } from "./networks";
 import { track } from "./track";
 import { baseLogger } from "./utils/logger";
@@ -34,46 +33,55 @@ async function parseErrorMessage(response: Response): Promise<string | null> {
 }
 
 type SentinelOptions = {
-  network: Network | "mainnet" | "testnet";
+  network?: Network | "mainnet" | "testnet";
   accessToken?: string;
 };
 
-type GetRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type SentinelUpsertOptions = SentinelOptions & {
+  /**
+   * Looks up rule by id before saving to update existing record
+   */
+  ruleId?: string;
+  /**
+   * Looks up rule by name and predicate value before saving to update existing record
+   */
+  deduplicateRuleName?: boolean;
+};
+
+type GetRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "GET";
 };
-type PutRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type PutRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "PUT";
   body: unknown;
 };
-type PostRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type PostRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "POST";
   body: unknown;
 };
-type DeleteRuleSentinelOptions = Omit<SentinelOptions, "network"> & {
+type DeleteRuleSentinelConfig = Omit<SentinelOptions, "network"> & {
   network: Network;
   method: "DELETE";
 };
 
-type CallSentinelOptions =
-  | GetRuleSentinelOptions
-  | PutRuleSentinelOptions
-  | PostRuleSentinelOptions
-  | DeleteRuleSentinelOptions;
+type CallSentinelConfig =
+  | GetRuleSentinelConfig
+  | PutRuleSentinelConfig
+  | PostRuleSentinelConfig
+  | DeleteRuleSentinelConfig;
 
 async function callSentinelApi<TResponse = unknown>(
   endpoint: string,
-  options: CallSentinelOptions
+  config: CallSentinelConfig
 ): Promise<{ data: TResponse }> {
   const startAt = Date.now();
-  const networkStack = options.network.toString();
+  const { accessToken } = ensureAccessToken(config.network, config);
+  const networkStack = config.network.toString();
   let attempts = 0;
-  const baseUrl = NetworkHostMapForSentinel[options.network];
-  const accessToken = options.accessToken ?? getToken(options.network);
-
-  invariant(accessToken, `Missing access token for ${options.network}`);
+  const baseUrl = NetworkHostMapForSentinel[config.network];
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -84,15 +92,15 @@ async function callSentinelApi<TResponse = unknown>(
       async () => {
         attempts = +1;
         const resp = await fetch(url, {
-          method: options.method,
+          method: config.method,
           headers: {
             "user-agent": `lworks-client/${libraryVersion}`,
             "Content-Type": "application/json",
             Authorization: accessToken,
           },
           body:
-            options.method === "PUT" || options.method === "POST"
-              ? JSON.stringify(options.body)
+            config.method === "PUT" || config.method === "POST"
+              ? JSON.stringify(config.body)
               : undefined,
         });
 
@@ -100,7 +108,7 @@ async function callSentinelApi<TResponse = unknown>(
           const errorMessage = await parseErrorMessage(resp);
           logger.trace(
             {
-              method: options.method,
+              method: config.method,
               networkStack,
               attempts,
               httpStatus: resp.status,
@@ -111,7 +119,7 @@ async function callSentinelApi<TResponse = unknown>(
 
           track(trackedEventName, accessToken, {
             status: "failed",
-            method: options.method,
+            method: config.method,
             timeElapsed: timeElapsed(startAt),
             url,
             pathname: parsedUrl.pathname,
@@ -128,7 +136,7 @@ async function callSentinelApi<TResponse = unknown>(
         const responseBody = await resp.json();
         logger.trace(
           {
-            method: options.method,
+            method: config.method,
             networkStack,
             attempts,
             httpStatus: resp.status,
@@ -191,21 +199,16 @@ export type StreamsRuleUpdate = Pick<StreamsRule, StreamsRuleUpdateFields>;
 export async function findRule(
   ruleType: StreamsRuleType,
   predicateValue: string,
-  options?: SentinelOptions & { name?: string }
+  name: string,
+  options?: SentinelOptions
 ): Promise<StreamsRule | undefined> {
   const withNetwork = ensureNetwork(options);
   const contextualLogger = logger.child({
     network: withNetwork.network,
     ruleType,
     predicateValue,
-    name: options?.name,
+    name,
   });
-  if (!options?.name) {
-    logger.warn(
-      "Multiple rules can exist for a given type and predicate value, a name must be provided to disambiguate"
-    );
-    return undefined;
-  }
 
   contextualLogger.debug(
     `Searching for rule of type ${ruleType} with predicate value ${predicateValue} on ${withNetwork.network}`
@@ -219,7 +222,7 @@ export async function findRule(
 
   const matchingRules = response.data.rules;
   logger.trace({ matchingRules }, `Found ${matchingRules.length} rules matching predicate`);
-  const matchByName = matchingRules.find((x) => x.ruleName === options.name);
+  const matchByName = matchingRules.find((x) => x.ruleName === name);
   logger.trace({ matchByName }, `Match by name: ${matchByName?.ruleId ?? "No match"}`);
   return matchByName;
 }
@@ -261,20 +264,20 @@ export async function deleteRuleById(
 
 export async function upsertRule(
   rule: StreamsRuleUpdate,
-  options?: SentinelOptions & { ruleId?: string }
+  options?: SentinelUpsertOptions
 ): Promise<StreamsRule> {
   const withNetwork = ensureNetwork(options);
-  const existingRuleById = options?.ruleId
-    ? await getRuleById(options.ruleId, { ...options, ...withNetwork })
-    : undefined;
+  let existingRule: StreamsRule | undefined;
+  if (options?.ruleId) {
+    existingRule = await getRuleById(options.ruleId, { ...options, ...withNetwork });
+  }
 
-  const existingRule =
-    existingRuleById ??
-    (await findRule(rule.ruleType, rule.predicateValue, {
+  if (!existingRule && options?.deduplicateRuleName && rule.ruleName) {
+    existingRule = await findRule(rule.ruleType, rule.predicateValue, rule.ruleName, {
       ...options,
       ...withNetwork,
-      name: rule.ruleName,
-    }));
+    });
+  }
 
   const { endpoint, method } = existingRule
     ? { endpoint: `/api/v1/rules/${existingRule.ruleId}`, method: "PUT" as const }
