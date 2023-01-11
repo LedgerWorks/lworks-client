@@ -34,7 +34,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
   logger.trace({ url, baseUrl }, "Mirror call");
   try {
     return await retry<T>(
-      async () => {
+      async (bail) => {
         attempts = +1;
         const resp = await fetch(url, {
           headers: {
@@ -66,7 +66,11 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             errorResponseMessage,
           });
           // eslint-disable-next-line no-underscore-dangle
-          throw new Error(`${resp.status} (${url}): ${errorResponseMessage}`);
+          const error = new Error(`${resp.status} (${url}): ${errorResponseMessage}`);
+          if (resp.status === 400 || resp.status === 401) {
+            bail(error);
+          }
+          throw error;
         }
         track(trackedEventName, accessToken, {
           status: "success",

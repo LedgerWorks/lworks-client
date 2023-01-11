@@ -1,7 +1,7 @@
 import fetch, { Response } from "node-fetch";
 import retry from "async-retry";
 
-import { PaginatedRuleResponse, StreamsRule, StreamsRuleType } from "./sentinel-types";
+import { StreamRulesQueryResult, StreamsRule, StreamsRuleType } from "./sentinel-types";
 import { libraryVersion } from "./config";
 import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
 import { Network, NetworkHostMapForSentinel } from "./networks";
@@ -35,6 +35,14 @@ async function parseErrorMessage(response: Response): Promise<string | null> {
 type SentinelOptions = {
   network?: Network | "mainnet" | "testnet";
   accessToken?: string;
+};
+
+type SentinelQueryOptions = SentinelOptions & {
+  ruleName?: string;
+  ruleType?: StreamsRuleType;
+  predicateValue?: string;
+  limit?: number;
+  next?: string;
 };
 
 type SentinelUpsertOptions = SentinelOptions & {
@@ -73,10 +81,12 @@ type CallSentinelConfig =
   | PostRuleSentinelConfig
   | DeleteRuleSentinelConfig;
 
+type SentinelApiResult<TResponse> = { data: TResponse; links?: { next?: string } };
+
 async function callSentinelApi<TResponse = unknown>(
   endpoint: string,
   config: CallSentinelConfig
-): Promise<{ data: TResponse }> {
+): Promise<SentinelApiResult<TResponse>> {
   const startAt = Date.now();
   const { accessToken } = ensureAccessToken(config.network, config);
   const networkStack = config.network.toString();
@@ -89,7 +99,7 @@ async function callSentinelApi<TResponse = unknown>(
   const queryParams = Object.fromEntries(searchParams.entries());
   try {
     return await retry(
-      async () => {
+      async (bail) => {
         attempts = +1;
         const resp = await fetch(url, {
           method: config.method,
@@ -131,7 +141,13 @@ async function callSentinelApi<TResponse = unknown>(
             errorResponseMessage: errorMessage,
           });
 
-          throw new Error([`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": "));
+          const error = new Error(
+            [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
+          );
+          if (resp.status === 400 || resp.status === 401) {
+            bail(error);
+          }
+          throw error;
         }
         const responseBody = await resp.json();
         logger.trace(
@@ -154,7 +170,7 @@ async function callSentinelApi<TResponse = unknown>(
           attempts,
           httpStatus: resp.status,
         });
-        return responseBody as { data: TResponse };
+        return responseBody as SentinelApiResult<TResponse>;
       },
       { retries: 4 }
     );
@@ -164,17 +180,47 @@ async function callSentinelApi<TResponse = unknown>(
   }
 }
 
-export async function getRules(options?: SentinelOptions): Promise<StreamsRule[]> {
-  const endpoint = "/api/v1/rules";
+/**
+ * query rules using /api/v1/rules
+ * @param options - standard sentinel api options and available query parameters for the endpoint
+ * @returns The query result. Pagination is possible if next is defined in the response. To paginate, include next into the next call to queryRules along with the original options.
+ */
+export async function queryRules(options?: SentinelQueryOptions): Promise<StreamRulesQueryResult> {
   const withNetwork = ensureNetwork(options);
+  let endpoint;
+  if (options?.next) {
+    endpoint = options.next;
+  } else {
+    endpoint = "/api/v1/rules";
+    const urlSearchParams = new URLSearchParams();
+    if (options?.limit) {
+      urlSearchParams.set("limit", `${options.limit}`);
+    }
+    if (options?.predicateValue) {
+      urlSearchParams.set("predicateValue", options.predicateValue);
+    }
+    if (options?.ruleType !== undefined) {
+      urlSearchParams.set("ruleType", `${options.ruleType}`);
+    }
+    if (options?.ruleName) {
+      urlSearchParams.set("ruleName", options.ruleName);
+    }
+    const params = urlSearchParams.toString();
+    if (params) {
+      endpoint += `?${params}`;
+    }
+  }
 
-  return (
-    await callSentinelApi<StreamsRule[]>(endpoint, {
-      ...options,
-      ...withNetwork,
-      method: "GET",
-    })
-  ).data;
+  const { data, links } = await callSentinelApi<StreamsRule[]>(endpoint, {
+    ...options,
+    ...withNetwork,
+    method: "GET",
+  });
+
+  return {
+    rules: data,
+    next: links?.next,
+  };
 }
 
 type StreamsRuleUpdateFields =
@@ -188,8 +234,9 @@ type StreamsRuleUpdateFields =
 export type StreamsRuleUpdate = Pick<StreamsRule, StreamsRuleUpdateFields>;
 
 /**
- * Find a rule based on predicate and name. This is useful to avoid adding the same
- * rule twice
+ * Find a rule based on predicate and name. This is useful to avoid adding the same rule twice.
+ * This is a convenient method to queryRules.
+ * In the event multiple rules have the same ruleType, predicateValue, and name the rule returned is not guaranteed to be consistent.
  * @param ruleType
  * @param predicateValue
  * @param name
@@ -202,29 +249,15 @@ export async function findRule(
   name: string,
   options?: SentinelOptions
 ): Promise<StreamsRule | undefined> {
-  const withNetwork = ensureNetwork(options);
-  const contextualLogger = logger.child({
-    network: withNetwork.network,
+  const queryResult = await queryRules({
+    ...options,
+    ruleName: name,
     ruleType,
     predicateValue,
-    name,
+    limit: 1,
   });
 
-  contextualLogger.debug(
-    `Searching for rule of type ${ruleType} with predicate value ${predicateValue} on ${withNetwork.network}`
-  );
-  const endpoint = `/api/v1/rules/types/${ruleType}/predicateValues/${predicateValue}`;
-  const response = await callSentinelApi<PaginatedRuleResponse>(endpoint, {
-    ...options,
-    ...withNetwork,
-    method: "GET",
-  });
-
-  const matchingRules = response.data.rules;
-  logger.trace({ matchingRules }, `Found ${matchingRules.length} rules matching predicate`);
-  const matchByName = matchingRules.find((x) => x.ruleName === name);
-  logger.trace({ matchByName }, `Match by name: ${matchByName?.ruleId ?? "No match"}`);
-  return matchByName;
+  return queryResult.rules.at(0);
 }
 
 export async function getRuleById(
@@ -305,4 +338,15 @@ export async function createRule(
     body: rule,
   });
   return data;
+}
+
+// DEPRECATED
+/**
+ * @deprecated use queryRules
+ * @param options
+ * @returns an array of rules
+ */
+export async function getRules(options?: SentinelOptions): Promise<StreamsRule[]> {
+  const { rules } = await queryRules(options);
+  return rules;
 }

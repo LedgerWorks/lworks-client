@@ -82,6 +82,14 @@ export type NotificationEventAuditRecord = {
   timeToLive?: number;
 };
 
+export type StreamRulesQueryResult = {
+  rules: StreamsRule[];
+  next?: string;
+};
+
+/**
+ * @deprecated
+ */
 export type PaginatedRuleResponse = {
   rules: StreamsRule[];
   nextToken?: string;
