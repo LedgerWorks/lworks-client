@@ -11,7 +11,6 @@ import {
 import { StreamsRule, StreamsRuleType } from "../sentinel-types";
 import { setNetwork } from "../config";
 import { Network } from "../networks";
-import { knownLookup } from "../enums";
 
 const runQualifier = Math.round(Math.random() * 10_000);
 const actionWebhookUrl = "http://example.com";
