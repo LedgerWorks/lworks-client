@@ -12,7 +12,7 @@ export type StreamsRule = {
   organizationId: string;
   userId: string;
   ruleType: StreamsRuleType;
-  chain: "hedera";
+  chain: "hedera" | "avalanche";
   predicateValue: string;
   ruleName?: string;
   actionWebhookUrl?: string;
@@ -86,6 +86,17 @@ export type StreamRulesQueryResult = {
   rules: StreamsRule[];
   next?: string;
 };
+
+type StreamsRuleUpdateFields =
+  | "ruleName"
+  | "ruleType"
+  | "chain"
+  | "predicateValue"
+  | "actionWebhookUrl"
+  | "actionWebhookCustomHeaders"
+  | "disabled";
+
+export type StreamsRuleUpdate = Pick<StreamsRule, StreamsRuleUpdateFields>;
 
 /**
  * @deprecated
