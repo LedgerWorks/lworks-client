@@ -1,3 +1,5 @@
+import { Response } from "node-fetch";
+
 import { getAccessToken, getNetwork } from "./config";
 import { knownLookup } from "./enums";
 import { Network } from "./networks";
@@ -56,4 +58,8 @@ export function ensureNetwork(options?: { network?: Network | "mainnet" | "testn
 
 export function timeElapsed(startedAt: number): number {
   return Date.now() - startedAt;
+}
+
+export function shouldBailRetry(response: Response) {
+  return response.status === 400 || response.status === 401 || response.status === 404;
 }

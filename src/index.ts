@@ -10,6 +10,7 @@ export {
 } from "./sentinel-client";
 export { Network } from "./networks";
 export * as MirrorResponse from "./mirror-api-types";
+export * as SentinelTypes from "./sentinel-types";
 export {
   getAllHCSMessages,
   decodeBase64Message,

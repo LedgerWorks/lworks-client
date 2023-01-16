@@ -1,6 +1,10 @@
 # LedgerWorks Client
 
-This library is intended to be used with the [LedgerWorks](https://lworks.io) Hedera Mirror. This is a convenience wrapper around `node-fetch` with automatic retry logic provided by `async-retry` and authentication handling. [Sign up](https://app.lworks.io/signup) for a free account if you don't have an existing access key. By default, this library will provide anonymous usage data back to LedgerWorks.
+This library is intended to be used with the [Ledger Works'](https://lworks.io) Hedera Mirror REST API and the ledger event notification service Sentinel.
+
+To learn more about these services, see [Mirror Docs](https://docs.lworks.io/category/mirror-api) and [Sentinel Docs](https://docs.lworks.io/category/sentinel).
+
+The client  uses `node-fetch` with automatic retry logic provided by `async-retry` and custom authentication handling. [Sign up](https://app.lworks.io/signup) for a free account if you don't have an existing access key. By default, this library will provide anonymous usage data back to LedgerWorks.
 
 Support and questions should be directed to [our discord](https://discord.gg/Rph3nbEEFA).
 
@@ -10,130 +14,76 @@ Support and questions should be directed to [our discord](https://discord.gg/Rph
 npm install lworks-client
 ```
 
-## Usage
+## Mirror Usage
 
-Once your access token is configured, you can call the mirror providing a network and endpoint (Endpoint documentation can be found [on the Hedera public mirror](https://mainnet-public.mirrornode.hedera.com/api/v1/docs/))
+Once your access token is configured, you can call the mirror providing a network and endpoint (Endpoint documentation can be found [on the Hedera public mirror](https://mainnet-public.mirrornode.hedera.com/api/v1/docs/)).
 
-```js
+```ts
 const { callMirror, MirrorResponse } = require("lworks-client");
 
-callMirror<MirrorResponse.Schemas["TransactionsResponse"]>("mainnet", "/api/v1/transactions?limit=100")
-  .then((resp) => {
-    console.log(resp);
-    // {
-    //     "transactions": [
-    //         {
-    //             "bytes": null,
-    //             "charged_tx_fee": 1642787,
-    //             "consensus_timestamp": "1666123944.820428059",
-    //             "entity_id": "0.0.48651905",
-    //             "max_fee": "200000000",
-    //             "memo_base64": "",
-    //             "name": "TOKENMINT",
-    //             "node": "0.0.3",
-    //             "nonce": 0,
-    //             "parent_consensus_timestamp": null,
-    //             "result": "SUCCESS",
-    //             "scheduled": false,
-    //             "token_transfers": [
-    //                 {
-    //                     "token_id": "0.0.48651905",
-    //                     "account": "0.0.18602592",
-    //                     "amount": 8112000000,
-    //                     "is_approval": false
-    //                 }
-    //             ],
-    //             "transaction_hash": "SXHasFfLzfn4E2PdN3LjoOAx7ZaAsuT8TsSiifBvAgUxYuhHQ5gzxrJOnTkWJrqJ",
-    //             "transaction_id": "0.0.18602592-1666123934-274397160",
-    //             "transfers": [
-    //                 {
-    //                     "account": "0.0.3",
-    //                     "amount": 82230,
-    //                     "is_approval": false
-    //                 },
-    //                 {
-    //                     "account": "0.0.98",
-    //                     "amount": 1560557,
-    //                     "is_approval": false
-    //                 },
-    //                 {
-    //                     "account": "0.0.18602592",
-    //                     "amount": -1642787,
-    //                     "is_approval": false
-    //                 }
-    //             ],
-    //             "valid_duration_seconds": "120",
-    //             "valid_start_timestamp": "1666123934.274397160"
-    //         },
-    //         {
-    //             "bytes": null,
-    //             "charged_tx_fee": 165214,
-    //             "consensus_timestamp": "1666123944.388621003",
-    //             "entity_id": "0.0.2601162",
-    //             "max_fee": "2000000000",
-    //             "memo_base64": "MTY2NjEyMzk0NDE3MyBNb25pdG9yIHBpbmdlciBvbiB0ZXN0bmV0LW1vbml0b3ItaGVkZXJhLW1pcnJvci1tb25pdG9yLTY5Y2ZmY2RkNmQta3Fta2Y=",
-    //             "name": "CONSENSUSSUBMITMESSAGE",
-    //             "node": "0.0.6",
-    //             "nonce": 0,
-    //             "parent_consensus_timestamp": null,
-    //             "result": "SUCCESS",
-    //             "scheduled": false,
-    //             "transaction_hash": "P+tfWp7LQHWTevMoD7GhRXX7asFb6OHHjaDgS+5QP3QlqgDhIcMAp5InHoR3a1NI",
-    //             "transaction_id": "0.0.88-1666123934-194790704",
-    //             "transfers": [
-    //                 {
-    //                     "account": "0.0.6",
-    //                     "amount": 8302,
-    //                     "is_approval": false
-    //                 },
-    //                 {
-    //                     "account": "0.0.88",
-    //                     "amount": -165214,
-    //                     "is_approval": false
-    //                 },
-    //                 {
-    //                     "account": "0.0.98",
-    //                     "amount": 156912,
-    //                     "is_approval": false
-    //                 }
-    //             ],
-    //             "valid_duration_seconds": "120",
-    //             "valid_start_timestamp": "1666123934.194790704"
-    //         }
-    //     ],
-    //     "links": {
-    //         "next": "/api/v1/transactions?limit=2&timestamp=lt:1666123944.388621003"
-    //     }
-    // }
-  });
+await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
+(
+  "/api/v1/transactions?limit=100",
+  { Network: Network.Mainnet }
+)
 ```
+
+## Call Sentinel
 
 ```ts
-import { callMirror, Network } from "lworks-client";
+import { queryRules, getRuleById, deleteRuleById SentinelTypes, getRuleById } from "lworks-client";
 
-callMirror<{
-    "transactions": Array<{
-        "bytes": null,
-        "consensus_timestamp": string,
-        "name": string,
-        "node": string
-      }>
-    }>(Network.Mainnet, "/api/v1/transactions?limit=100")
-  .then((resp) => {
-    console.log(resp.transactions);
+// Query all rules targeting HCS Topic activity
+const result = await queryRules({
+  network: Network.Testnet,
+  ruleType: SentinelTypes.StreamsRuleType.HCSMessagesByTopicId,
+});
+
+let rules = result.rules;
+// simple pagination example
+if(result.next) {
+  const result2 = await queryRules({
+    network: Network.Testnet,
+    ruleType: SentinelTypes.StreamsRuleType.HCSMessagesByTopicId,
+    next: result1.next,
   });
+
+  rules = rules.concat(result2.rules);
+}
+
+  if(rules.length > 0) {
+    // Delete example
+    await deleteRuleById(rule[0].ruleId, { network:  Network.Testnet });
+
+  // Sentinel update and delete operations are asynchronous.
+  // E.g., the Sentinel API returns a 202 status code.
+  // Here, we wait for the rule deletion to be processed.
+  // Note: This code is for demonstrational purposes only and should not be used as written.
+  let ruleDeleted = false;
+  while(true) {
+    const deletedRule = getRuleById(rule[0].ruleId, { network:  Network.Testnet });
+    if(deletedRule === undefined) {
+      break;
+    }
+  }
+}
 ```
 
-Alternatively if you only plan on using a single network, you can set the network and the omit it on each call.
+## Options
+
+The global configuration object can be configured with a single call or with individual `set<OPTION>` calls.
+
+This global options has the following type
 
 ```ts
-import { callMirror, Network, setNetwork } from "lworks-client";
-
-setNetwork(Network.Mainnet); // OR setNetwork("mainnet");
-callMirror("/api/v1/transactions?limit=100");
+type Config = {
+  disableTracking: boolean;
+  network: null | Network;
+  accessToken: null | string;
+};
 ```
 
-## Access Token Configuration
+### Configure Access Token
 
 Get your access token(s) from <https://app.lworks.io/api-access-tokens>
 
@@ -152,30 +102,37 @@ Get your access token(s) from <https://app.lworks.io/api-access-tokens>
 
 1. Programmatically configure a single token by
 
-    ```js
-    const { setAccessToken } = require("lworks-client");
-
-    setAccessToken("b226ac68f00b444b6ab249a029bd01d8");
-    ```
-
     ```ts
     import { setAccessToken } from "lworks-client";
 
     setAccessToken("b226ac68f00b444b6ab249a029bd01d8");
     ```
 
-## Options
+     ```ts
+    import { configure } from "lworks-client";
 
-The global configuration object can be configured with a single call or with individual `set<OPTION>` calls.
+    configure({
+      accessToken: "b226ac68f00b444b6ab249a029bd01d8",
+    });
+    ```
 
-This global options has the following type
+### Configure Network
+
+If you only plan on using a single network, you can set the network and the omit it on each call.
 
 ```ts
-type Config = {
-  disableTracking: boolean;
-  network: null | Network;
-  accessToken: null | string;
-};
+import { setNetwork } from "lworks-client";
+
+setNetwork("mainnet");
+```
+
+```ts
+import { configure } from "lworks-client";
+
+configure({
+  network: Network.Mainnet,
+});
+
 ```
 
 ### Configure anonymous metrics
