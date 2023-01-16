@@ -1,6 +1,6 @@
 # LedgerWorks Client
 
-This library is intended to be used with the [LedgerWorks](https://lworks.io) Hedera Mirror and Ledger Works' notification service Sentinel.
+This library is intended to be used with the [Ledger Works'](https://lworks.io) Hedera Mirror REST API and the ledger event notification service Sentinel.
 
 To learn more about these services, see [Mirror Docs](https://docs.lworks.io/category/mirror-api) and [Sentinel Docs](https://docs.lworks.io/category/sentinel).
 
