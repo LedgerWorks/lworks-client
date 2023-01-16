@@ -4,7 +4,7 @@ import retry from "async-retry";
 import { Network, NetworkHostMap } from "./networks";
 import { track } from "./track";
 import { libraryVersion } from "./config";
-import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
+import { ensureAccessToken, ensureNetwork, shouldBailRetry, timeElapsed } from "./client-helpers";
 import { baseLogger } from "./utils/logger";
 
 const logger = baseLogger.child({ client: "mirror" });
@@ -67,7 +67,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
           });
           // eslint-disable-next-line no-underscore-dangle
           const error = new Error(`${resp.status} (${url}): ${errorResponseMessage}`);
-          if (resp.status === 400 || resp.status === 401) {
+          if (shouldBailRetry(resp)) {
             bail(error);
           }
           throw error;

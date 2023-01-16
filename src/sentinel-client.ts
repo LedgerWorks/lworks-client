@@ -8,7 +8,7 @@ import {
   StreamsRuleUpdate,
 } from "./sentinel-types";
 import { libraryVersion } from "./config";
-import { ensureAccessToken, ensureNetwork, timeElapsed } from "./client-helpers";
+import { ensureAccessToken, ensureNetwork, shouldBailRetry, timeElapsed } from "./client-helpers";
 import { Network, NetworkHostMapForSentinel } from "./networks";
 import { track } from "./track";
 import { baseLogger } from "./utils/logger";
@@ -149,7 +149,7 @@ async function callSentinelApi<TResponse = unknown>(
           const error = new Error(
             [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
           );
-          if (resp.status === 400 || resp.status === 401) {
+          if (shouldBailRetry(resp)) {
             bail(error);
           }
           throw error;
