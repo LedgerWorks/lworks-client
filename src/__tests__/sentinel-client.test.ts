@@ -58,6 +58,10 @@ describe("sentinel client", () => {
         predicateValue: "0.0.1234",
         ruleType: StreamsRuleType.HCSMessagesByTopicId,
         ruleName: testRuleName(`Hello ${Math.random()}`),
+        batchOptions: {
+          enabled: true,
+          maxBatchSize: 5,
+        },
         actionWebhookUrl,
         chain: "hedera",
       },
