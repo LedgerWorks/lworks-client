@@ -7,6 +7,11 @@ export enum StreamsRuleType {
   AccountActivityByAccount = 6,
 }
 
+export type StreamsRuleBatchOptions = {
+  enabled: boolean;
+  maxBatchSize: number;
+};
+
 export type StreamsRule = {
   ruleId: string;
   organizationId: string;
@@ -14,6 +19,7 @@ export type StreamsRule = {
   ruleType: StreamsRuleType;
   chain: "hedera" | "avalanche";
   predicateValue: string;
+  batchOptions?: StreamsRuleBatchOptions;
   ruleName?: string;
   actionWebhookUrl?: string;
   actionWebhookCustomHeaders?: Record<string, string>;
@@ -48,6 +54,7 @@ export enum StreamEventStatus {
   Pending,
   Skipped,
   Timeout,
+  Batching,
 }
 
 export type NotificationEventMetadata = {
@@ -62,6 +69,8 @@ export type NotificationEventMetadata = {
   destinationType?: NotifiableItemDestinationType;
   errorMessage?: string;
   timeToLive?: number;
+  batchSize?: number;
+  batchSpanSeconds?: number;
 };
 
 export type NotificationEventRecord = NotificationEventMetadata & {
@@ -92,6 +101,7 @@ type StreamsRuleUpdateFields =
   | "ruleType"
   | "chain"
   | "predicateValue"
+  | "batchOptions"
   | "actionWebhookUrl"
   | "actionWebhookCustomHeaders"
   | "disabled";
