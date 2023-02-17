@@ -7,6 +7,7 @@ export {
   getRuleById,
   getRules,
   upsertRule,
+  queryRules,
 } from "./sentinel-client";
 export { Network } from "./networks";
 export * as MirrorResponse from "./mirror-api-types";
