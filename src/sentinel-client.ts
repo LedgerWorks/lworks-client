@@ -8,10 +8,18 @@ import {
   StreamsRuleUpdate,
 } from "./sentinel-types";
 import { libraryVersion } from "./config";
-import { ensureAccessToken, ensureNetwork, shouldBailRetry, timeElapsed } from "./client-helpers";
-import { Network, NetworkHostMapForSentinel } from "./networks";
+import {
+  ensureAccessToken,
+  ensureEnvironment,
+  ensureNetwork,
+  shouldBailRetry,
+  timeElapsed,
+} from "./client-helpers";
+import { Network } from "./networks";
 import { track } from "./track";
 import { baseLogger } from "./utils/logger";
+import { Environment } from "./environment";
+import { getSentinelUrl } from "./urls";
 
 const logger = baseLogger.child({ client: "sentinel" });
 const trackedEventName = "Sentinel Call";
@@ -39,6 +47,7 @@ async function parseErrorMessage(response: Response): Promise<string | null> {
 
 type SentinelOptions = {
   network?: Network | "mainnet" | "testnet";
+  environment?: Environment;
   accessToken?: string;
 };
 
@@ -95,13 +104,14 @@ async function callSentinelApi<TResponse = unknown>(
   const startAt = Date.now();
   const { accessToken } = ensureAccessToken(config.network, config);
   const networkStack = config.network.toString();
-  let attempts = 0;
-  const baseUrl = NetworkHostMapForSentinel[config.network];
+  const environment = ensureEnvironment(config);
 
+  const baseUrl = getSentinelUrl(environment, config.network);
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
   const searchParams = new URLSearchParams(parsedUrl.search);
   const queryParams = Object.fromEntries(searchParams.entries());
+  let attempts = 0;
   try {
     return await retry(
       async (bail) => {
@@ -118,6 +128,7 @@ async function callSentinelApi<TResponse = unknown>(
               ? JSON.stringify(config.body)
               : undefined,
         });
+        logger.debug({ responseStatus: resp.status, url }, "Sentinel response");
 
         if (resp.status >= 400) {
           const errorMessage = await parseErrorMessage(resp);
