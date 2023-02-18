@@ -1,7 +1,7 @@
-import { Environment, parseEnvironment } from "./environment";
+import { Environment } from "./environment";
 import { Network } from "./networks";
 
-export const libraryVersion = "1.1.1";
+export const libraryVersion = "1.2.0";
 
 type Config = {
   disableTracking: boolean;
