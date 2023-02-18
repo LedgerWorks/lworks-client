@@ -10,6 +10,7 @@ export {
   queryRules,
 } from "./sentinel-client";
 export { Network } from "./networks";
+export { Environment, parseEnvironment } from "./environment";
 export * as MirrorResponse from "./mirror-api-types";
 export * as SentinelTypes from "./sentinel-types";
 export {
