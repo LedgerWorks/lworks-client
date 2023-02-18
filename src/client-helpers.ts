@@ -1,8 +1,10 @@
 import { Response } from "node-fetch";
 
-import { getAccessToken, getNetwork } from "./config";
+import { getAccessToken, getEnvironment, getNetwork } from "./config";
 import { knownLookup } from "./enums";
+import { Environment, parseEnvironment } from "./environment";
 import { Network } from "./networks";
+import { isNotNullOrUndefined } from "./utils/is-not-null-or-undefined";
 import { baseLogger } from "./utils/logger";
 
 function getToken(network: Network): string | undefined {
@@ -54,6 +56,15 @@ export function ensureNetwork(options?: { network?: Network | "mainnet" | "testn
   throw new Error(
     "Network is not configured. Configure network globally with 'configure' or pass in options on the request."
   );
+}
+
+export function ensureEnvironment(options?: { environment?: Environment }): Environment {
+  const environmentSources = [
+    options?.environment,
+    getEnvironment(),
+    parseEnvironment(process.env.LWORKS_ENVIRONMENT),
+  ];
+  return environmentSources.find(isNotNullOrUndefined) ?? Environment.prod;
 }
 
 export function timeElapsed(startedAt: number): number {

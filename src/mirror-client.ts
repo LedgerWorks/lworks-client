@@ -1,22 +1,34 @@
 import fetch from "node-fetch";
 import retry from "async-retry";
 
-import { Network, NetworkHostMap } from "./networks";
+import { Network } from "./networks";
 import { track } from "./track";
 import { libraryVersion } from "./config";
-import { ensureAccessToken, ensureNetwork, shouldBailRetry, timeElapsed } from "./client-helpers";
+import {
+  ensureAccessToken,
+  ensureEnvironment,
+  ensureNetwork,
+  shouldBailRetry,
+  timeElapsed,
+} from "./client-helpers";
 import { baseLogger } from "./utils/logger";
+import { Environment } from "./environment";
+import { getMirrorUrl } from "./urls";
 
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
 
 type MirrorConfig = {
   network: Network;
+  environment: Environment;
   accessToken: string;
 };
 
 export type MirrorOptions = Partial<
-  Omit<MirrorConfig, "network"> & { network: Network | "mainnet" | "testnet" }
+  Omit<MirrorConfig, "network" | "environment"> & {
+    network: Network | "mainnet" | "testnet";
+    environment?: Environment;
+  }
 >;
 
 async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
@@ -25,7 +37,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
   const networkStack = network.toString();
 
   let attempts = 0;
-  const baseUrl = NetworkHostMap[config.network];
+  const baseUrl = getMirrorUrl(config.environment, config.network);
 
   const url = `${baseUrl}${endpoint}`;
   const parsedUrl = new URL(url);
@@ -43,6 +55,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             Authorization: accessToken,
           },
         });
+        logger.debug({ responseStatus: resp.status, url }, "Mirror response");
 
         if (resp.status >= 400) {
           const errorResponse = (await resp.json()) as {
@@ -102,17 +115,16 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
 }
 
 /**
- * Call the mirror the the specified network and endpoint
+ * Call the mirror with the specified network and endpoint
  * @param endpoint The mirror endpoint such as `/api/v1/transactions?limit=100`
  * @param options An object to optionally specify the network and access credentials
  */
 export async function callMirror<T>(endpoint: string, options: MirrorOptions = {}): Promise<T> {
-  if (!endpoint) {
-    throw new Error("Endpoint is required");
-  }
+  if (!endpoint) throw new Error("Endpoint is required");
 
   const { network } = ensureNetwork(options);
   const { accessToken } = ensureAccessToken(network, options);
+  const environment = ensureEnvironment(options);
 
-  return get<T>(endpoint, { accessToken, network });
+  return get<T>(endpoint, { accessToken, network, environment });
 }

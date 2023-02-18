@@ -17,7 +17,8 @@
     "lint": "eslint --ext .ts ./src && prettier --check ./src",
     "lint:fix": "npm run lint -- --fix",
     "pretest": "node ./scripts/update-library-version.js",
-    "test": "jest"
+    "test": "jest",
+    "dev:run": "esbuild src/dev.ts --bundle --sourcemap --outdir=dist/dev --platform=node --target=node18 && node -r dotenv/config dist/dev/dev.js"
   },
   "author": "",
   "license": "MIT",

@@ -1,3 +1,4 @@
+import { Environment, parseEnvironment } from "./environment";
 import { Network } from "./networks";
 
 export const libraryVersion = "1.1.1";
@@ -5,12 +6,14 @@ export const libraryVersion = "1.1.1";
 type Config = {
   disableTracking: boolean;
   network: null | Network;
+  environment: null | Environment;
   accessToken: null | string;
 };
 
 const config: Config = {
   disableTracking: false,
   network: null,
+  environment: null,
   accessToken: null,
 };
 
@@ -54,6 +57,18 @@ export function getNetwork() {
     console.warn("network is not set");
   }
   return config.network;
+}
+
+/**
+ * Assign default environment used when calling `callMirror` with only an endpoint
+ * @param environment dev|stage|prod
+ */
+export function setEnvironment(environment: Environment) {
+  config.environment = environment;
+}
+
+export function getEnvironment() {
+  return config.environment;
 }
 
 /**
