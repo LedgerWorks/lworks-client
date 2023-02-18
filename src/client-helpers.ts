@@ -4,7 +4,6 @@ import { getAccessToken, getEnvironment, getNetwork } from "./config";
 import { knownLookup } from "./enums";
 import { Environment, parseEnvironment } from "./environment";
 import { Network } from "./networks";
-import { isNotNullOrUndefined } from "./utils/is-not-null-or-undefined";
 import { baseLogger } from "./utils/logger";
 
 function getToken(network: Network): string | undefined {
@@ -59,12 +58,15 @@ export function ensureNetwork(options?: { network?: Network | "mainnet" | "testn
 }
 
 export function ensureEnvironment(options?: { environment?: Environment }): Environment {
-  const environmentSources = [
-    options?.environment,
-    getEnvironment(),
-    parseEnvironment(process.env.LWORKS_ENVIRONMENT),
-  ];
-  return environmentSources.find(isNotNullOrUndefined) ?? Environment.prod;
+  if (options?.environment) return options.environment;
+
+  const fromGlobal = getEnvironment();
+  if (fromGlobal) return fromGlobal;
+
+  const fromEnvironmentVariable = process.env.LWORKS_ENVIRONMENT;
+  if (fromEnvironmentVariable) return parseEnvironment(fromEnvironmentVariable);
+
+  return Environment.prod;
 }
 
 export function timeElapsed(startedAt: number): number {
