@@ -11,6 +11,7 @@ export {
 } from "./sentinel-client";
 export { Network } from "./networks";
 export { Environment, parseEnvironment } from "./environment";
+export { Chain, parseChain } from "./chain";
 export * as MirrorResponse from "./mirror-api-types";
 export * as SentinelTypes from "./sentinel-types";
 export {
