@@ -11,6 +11,7 @@ import {
 import { StreamsRule, StreamsRuleType } from "../sentinel-types";
 import { setNetwork } from "../config";
 import { Network } from "../networks";
+import { Chain } from "../chain";
 
 const runQualifier = Math.round(Math.random() * 10_000);
 const actionWebhookUrl = "http://example.com";
@@ -63,7 +64,7 @@ describe("sentinel client", () => {
           maxBatchSize: 5,
         },
         actionWebhookUrl,
-        chain: "hedera",
+        chain: Chain.Hedera,
       },
       { network: "testnet" }
     );
@@ -91,7 +92,7 @@ describe("sentinel client", () => {
         ruleType: StreamsRuleType.HCSMessagesByTopicId,
         ruleName: testRuleName(`Hello ${Math.random()}`),
         actionWebhookUrl,
-        chain: "hedera",
+        chain: Chain.Hedera,
       },
       { network: "testnet" }
     );
@@ -105,7 +106,7 @@ describe("sentinel client", () => {
         ruleType: StreamsRuleType.HCSMessagesByTopicId,
         ruleName: updatedName,
         actionWebhookUrl,
-        chain: "hedera",
+        chain: Chain.Hedera,
       },
       { ruleId: createdRule.ruleId, network: "testnet" }
     );

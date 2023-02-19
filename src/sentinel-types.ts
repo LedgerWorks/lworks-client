@@ -1,3 +1,5 @@
+import { Chain, LegacyChainStrings } from "./chain";
+
 export enum StreamsRuleType {
   HCSMessagesByTopicId = 0,
   TokenMintsByTokenId = 1,
@@ -18,7 +20,7 @@ export type StreamsRule = {
   organizationId: string;
   userId: string;
   ruleType: StreamsRuleType;
-  chain: "hedera" | "avalanche";
+  chain: Chain | LegacyChainStrings;
   predicateValue: string;
   batchOptions?: StreamsRuleBatchOptions;
   ruleName?: string;
