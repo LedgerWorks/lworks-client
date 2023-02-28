@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch, { RequestInit } from "node-fetch";
 import retry from "async-retry";
 
 import { libraryVersion } from "./config";
@@ -7,60 +7,88 @@ import {
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
-  timeElapsed,
 } from "./client-helpers";
-import { track } from "./track";
 import { baseLogger } from "./utils/logger";
 import { getMultichainMetricsUrl } from "./urls";
 import { getErrorMessageParser } from "./get-error-message-parser";
-import { ApiCallOptions, AssembledMetricAlarm, MetricAlarm, StandardApiResult } from "./types";
+import {
+  AccessTokenApiCallOptions,
+  AssembledMetricAlarm,
+  IamApiCallOptions,
+  MetricAlarm,
+  StandardApiResult,
+} from "./types";
+import { getHeadersWithIamSignature } from "./utils/get-headers-with-iam-signature";
+import { AwsCredentials } from "./types/aws";
 
 const logger = baseLogger.child({ client: "multichain-metrics" });
-const trackedEventName = "Multichain Metrics Call";
 
-type CallWithAlarmIdOptions = ApiCallOptions & {
+type CallWithAlarmIdOptions = AccessTokenApiCallOptions & {
   alarmId: string;
 };
 
-type CallMultichainApiOptions = ApiCallOptions | CallWithAlarmIdOptions;
+type AdminGetOwnerDataOptions = IamApiCallOptions & {
+  owner: string;
+};
+
+type OwnerCallMultichainApiOptions = AccessTokenApiCallOptions | CallWithAlarmIdOptions;
+type AdminCallMultichainOptions = IamApiCallOptions | AdminGetOwnerDataOptions;
+type MultichainApiOptions = OwnerCallMultichainApiOptions | AdminCallMultichainOptions;
+
+function isAdminCall(options: MultichainApiOptions): options is AdminCallMultichainOptions {
+  const adminCallDiscriminator: keyof AdminCallMultichainOptions = "credentials";
+  return adminCallDiscriminator in options;
+}
 
 function isCallWithAlarmIdOptions(
-  options: CallMultichainApiOptions
+  options: OwnerCallMultichainApiOptions
 ): options is CallWithAlarmIdOptions {
   const putAlarmDiscriminator: keyof CallWithAlarmIdOptions = "alarmId";
   return putAlarmDiscriminator in options;
 }
 
+function authenticateAccessTokenRequest(request: RequestInit, accessToken: string) {
+  return {
+    ...request,
+    headers: { ...request.headers, Authorization: accessToken },
+  };
+}
+
+function authenticateIamRequest(
+  url: string,
+  request: RequestInit,
+  credentials: AwsCredentials,
+  region?: string
+) {
+  const signedHeaders = getHeadersWithIamSignature(credentials, url, request, region);
+  return { ...request, headers: signedHeaders };
+}
+
 export async function callMultichainApi<TResponse = unknown>(
   endpoint: string,
-  options: CallMultichainApiOptions
+  options: MultichainApiOptions
 ): Promise<StandardApiResult<TResponse>> {
-  const startAt = Date.now();
   const { network } = ensureNetwork(options);
-  const { accessToken } = ensureAccessToken(network, options);
   const environment = ensureEnvironment(options);
 
   const baseUrl = getMultichainMetricsUrl(environment, network);
   const url = `${baseUrl}${endpoint}`;
   const contextualLogger = logger.child({ network, environment, url });
-  const parsedUrl = new URL(url);
-  const searchParams = new URLSearchParams(parsedUrl.search);
-  const queryParams = Object.fromEntries(searchParams.entries());
   try {
+    const request = {
+      method: options.method ?? "GET",
+      headers: {
+        "user-agent": `lworks-client/${libraryVersion}`,
+        "Content-Type": "application/json",
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    };
+    const authenticatedRequest = isAdminCall(options)
+      ? authenticateIamRequest(url, request, options.credentials)
+      : authenticateAccessTokenRequest(request, ensureAccessToken(network, options).accessToken);
     return await retry(
       async (bail, attempts) => {
-        const resp = await fetch(url, {
-          method: options.method ?? "GET",
-          headers: {
-            "user-agent": `lworks-client/${libraryVersion}`,
-            "Content-Type": "application/json",
-            Authorization: accessToken,
-          },
-          body:
-            options.method === "PUT" || options.method === "POST"
-              ? JSON.stringify(options.body)
-              : undefined,
-        });
+        const resp = await fetch(url, authenticatedRequest);
         contextualLogger.debug({ responseStatus: resp.status }, "Multichain metrics response");
 
         if (resp.status >= 400) {
@@ -74,20 +102,6 @@ export async function callMultichainApi<TResponse = unknown>(
             },
             "Failed"
           );
-
-          track(trackedEventName, accessToken, {
-            status: "failed",
-            method: options.method,
-            timeElapsed: timeElapsed(startAt),
-            url,
-            pathname: parsedUrl.pathname,
-            queryParams,
-            endpoint,
-            networkStack: network,
-            attempts,
-            httpStatus: resp.status,
-            errorResponseMessage: errorMessage,
-          });
 
           const error = new Error(
             [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
@@ -106,17 +120,6 @@ export async function callMultichainApi<TResponse = unknown>(
           },
           "Successful"
         );
-        track(trackedEventName, accessToken, {
-          status: "success",
-          timeElapsed: timeElapsed(startAt),
-          url,
-          pathname: parsedUrl.pathname,
-          queryParams,
-          endpoint,
-          networkStack: network,
-          attempts,
-          httpStatus: resp.status,
-        });
         return responseBody as StandardApiResult<TResponse>;
       },
       { retries: 4 }
@@ -133,7 +136,7 @@ export async function callMultichainApi<TResponse = unknown>(
  * @returns All alarms for the requesting user
  */
 export async function getAlarms(
-  options: CallMultichainApiOptions = {}
+  options: OwnerCallMultichainApiOptions = {}
 ): Promise<AssembledMetricAlarm[]> {
   const { data: metricAlarms } = await callMultichainApi<AssembledMetricAlarm[]>("/api/v1/alarms", {
     ...options,
@@ -162,7 +165,7 @@ export async function getUnassembledAlarm(options: CallWithAlarmIdOptions): Prom
  * @returns The upserted alarm
  */
 export async function upsertAlarm(
-  options: CallMultichainApiOptions
+  options: OwnerCallMultichainApiOptions
 ): Promise<AssembledMetricAlarm> {
   const [endpoint, method] = isCallWithAlarmIdOptions(options)
     ? [`/api/v1/alarms/${options.alarmId}`, "PUT"]
@@ -184,4 +187,20 @@ export async function deleteAlarm(options: CallWithAlarmIdOptions): Promise<void
     ...options,
     method: "DELETE",
   });
+}
+
+/**
+ * Get an unassembled alarm for an owner. This is an admin call that requires
+ * elevated permissions
+ * @param options The options to use when fetching the alarm
+ * @returns All unassembled alarms for the specified owner
+ */
+export async function adminGetUnassembledAlarmsForOwner(
+  options: AdminGetOwnerDataOptions
+): Promise<MetricAlarm[]> {
+  const { data: alarms } = await callMultichainApi<MetricAlarm[]>(
+    `/api/v1/admin/owners/${options.owner}/alarms`,
+    { ...options, method: "GET" }
+  );
+  return alarms;
 }
