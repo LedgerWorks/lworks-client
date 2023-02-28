@@ -1,10 +1,25 @@
 import { Environment } from "../environment";
 import { Network } from "../networks";
 
-export type ApiCallOptions = {
+import { AwsCredentials } from "./aws";
+
+export type BaseApiCallOptions = {
   network?: Network;
   environment?: Environment;
-  accessToken?: string;
+  headers?: Record<string, string>;
   method?: string;
   body?: unknown;
 };
+
+export type AccessTokenApiCallOptions = BaseApiCallOptions & {
+  accessToken?: string;
+};
+
+export type IamApiCallOptions = BaseApiCallOptions & {
+  credentials: AwsCredentials;
+};
+
+export enum AuthenticationType {
+  accessToken = "accessToken",
+  iam = "iam",
+}
