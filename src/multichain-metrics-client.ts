@@ -14,6 +14,8 @@ import { getErrorMessageParser } from "./get-error-message-parser";
 import {
   AccessTokenApiCallOptions,
   AssembledMetricAlarm,
+  DeleteOwnerAlarmsResponseData,
+  DisableOwnerAlarmsResponseData,
   IamApiCallOptions,
   MetricAlarm,
   StandardApiResult,
@@ -202,5 +204,51 @@ export async function adminGetUnassembledAlarmsForOwner(
     `/api/v1/admin/owners/${options.owner}/alarms`,
     { ...options, method: "GET" }
   );
+  return alarms;
+}
+
+/**
+ * Disable all alarms for an owner. This is an admin call that requires
+ * elevated permissions
+ * @param options The options to use when disabling the owner's alarms
+ * @returns The alarm ids of all disabled alarms
+ */
+export async function adminDisableAlarmsForOwner(
+  options: AdminGetOwnerDataOptions
+): Promise<string[]> {
+  const { data } = await callMultichainApi<DisableOwnerAlarmsResponseData>(
+    `/api/v1/admin/owners/${options.owner}/alarms/disable`,
+    { ...options, method: "POST" }
+  );
+  return data.disabledAlarmIds;
+}
+
+/**
+ * Delete all alarms for an owner. This is an admin call that requires
+ * elevated permissions
+ * @param options The options to use when deleting the owner's alarm
+ * @returns The alarm ids of all deleted alarms
+ */
+export async function adminDeleteAlarmsForOwner(
+  options: AdminGetOwnerDataOptions
+): Promise<string[]> {
+  const { data } = await callMultichainApi<DeleteOwnerAlarmsResponseData>(
+    `/api/v1/admin/owners/${options.owner}/alarms`,
+    { ...options, method: "DELETE" }
+  );
+  return data.deletedAlarmIds;
+}
+
+/**
+ * Delete all alarms for an owner. This is an admin call that requires
+ * elevated permissions
+ * @param options The options to use when deleting the owner's alarm
+ * @returns The alarm ids of all deleted alarms
+ */
+export async function adminGetManagedAlarms(options: IamApiCallOptions): Promise<MetricAlarm[]> {
+  const { data: alarms } = await callMultichainApi<MetricAlarm[]>(`/api/v1/admin/managed-alarms`, {
+    ...options,
+    method: "GET",
+  });
   return alarms;
 }

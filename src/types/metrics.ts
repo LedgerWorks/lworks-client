@@ -84,3 +84,11 @@ export type AlarmHistoryItem = {
   owner: string;
   val: number | string;
 };
+
+export type DisableOwnerAlarmsResponseData = {
+  disabledAlarmIds: string[];
+};
+
+export type DeleteOwnerAlarmsResponseData = {
+  deletedAlarmIds: string[];
+};
