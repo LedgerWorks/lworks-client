@@ -20,30 +20,11 @@ import { track } from "./track";
 import { baseLogger } from "./utils/logger";
 import { Environment } from "./environment";
 import { getSentinelUrl } from "./urls";
+import { getErrorMessageParser } from "./get-error-message-parser";
 
 const logger = baseLogger.child({ client: "sentinel" });
+const errorMessageParser = getErrorMessageParser(logger);
 const trackedEventName = "Sentinel Call";
-
-async function parseErrorMessage(response: Response): Promise<string | null> {
-  try {
-    const responseBody = await response.json();
-    // Sentinel code-level errors
-    if ("error" in responseBody) {
-      return responseBody.error as string;
-    }
-    // API Gateway errors
-    if ("Message" in responseBody) {
-      return responseBody.Message as string;
-    }
-    // Unknown JSON error
-    return JSON.stringify(responseBody);
-  } catch (err) {
-    logger.warn(
-      "Failed to parse error body from Sentinel response; falling back to status code only"
-    );
-    return null;
-  }
-}
 
 type SentinelOptions = {
   network?: Network | "mainnet" | "testnet";
@@ -131,7 +112,7 @@ async function callSentinelApi<TResponse = unknown>(
         logger.debug({ responseStatus: resp.status, url }, "Sentinel response");
 
         if (resp.status >= 400) {
-          const errorMessage = await parseErrorMessage(resp);
+          const errorMessage = await errorMessageParser.parse(resp);
           logger.trace(
             {
               method: config.method,

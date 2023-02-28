@@ -14,3 +14,8 @@ export function getSentinelUrl(environment: Environment, network: Network): stri
   const environmentPrefix = getEnvironmentPrefix(environment);
   return `https://${network}.streams.${environmentPrefix}api.lworks.io`;
 }
+
+export function getMultichainMetricsUrl(environment: Environment, network: Network): string {
+  const environmentPrefix = getEnvironmentPrefix(environment);
+  return `https://${network}.multichain-metrics.${environmentPrefix}api.lworks.io`;
+}
