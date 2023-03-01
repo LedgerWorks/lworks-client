@@ -19,6 +19,7 @@ export {
   getAlarms,
   getUnassembledAlarm,
   upsertAlarm,
+  adminUpsertAlarm,
 } from "./multichain-monitoring-client";
 export { Network, parseNetwork } from "./networks";
 export { Environment, parseEnvironment } from "./environment";
