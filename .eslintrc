@@ -4,7 +4,7 @@
   "parserOptions": {
     "project": "./tsconfig.eslint.json"
   },
-  "ignorePatterns": "scripts/",
+  "ignorePatterns": ["scripts/", "dev.ts"],
   "plugins": ["import", "@typescript-eslint", "sonarjs"],
   "extends": [
     "airbnb-base",
