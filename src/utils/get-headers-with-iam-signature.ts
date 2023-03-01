@@ -1,9 +1,9 @@
 import { URL } from "node:url";
 
-import { RequestInit } from "node-fetch";
 import { sign } from "aws4";
 
 import { AwsCredentials } from "../types/aws";
+import { SignableRequest } from "../types";
 
 /**
  * Get the request headers required to IAM-sign an HTTP request using a AWS v4 signatures.
@@ -18,7 +18,7 @@ import { AwsCredentials } from "../types/aws";
 export function getHeadersWithIamSignature(
   credentials: AwsCredentials,
   url: string,
-  requestOptions: RequestInit,
+  requestOptions: SignableRequest,
   region?: string,
   service = "execute-api"
 ): Record<string, string> {
@@ -29,7 +29,8 @@ export function getHeadersWithIamSignature(
       host: hostname,
       path: pathname,
       service,
-      body: requestOptions.body ? JSON.stringify(requestOptions.body) : undefined,
+      headers: requestOptions.headers,
+      body: requestOptions.body,
       region: region ?? process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION,
     },
     credentials
