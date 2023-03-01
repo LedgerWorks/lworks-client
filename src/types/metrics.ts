@@ -12,9 +12,13 @@ export enum NotifyOn {
 }
 
 export type AlarmNotification = {
-  notifyOn: NotifyOn;
+  notifyOn?: NotifyOn;
   actionWebhookUrl?: string;
   actionWebhookCustomHeaders?: Record<string, string>;
+  batchOptions?: {
+    enabled: boolean;
+    maxBatchSize: number;
+  };
 };
 
 export type MetricAlarmDefinition = {
