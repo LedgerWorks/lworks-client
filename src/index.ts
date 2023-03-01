@@ -1,4 +1,4 @@
-export { configure, setAccessToken, setNetwork, disableTracking } from "./config";
+export { configure, setAccessToken, setNetwork, setEnvironment, disableTracking } from "./config";
 export { callMirror } from "./mirror-client";
 export {
   createRule,
