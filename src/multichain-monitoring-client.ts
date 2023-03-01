@@ -1,4 +1,6 @@
-import fetch, { RequestInit } from "node-fetch";
+import { randomUUID } from "node:crypto";
+
+import fetch from "node-fetch";
 import retry from "async-retry";
 
 import { libraryVersion } from "./config";
@@ -13,11 +15,13 @@ import { getMultichainMetricsUrl } from "./urls";
 import { getErrorMessageParser } from "./get-error-message-parser";
 import {
   AccessTokenApiCallOptions,
+  ApiSavableAlarm,
   AssembledMetricAlarm,
   DeleteOwnerAlarmsResponseData,
   DisableOwnerAlarmsResponseData,
   IamApiCallOptions,
   MetricAlarm,
+  SignableRequest,
   StandardApiResult,
 } from "./types";
 import { getHeadersWithIamSignature } from "./utils/get-headers-with-iam-signature";
@@ -25,16 +29,33 @@ import { AwsCredentials } from "./types/aws";
 
 const logger = baseLogger.child({ client: "multichain-metrics" });
 
-type CallWithAlarmIdOptions = AccessTokenApiCallOptions & {
+type CallWithAlarmIdOptions = {
   alarmId: string;
 };
 
-type AdminGetOwnerDataOptions = IamApiCallOptions & {
+type OwnerCallWithAlarmIdOptions = AccessTokenApiCallOptions & {
+  alarmId: string;
+};
+
+type AdminCallWithOwner = IamApiCallOptions & {
   owner: string;
 };
 
-type OwnerCallMultichainApiOptions = AccessTokenApiCallOptions | CallWithAlarmIdOptions;
-type AdminCallMultichainOptions = IamApiCallOptions | AdminGetOwnerDataOptions;
+type SaveAlarmRequest = {
+  body: ApiSavableAlarm;
+};
+
+type OwnerCallSaveAlarmRequest = AccessTokenApiCallOptions & SaveAlarmRequest;
+type AdminSaveAlarmRequest = AdminCallWithOwner &
+  SaveAlarmRequest & {
+    alarmId?: string;
+  };
+
+type OwnerCallMultichainApiOptions =
+  | AccessTokenApiCallOptions
+  | OwnerCallWithAlarmIdOptions
+  | OwnerCallSaveAlarmRequest;
+type AdminCallMultichainOptions = IamApiCallOptions | AdminCallWithOwner | AdminSaveAlarmRequest;
 type MultichainApiOptions = OwnerCallMultichainApiOptions | AdminCallMultichainOptions;
 
 function isAdminCall(options: MultichainApiOptions): options is AdminCallMultichainOptions {
@@ -43,13 +64,13 @@ function isAdminCall(options: MultichainApiOptions): options is AdminCallMultich
 }
 
 function isCallWithAlarmIdOptions(
-  options: OwnerCallMultichainApiOptions
+  options: MultichainApiOptions
 ): options is CallWithAlarmIdOptions {
-  const putAlarmDiscriminator: keyof CallWithAlarmIdOptions = "alarmId";
-  return putAlarmDiscriminator in options;
+  const alarmIdDiscriminator: keyof OwnerCallWithAlarmIdOptions = "alarmId";
+  return alarmIdDiscriminator in options;
 }
 
-function authenticateAccessTokenRequest(request: RequestInit, accessToken: string) {
+function authenticateAccessTokenRequest(request: SignableRequest, accessToken: string) {
   return {
     ...request,
     headers: { ...request.headers, Authorization: accessToken },
@@ -58,7 +79,7 @@ function authenticateAccessTokenRequest(request: RequestInit, accessToken: strin
 
 function authenticateIamRequest(
   url: string,
-  request: RequestInit,
+  request: SignableRequest,
   credentials: AwsCredentials,
   region?: string
 ) {
@@ -81,7 +102,7 @@ export async function callMultichainApi<TResponse = unknown>(
       method: options.method ?? "GET",
       headers: {
         "user-agent": `lworks-client/${libraryVersion}`,
-        "Content-Type": "application/json",
+        "content-type": "application/json",
       },
       body: options.body ? JSON.stringify(options.body) : undefined,
     };
@@ -152,7 +173,9 @@ export async function getAlarms(
  * @param options The options to use when fetching the alarm
  * @returns All unassembled alarm
  */
-export async function getUnassembledAlarm(options: CallWithAlarmIdOptions): Promise<MetricAlarm> {
+export async function getUnassembledAlarm(
+  options: OwnerCallWithAlarmIdOptions
+): Promise<MetricAlarm> {
   const { data: alarm } = await callMultichainApi<MetricAlarm>(
     `/api/v1/alarms/${options.alarmId}`,
     { ...options, method: "GET" }
@@ -167,7 +190,7 @@ export async function getUnassembledAlarm(options: CallWithAlarmIdOptions): Prom
  * @returns The upserted alarm
  */
 export async function upsertAlarm(
-  options: OwnerCallMultichainApiOptions
+  options: OwnerCallSaveAlarmRequest
 ): Promise<AssembledMetricAlarm> {
   const [endpoint, method] = isCallWithAlarmIdOptions(options)
     ? [`/api/v1/alarms/${options.alarmId}`, "PUT"]
@@ -183,7 +206,7 @@ export async function upsertAlarm(
  * Delete a metric alarm
  * @param options The delete options to use
  */
-export async function deleteAlarm(options: CallWithAlarmIdOptions): Promise<void> {
+export async function deleteAlarm(options: OwnerCallWithAlarmIdOptions): Promise<void> {
   const endpoint = `/api/v1/alarms/${options.alarmId}`;
   await callMultichainApi<MetricAlarm>(endpoint, {
     ...options,
@@ -198,7 +221,7 @@ export async function deleteAlarm(options: CallWithAlarmIdOptions): Promise<void
  * @returns All unassembled alarms for the specified owner
  */
 export async function adminGetUnassembledAlarmsForOwner(
-  options: AdminGetOwnerDataOptions
+  options: AdminCallWithOwner
 ): Promise<MetricAlarm[]> {
   const { data: alarms } = await callMultichainApi<MetricAlarm[]>(
     `/api/v1/admin/owners/${options.owner}/alarms`,
@@ -213,9 +236,7 @@ export async function adminGetUnassembledAlarmsForOwner(
  * @param options The options to use when disabling the owner's alarms
  * @returns The alarm ids of all disabled alarms
  */
-export async function adminDisableAlarmsForOwner(
-  options: AdminGetOwnerDataOptions
-): Promise<string[]> {
+export async function adminDisableAlarmsForOwner(options: AdminCallWithOwner): Promise<string[]> {
   const { data } = await callMultichainApi<DisableOwnerAlarmsResponseData>(
     `/api/v1/admin/owners/${options.owner}/alarms/disable`,
     { ...options, method: "POST" }
@@ -229,9 +250,7 @@ export async function adminDisableAlarmsForOwner(
  * @param options The options to use when deleting the owner's alarm
  * @returns The alarm ids of all deleted alarms
  */
-export async function adminDeleteAlarmsForOwner(
-  options: AdminGetOwnerDataOptions
-): Promise<string[]> {
+export async function adminDeleteAlarmsForOwner(options: AdminCallWithOwner): Promise<string[]> {
   const { data } = await callMultichainApi<DeleteOwnerAlarmsResponseData>(
     `/api/v1/admin/owners/${options.owner}/alarms`,
     { ...options, method: "DELETE" }
@@ -251,4 +270,23 @@ export async function adminGetManagedAlarms(options: IamApiCallOptions): Promise
     method: "GET",
   });
   return alarms;
+}
+
+/**
+ * Upsert a metric alarm as an admin on behalf of an owner. This is an admin call that requires
+ * elevated permissions
+ * @param options The upsert options to use. Ensure the alarmId is set if you wish to update
+ * an existing alarm. Otherwise a new alarm will be created
+ * @returns The upserted alarm
+ */
+export async function adminUpsertAlarm(
+  options: AdminSaveAlarmRequest
+): Promise<AssembledMetricAlarm> {
+  const alarmId = isCallWithAlarmIdOptions(options) ? options.alarmId : randomUUID();
+  const endpoint = `/api/v1/admin/owners/${options.owner}/alarms/${alarmId}`;
+  const { data: metricAlarm } = await callMultichainApi<AssembledMetricAlarm>(endpoint, {
+    ...options,
+    method: "PUT",
+  });
+  return metricAlarm;
 }

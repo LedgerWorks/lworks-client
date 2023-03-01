@@ -92,3 +92,17 @@ export type DisableOwnerAlarmsResponseData = {
 export type DeleteOwnerAlarmsResponseData = {
   deletedAlarmIds: string[];
 };
+
+type NonSettableAlarmFields =
+  | "alarmId"
+  | "sort"
+  | "owner"
+  | "createdDate"
+  | "updatedDate"
+  | "deletedDate";
+
+/**
+ * This type represents an alarm containing the minimum fields that can be provided
+ * to save an alarm via the alarms API
+ */
+export type ApiSavableAlarm = Omit<MetricAlarm, NonSettableAlarmFields>;

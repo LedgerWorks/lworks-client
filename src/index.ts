@@ -25,7 +25,7 @@ export { Environment, parseEnvironment } from "./environment";
 export { Chain, parseChain } from "./chain";
 export * as MirrorResponse from "./mirror-api-types";
 export * as SentinelTypes from "./sentinel-types";
-export * as MultichainMonitoringTypes from "./multichain-monitoring-client";
+export * as LworksClientTypes from "./types";
 export {
   getAllHCSMessages,
   decodeBase64Message,
