@@ -58,13 +58,16 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
         logger.debug({ responseStatus: resp.status, url }, "Mirror response");
 
         if (resp.status >= 400) {
-          const errorResponse = (await resp.json()) as {
+          const errorResponse = (await resp.json()) as Partial<{
             _status: {
               messages: Array<{ message: string }>;
             };
-          };
+          }>;
+          const { _status: status } = errorResponse;
           // eslint-disable-next-line no-underscore-dangle
-          const errorResponseMessage = errorResponse._status.messages[0].message;
+          const errorResponseMessage = status
+            ? status.messages.at(0)?.message
+            : "Unknown error response";
 
           track(trackedEventName, accessToken, {
             status: "failed",
