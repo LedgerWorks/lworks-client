@@ -15,7 +15,7 @@ export type paths = {
   "/api/v1/accounts/{idOrAliasOrEvmAddress}": {
     /**
      * Get account by alias, id, or evm address 
-     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address
+     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address. The information will be limited to at most 1000 token balances for the account as outlined in HIP-367.
      */
     get: operations["getAccountByIdOrAliasOrEvmAddress"];
   };
@@ -62,6 +62,20 @@ export type paths = {
      */
     get: operations["listNftByAccountId"];
   };
+  "/api/v1/accounts/{idOrAliasOrEvmAddress}/rewards": {
+    /**
+     * Get past staking reward payouts for an account 
+     * @description Returns information for all past staking reward payouts for an account.
+     */
+    get: operations["listStakingRewardsByAccountId"];
+  };
+  "/api/v1/accounts/{idOrAliasOrEvmAddress}/tokens": {
+    /**
+     * Get token relationships info for an account 
+     * @description Returns information for all token relationships for an account.
+     */
+    get: operations["listTokenRelationshipByAccountId"];
+  };
   "/api/v1/accounts/{idOrAliasOrEvmAddress}/allowances/crypto": {
     /**
      * Get crypto allowances for an account info 
@@ -103,7 +117,7 @@ export type paths = {
   "/api/v1/balances": {
     /**
      * List account balances 
-     * @description Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts.
+     * @description Returns a timestamped list of account balances on the network, limited to at most 50 token balances per account as outlined in HIP-367. This includes both HBAR and token balances for accounts.
      */
     get: operations["listAccountBalances"];
   };
@@ -141,6 +155,13 @@ export type paths = {
      * @description Returns a list of all ContractResults for a contract's function executions.
      */
     get: operations["listContractResults"];
+  };
+  "/api/v1/contracts/{contractIdOrAddress}/state": {
+    /**
+     * The contract current state from a contract on the network 
+     * @description Returns a list of all contract's slots.
+     */
+    get: operations["listContractState"];
   };
   "/api/v1/contracts/{contractIdOrAddress}/results/{timestamp}": {
     /**
@@ -402,20 +423,27 @@ export type components = {
     ContractResponse: components["schemas"]["Contract"] & ({
       /**
        * Format: binary 
-       * @description The contract bytecode in hex 
+       * @description The contract bytecode in hex during deployment 
        * @example 0x01021a1fdc9b
        */
       bytecode?: string | null;
+      /**
+       * Format: binary 
+       * @description The contract bytecode in hex after deployment 
+       * @example 0x0302fa1ad39c
+       */
+      runtime_bytecode?: string | null;
     });
     ContractsResponse: {
       contracts?: components["schemas"]["Contracts"];
       links?: components["schemas"]["Links"];
     };
-    ContractResultResponse: {
-      contracts?: components["schemas"]["ContractResultDetails"];
-    };
     ContractResultsResponse: {
-      contracts?: components["schemas"]["ContractResults"];
+      results?: components["schemas"]["ContractResults"];
+      links?: components["schemas"]["Links"];
+    };
+    ContractStateResponse: {
+      state?: (components["schemas"]["ContractState"])[];
       links?: components["schemas"]["Links"];
     };
     ContractActionsResponse: {
@@ -442,9 +470,6 @@ export type components = {
       nodes: components["schemas"]["NetworkNodes"];
       links: components["schemas"]["Links"];
     };
-    NetworkStakeResponse: {
-      network_stake?: components["schemas"]["NetworkStake"];
-    };
     NetworkSupplyResponse: {
       /**
        * @description The network's released supply of hbars in tinybars 
@@ -464,6 +489,10 @@ export type components = {
     };
     BlocksResponse: {
       blocks?: components["schemas"]["Blocks"];
+      links?: components["schemas"]["Links"];
+    };
+    StakingRewardsResponse: {
+      rewards?: (components["schemas"]["StakingReward"])[];
       links?: components["schemas"]["Links"];
     };
     /**
@@ -575,6 +604,10 @@ export type components = {
     TokenBalancesResponse: {
       timestamp?: components["schemas"]["TimestampNullable"];
       balances?: components["schemas"]["TokenDistribution"];
+      links?: components["schemas"]["Links"];
+    };
+    TokenRelationshipResponse: {
+      tokens?: (components["schemas"]["TokenRelationship"])[];
       links?: components["schemas"]["Links"];
     };
     TokensResponse: {
@@ -865,6 +898,11 @@ export type components = {
     };
     ContractResult: {
       /**
+       * @description The hex encoded evm address of contract 
+       * @example 0x25fe26adc577cc89172e6156c9e24f7b9751b762
+       */
+      address?: string;
+      /**
        * Format: int64 
        * @description The number of tinybars sent to the function 
        * @example 10
@@ -877,7 +915,7 @@ export type components = {
        */
       call_result?: string | null;
       contract_id?: components["schemas"]["EntityId"];
-      /** @description The network's released supply of hbars in tinybars */
+      /** @description The list of smart contracts that were created by the function call. */
       created_contract_ids?: (components["schemas"]["EntityId"])[] | null;
       /**
        * @description The message when an error occurs during smart contract execution 
@@ -926,6 +964,11 @@ export type components = {
        * @example 0xabcd
        */
       access_list?: string | null;
+      /**
+       * @description The hex encoded evm address of contract 
+       * @example 0x25fe26adc577cc89172e6156c9e24f7b9751b762
+       */
+      address?: string;
       /**
        * Format: int64 
        * @description The total amount of gas used in the block 
@@ -1029,6 +1072,23 @@ export type components = {
       topics?: components["schemas"]["ContractLogTopics"];
     };
     ContractResultLogs: (components["schemas"]["ContractResultLog"])[];
+    ContractState: {
+      address: components["schemas"]["EvmAddress"];
+      contract_id: components["schemas"]["EntityId"];
+      timestamp: components["schemas"]["Timestamp"];
+      /**
+       * Format: binary 
+       * @description The hex encoded storage slot. 
+       * @example 0x00000000000000000000000000000000000000000000000000000000000000fa
+       */
+      slot: string;
+      /**
+       * Format: binary 
+       * @description The hex encoded value to the slot. `0x` implies no value written. 
+       * @example 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925
+       */
+      value: string;
+    };
     ContractResultStateChange: {
       address?: components["schemas"]["EvmAddress"];
       contract_id?: components["schemas"]["EntityId"];
@@ -1255,7 +1315,7 @@ export type components = {
        * @description An identifier for the node
        */
       node_id: number;
-      /** @description hex encoded hash of the node’s TLS certificate */
+      /** @description hex encoded hash of the node's TLS certificate */
       node_cert_hash: string | null;
       /** @description hex encoded X509 RSA public key used to verify stream file signature */
       public_key: string | null;
@@ -1282,7 +1342,7 @@ export type components = {
        * beginning of the staking period
        */
       stake_rewarded: number | null;
-      staking_period: components["schemas"]["TimestampRange"] & (Record<string, unknown> | null);
+      staking_period: components["schemas"]["TimestampRangeNullable"] & Record<string, never>;
       timestamp: components["schemas"]["TimestampRange"];
     };
     NetworkNodes: (components["schemas"]["NetworkNode"])[];
@@ -1298,21 +1358,21 @@ export type components = {
     NetworkFees: (components["schemas"]["NetworkFee"])[];
     /**
      * @example {
-     *   "max_staking_reward_rate_per_hbar": "17808,",
-     *   "node_reward_fee_fraction": "1.0,",
-     *   "stake_total": "35000000000000000,",
+     *   "max_staking_reward_rate_per_hbar": 17808,
+     *   "node_reward_fee_fraction": 1,
+     *   "stake_total": 35000000000000000,
      *   "staking_period": {
      *     "from": "1655164800.000000000",
      *     "to": "1655251200.000000000"
      *   },
-     *   "staking_period_duration": "1440,",
-     *   "staking_periods_stored": "365,",
-     *   "staking_reward_fee_fraction": "1.0,",
-     *   "staking_reward_rate": "100000000000,",
+     *   "staking_period_duration": 1440,
+     *   "staking_periods_stored": 365,
+     *   "staking_reward_fee_fraction": 1,
+     *   "staking_reward_rate": 100000000000,
      *   "staking_start_threshold": 25000000000000000
      * }
      */
-    NetworkStake: {
+    NetworkStakeResponse: {
       /**
        * Format: int64 
        * @description The maximum reward rate, in tinybars per whole hbar, that any account can receive in a day
@@ -1474,7 +1534,7 @@ export type components = {
     };
     Schedules: (components["schemas"]["Schedule"])[];
     ScheduleSignature: {
-      consensus_timestmap?: components["schemas"]["Timestamp"];
+      consensus_timestamp?: components["schemas"]["Timestamp"];
       /**
        * Format: byte 
        * @example AAEBAwuqAwzB
@@ -1503,6 +1563,40 @@ export type components = {
       port: number;
     };
     ServiceEndpoints: (components["schemas"]["ServiceEndpoint"])[];
+    /**
+     * @example {
+     *   "account_id": "0.0.1000",
+     *   "amount": 10,
+     *   "timestamp": 1234567890
+     * }
+     */
+    StakingReward: {
+      account_id: components["schemas"]["EntityId"];
+      /**
+       * Format: int64 
+       * @description The number of tinybars awarded 
+       * @example 10
+       */
+      amount: number;
+      timestamp: components["schemas"]["Timestamp"];
+    };
+    /**
+     * @description A staking reward transfer 
+     * @example {
+     *   "account_id": "0.0.1000",
+     *   "amount": 10
+     * }
+     */
+    StakingRewardTransfer: {
+      account: components["schemas"]["EntityId"];
+      /**
+       * Format: int64 
+       * @description The number of tinybars awarded 
+       * @example 10
+       */
+      amount: number;
+    };
+    StakingRewardTransfers: (components["schemas"]["StakingRewardTransfer"])[];
     /** @example 1586567700.453054000 */
     Timestamp: string;
     /** @example 1586567700.453054000 */
@@ -1512,6 +1606,11 @@ export type components = {
       from?: components["schemas"]["Timestamp"] & Record<string, never>;
       to?: components["schemas"]["TimestampNullable"] & Record<string, never>;
     };
+    /** @description A timestamp range an entity is valid for */
+    TimestampRangeNullable: ({
+      from?: components["schemas"]["Timestamp"] & Record<string, never>;
+      to?: components["schemas"]["TimestampNullable"] & Record<string, never>;
+    }) | null;
     /**
      * @example {
      *   "token_id": "0.0.1",
@@ -1557,14 +1656,21 @@ export type components = {
     TokenInfo: {
       admin_key?: components["schemas"]["Key"];
       auto_renew_account?: components["schemas"]["EntityId"];
-      /** @example null */
-      auto_renew_period?: Record<string, unknown> | null;
+      /**
+       * Format: int64 
+       * @example null
+       */
+      auto_renew_period?: number | null;
       created_timestamp?: components["schemas"]["Timestamp"];
       /** @example 1000 */
       decimals?: string;
       /** @example true */
       deleted?: boolean | null;
-      expiry_timestamp?: components["schemas"]["TimestampNullable"];
+      /**
+       * Format: int64 
+       * @example 1234567890100000
+       */
+      expiry_timestamp?: number | null;
       fee_schedule_key?: components["schemas"]["Key"];
       /** @example false */
       freeze_default?: boolean;
@@ -1604,6 +1710,43 @@ export type components = {
       type?: "FUNGIBLE_COMMON" | "NON_FUNGIBLE_UNIQUE";
       wipe_key?: components["schemas"]["Key"];
       custom_fees?: components["schemas"]["CustomFees"];
+    };
+    /**
+     * @example {
+     *   "automatic_association": true,
+     *   "balance": 5,
+     *   "created_timestamp": 123456789,
+     *   "freeze_status": "UNFROZEN",
+     *   "kyc_status": "GRANTED",
+     *   "token_id": "0.0.27335"
+     * }
+     */
+    TokenRelationship: {
+      /**
+       * @description Specifies if the relationship is implicitly/explicitly associated. 
+       * @example true
+       */
+      automatic_association: boolean;
+      /**
+       * Format: int64 
+       * @description For FUNGIBLE_COMMON, the balance that the account holds in the smallest denomination. For NON_FUNGIBLE_UNIQUE, the number of NFTs held by the account. 
+       * @example 5
+       */
+      balance: number;
+      created_timestamp: components["schemas"]["Timestamp"];
+      /**
+       * @description The Freeze status of the account. 
+       * @example UNFROZEN 
+       * @enum {string}
+       */
+      freeze_status: "NOT_APPLICABLE" | "FROZEN" | "UNFROZEN";
+      /**
+       * @description The KYC status of the account. 
+       * @example GRANTED 
+       * @enum {string}
+       */
+      kyc_status: "NOT_APPLICABLE" | "GRANTED" | "REVOKED";
+      token_id: components["schemas"]["EntityId"];
     };
     LogTopicQueryParam: (string)[];
     /** @enum {string} */
@@ -1655,6 +1798,16 @@ export type components = {
      *   "parent_consensus_timestamp": "1234567890.000000007",
      *   "result": "SUCCESS",
      *   "scheduled": false,
+     *   "staking_reward_transfers": [
+     *     {
+     *       "account": 3,
+     *       "amount": 150
+     *     },
+     *     {
+     *       "account": 9,
+     *       "amount": 200
+     *     }
+     *   ],
      *   "transaction_hash": "vigzKe2J7fv4ktHBbNTSzQmKq7Lzdq1/lJMmHT+a2KgvdhAuadlvS4eKeqKjIRmW",
      *   "transaction_id": "0.0.8-1234567890-000000006",
      *   "token_transfers": [
@@ -1686,6 +1839,16 @@ export type components = {
      *       "account": "0.0.98",
      *       "amount": 1,
      *       "is_approval": false
+     *     },
+     *     {
+     *       "account": "0.0.800",
+     *       "amount": 150,
+     *       "is_approval": false
+     *     },
+     *     {
+     *       "account": "0.0.800",
+     *       "amount": 200,
+     *       "is_approval": false
      *     }
      *   ],
      *   "valid_duration_seconds": 11,
@@ -1708,6 +1871,7 @@ export type components = {
       parent_consensus_timestamp?: components["schemas"]["TimestampNullable"];
       result?: string;
       scheduled?: boolean;
+      staking_reward_transfers?: components["schemas"]["StakingRewardTransfers"];
       token_transfers?: ({
           token_id: components["schemas"]["EntityId"];
           account: components["schemas"]["EntityId"];
@@ -1768,6 +1932,16 @@ export type components = {
      *   "parent_consensus_timestamp": "1234567890.000000007",
      *   "result": "SUCCESS",
      *   "scheduled": false,
+     *   "staking_reward_transfers": [
+     *     {
+     *       "account": 3,
+     *       "amount": 200
+     *     },
+     *     {
+     *       "account": 9,
+     *       "amount": 300
+     *     }
+     *   ],
      *   "transaction_hash": "vigzKe2J7fv4ktHBbNTSzQmKq7Lzdq1/lJMmHT+a2KgvdhAuadlvS4eKeqKjIRmW",
      *   "transaction_id": "0.0.8-1234567890-000000006",
      *   "token_transfers": [
@@ -1799,6 +1973,16 @@ export type components = {
      *       "account": "0.0.98",
      *       "amount": 1,
      *       "is_approval": true
+     *     },
+     *     {
+     *       "account": "0.0.800",
+     *       "amount": 200,
+     *       "is_approval": false
+     *     },
+     *     {
+     *       "account": "0.0.800",
+     *       "amount": 300,
+     *       "is_approval": false
      *     }
      *   ],
      *   "valid_duration_seconds": 11,
@@ -1872,7 +2056,7 @@ export type components = {
   };
   parameters: {
     /** @description Account alias or account id or evm address */
-    accountIdOrAliasOrEvmAddressPathParam: components["schemas"]["AccountAlias"] | components["schemas"]["EntityId"] | components["schemas"]["EvmAddress"] | components["schemas"]["EvmAddressWithShardRealm"];
+    accountIdOrAliasOrEvmAddressPathParam: string;
     /** @description The optional balance value to compare against */
     accountBalanceQueryParam: string;
     /** @description The ID of the account to return information for */
@@ -1883,16 +2067,16 @@ export type components = {
      */
     accountPublicKeyQueryParam: string;
     /**
-     * @description Whether to include balance information or not 
+     * @description Whether to include balance information or not. If included, token balances are limited to at most 50 per account as outlined in HIP-367. 
      * @example true
      */
     balanceQueryParam: boolean;
     /** @description The ID of the smart contract */
-    contractIdQueryParam: components["schemas"]["EntityIdQuery"] | components["schemas"]["EvmAddressWithShardRealm"];
-    /** @description The ID or hex encoded EVM address associated with this contract. */
-    contractIdPathParam: components["schemas"]["EntityId"] | components["schemas"]["EvmAddressWithShardRealm"];
+    contractIdQueryParam: string;
+    /** @description The ID or hex encoded EVM address (with or without 0x prefix) associated with this contract. */
+    contractIdOrAddressPathParam: string;
     /** @description Accepts both eth and hedera hash format or block number */
-    hashOrNumberPathParam: components["schemas"]["HederaHash"] | components["schemas"]["EthereumHash"] | components["schemas"]["PositiveNumber"];
+    hashOrNumberPathParam: string;
     /** @description Entity id */
     entityIdPathParam: components["schemas"]["EntityId"];
     /** @description The ID of the file entity */
@@ -1904,7 +2088,7 @@ export type components = {
     /** @description Topic id */
     topicIdPathParam: components["schemas"]["EntityId"];
     /** @description Account ID or EVM address executing the contract */
-    fromQueryParam: components["schemas"]["EntityId"] | components["schemas"]["EvmAddress"];
+    fromQueryParam: string;
     /** @description Contract log index */
     logIndexQueryParam: string;
     /**
@@ -1993,6 +2177,8 @@ export type components = {
     contractActionsIndexQueryParam: string;
     /** @description The block's number */
     contractsBlockNumberQueryParam: string;
+    /** @description The slot's number */
+    slotQueryParam: string;
     /** @description The block's hash */
     blockHashQueryParam: string;
     /**
@@ -2006,7 +2192,7 @@ export type components = {
      */
     internalQueryParam: boolean;
     /** @description Transaction Id or a 32 byte hash with optional 0x prefix */
-    transactionIdOrEthHashPathParam: components["schemas"]["EthereumHash"] | components["schemas"]["TransactionIdStr"];
+    transactionIdOrEthHashPathParam: string;
   };
   requestBodies: never;
   headers: never;
@@ -2035,7 +2221,7 @@ export type operations = {
   getAccountByIdOrAliasOrEvmAddress: {
     /**
      * Get account by alias, id, or evm address 
-     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address
+     * @description Return the account transactions and balance information given an account alias, an account id, or an evm address. The information will be limited to at most 1000 token balances for the account as outlined in HIP-367.
      */
     responses: {
       /** @description OK */
@@ -2094,6 +2280,38 @@ export type operations = {
       200: {
         content: {
           "application/json": components["schemas"]["Nfts"];
+        };
+      };
+      400: components["responses"]["InvalidParameterError"];
+      404: components["responses"]["NotFoundError"];
+    };
+  };
+  listStakingRewardsByAccountId: {
+    /**
+     * Get past staking reward payouts for an account 
+     * @description Returns information for all past staking reward payouts for an account.
+     */
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StakingRewardsResponse"];
+        };
+      };
+      400: components["responses"]["InvalidParameterError"];
+      404: components["responses"]["NotFoundError"];
+    };
+  };
+  listTokenRelationshipByAccountId: {
+    /**
+     * Get token relationships info for an account 
+     * @description Returns information for all token relationships for an account.
+     */
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TokenRelationshipResponse"];
         };
       };
       400: components["responses"]["InvalidParameterError"];
@@ -2159,7 +2377,7 @@ export type operations = {
   listAccountBalances: {
     /**
      * List account balances 
-     * @description Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts.
+     * @description Returns a timestamped list of account balances on the network, limited to at most 50 token balances per account as outlined in HIP-367. This includes both HBAR and token balances for accounts.
      */
     responses: {
       /** @description OK */
@@ -2248,6 +2466,22 @@ export type operations = {
       400: components["responses"]["InvalidParameterError"];
     };
   };
+  listContractState: {
+    /**
+     * The contract current state from a contract on the network 
+     * @description Returns a list of all contract's slots.
+     */
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ContractStateResponse"];
+        };
+      };
+      400: components["responses"]["InvalidParameterError"];
+      404: components["responses"]["NotFoundError"];
+    };
+  };
   getContractResultByIdAndTimestamp: {
     /**
      * Get the contract result from a contract on the network executed at a given timestamp 
@@ -2257,13 +2491,13 @@ export type operations = {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["ContractResultResponse"];
+          "application/json": components["schemas"]["ContractResultDetails"];
         };
       };
       /** @description Partial Content */
       206: {
         content: {
-          "application/json": components["schemas"]["ContractResultResponse"];
+          "application/json": components["schemas"]["ContractResultDetails"];
         };
       };
       400: components["responses"]["InvalidParameterError"];
@@ -2294,13 +2528,13 @@ export type operations = {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["ContractResultResponse"];
+          "application/json": components["schemas"]["ContractResultDetails"];
         };
       };
       /** @description Partial Content */
       206: {
         content: {
-          "application/json": components["schemas"]["ContractResultResponse"];
+          "application/json": components["schemas"]["ContractResultDetails"];
         };
       };
       400: components["responses"]["InvalidParameterError"];
@@ -2468,6 +2702,7 @@ export type operations = {
           "application/json": components["schemas"]["NetworkStakeResponse"];
         };
       };
+      400: components["responses"]["InvalidParameterError"];
       404: components["responses"]["NotFoundError"];
       500: components["responses"]["ServiceUnavailableError"];
     };
@@ -2581,11 +2816,11 @@ export type operations = {
      * @description Returns the list of topic messages for the given topic id.
      */
     parameters?: {
-        /** @example 2 */
         /** @example base64 */
+        /** @example 2 */
       query?: {
-        sequencenumber?: number;
         encoding?: string;
+        sequencenumber?: number;
       };
     };
     responses: {
