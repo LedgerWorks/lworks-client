@@ -27,10 +27,13 @@ paths:
     get:
       summary: Get account by alias, id, or evm address
       description: |
-        Return the account transactions and balance information given an account alias, an account id, or an evm address
+        Return the account transactions and balance information given an account alias, an account id, or an evm address. The information will be limited to at most 1000 token balances for the account as outlined in HIP-367.
       operationId: getAccountByIdOrAliasOrEvmAddress
       parameters:
         - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/timestampQueryParam'
         - $ref: '#/components/parameters/transactionTypeQueryParam'
       responses:
         200:
@@ -90,11 +93,11 @@ paths:
       operationId: listNftByAccountId
       parameters:
         - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
-        - $ref: '#/components/parameters/tokenIdQueryParam'
-        - $ref: '#/components/parameters/serialNumberQueryParam'
-        - $ref: '#/components/parameters/spenderIdQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/serialNumberQueryParam'
+        - $ref: '#/components/parameters/spenderIdQueryParam'
+        - $ref: '#/components/parameters/tokenIdQueryParam'
       responses:
         200:
           description: OK
@@ -108,6 +111,54 @@ paths:
           $ref: '#/components/responses/NotFoundError'
       tags:
         - accounts
+  /api/v1/accounts/{idOrAliasOrEvmAddress}/rewards:
+    get:
+      summary: Get past staking reward payouts for an account
+      description: |
+        Returns information for all past staking reward payouts for an account.
+      operationId: listStakingRewardsByAccountId
+      parameters:
+        - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/timestampQueryParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StakingRewardsResponse'
+        400:
+          $ref: '#/components/responses/InvalidParameterError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+      tags:
+        - accounts
+  /api/v1/accounts/{idOrAliasOrEvmAddress}/tokens:
+    get:
+      summary: Get token relationships info for an account
+      description: |
+        Returns information for all token relationships for an account.
+      operationId: listTokenRelationshipByAccountId
+      parameters:
+        - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/tokenIdQueryParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRelationshipResponse'
+        400:
+          $ref: '#/components/responses/InvalidParameterError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+      tags:
+        - accounts
   /api/v1/accounts/{idOrAliasOrEvmAddress}/allowances/crypto:
     get:
       summary: Get crypto allowances for an account info
@@ -115,9 +166,9 @@ paths:
       operationId: listCryptoAllowancesByAccountId
       parameters:
         - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
-        - $ref: '#/components/parameters/spenderIdQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/spenderIdQueryParam'
       responses:
         200:
           description: OK
@@ -164,10 +215,10 @@ paths:
       operationId: listTokenAllowancesByAccountId
       parameters:
         - $ref: '#/components/parameters/accountIdOrAliasOrEvmAddressPathParam'
-        - $ref: '#/components/parameters/spenderIdQueryParam'
-        - $ref: '#/components/parameters/tokenIdQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/spenderIdQueryParam'
+        - $ref: '#/components/parameters/tokenIdQueryParam'
       responses:
         200:
           description: OK
@@ -184,15 +235,15 @@ paths:
   /api/v1/balances:
     get:
       summary: List account balances
-      description: Returns a timestamped list of account balances on the network. This includes both HBAR and token balances for accounts.
+      description: Returns a timestamped list of account balances on the network, limited to at most 50 token balances per account as outlined in HIP-367. This includes both HBAR and token balances for accounts.
       operationId: listAccountBalances
       parameters:
         - $ref: '#/components/parameters/accountIdQueryParam'
         - $ref: '#/components/parameters/accountBalanceQueryParam'
-        - $ref: '#/components/parameters/orderQueryParamDesc'
         - $ref: '#/components/parameters/accountPublicKeyQueryParam'
-        - $ref: '#/components/parameters/timestampQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
           description: OK
@@ -211,9 +262,9 @@ paths:
       operationId: listBlocks
       parameters:
         - $ref: '#/components/parameters/blockNumberQueryParam'
-        - $ref: '#/components/parameters/timestampQueryParam'
-        - $ref: '#/components/parameters/orderQueryParamDesc'
         - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
           description: OK
@@ -271,7 +322,7 @@ paths:
       description: Return the contract information given an id
       operationId: getContractById
       parameters:
-        - $ref: '#/components/parameters/contractIdPathParam'
+        - $ref: '#/components/parameters/contractIdOrAddressPathParam'
         - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
@@ -292,15 +343,15 @@ paths:
       description: Returns a list of all ContractResults for a contract's function executions.
       operationId: listContractResults
       parameters:
-        - $ref: '#/components/parameters/contractIdPathParam'
+        - $ref: '#/components/parameters/contractIdOrAddressPathParam'
+        - $ref: '#/components/parameters/blockHashQueryParam'
+        - $ref: '#/components/parameters/contractsBlockNumberQueryParam'
         - $ref: '#/components/parameters/fromQueryParam'
+        - $ref: '#/components/parameters/internalQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
         - $ref: '#/components/parameters/timestampQueryParam'
-        - $ref: '#/components/parameters/contractsBlockNumberQueryParam'
-        - $ref: '#/components/parameters/blockHashQueryParam'
         - $ref: '#/components/parameters/transactionIndexQueryParam'
-        - $ref: '#/components/parameters/internalQueryParam'
       responses:
         200:
           description: OK
@@ -312,13 +363,36 @@ paths:
           $ref: '#/components/responses/InvalidParameterError'
       tags:
         - contracts
+  /api/v1/contracts/{contractIdOrAddress}/state:
+    get:
+      summary: The contract current state from a contract on the network
+      description: Returns a list of all contract's slots.
+      operationId: listContractState
+      parameters:
+        - $ref: '#/components/parameters/contractIdOrAddressPathParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/slotQueryParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractStateResponse'
+        400:
+          $ref: '#/components/responses/InvalidParameterError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+      tags:
+        - contracts
   /api/v1/contracts/{contractIdOrAddress}/results/{timestamp}:
     get:
       summary: Get the contract result from a contract on the network executed at a given timestamp
       description: Returns a single ContractResult for a contract's function executions at a specific timestamp.
       operationId: getContractResultByIdAndTimestamp
       parameters:
-        - $ref: '#/components/parameters/contractIdPathParam'
+        - $ref: '#/components/parameters/contractIdOrAddressPathParam'
         - $ref: '#/components/parameters/timestampPathParam'
       responses:
         200:
@@ -326,13 +400,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractResultResponse'
+                $ref: '#/components/schemas/ContractResultDetails'
         206:
           description: Partial Content
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractResultResponse'
+                $ref: '#/components/schemas/ContractResultDetails'
         400:
           $ref: '#/components/responses/InvalidParameterError'
         404:
@@ -346,13 +420,13 @@ paths:
       operationId: listAllContractsResults
       parameters:
         - $ref: '#/components/parameters/fromQueryParam'
+        - $ref: '#/components/parameters/blockHashQueryParam'
+        - $ref: '#/components/parameters/contractsBlockNumberQueryParam'
+        - $ref: '#/components/parameters/internalQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
         - $ref: '#/components/parameters/timestampQueryParam'
-        - $ref: '#/components/parameters/contractsBlockNumberQueryParam'
-        - $ref: '#/components/parameters/blockHashQueryParam'
         - $ref: '#/components/parameters/transactionIndexQueryParam'
-        - $ref: '#/components/parameters/internalQueryParam'
       responses:
         200:
           description: OK
@@ -378,13 +452,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractResultResponse'
+                $ref: '#/components/schemas/ContractResultDetails'
         206:
           description: Partial Content
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractResultResponse'
+                $ref: '#/components/schemas/ContractResultDetails'
         400:
           $ref: '#/components/responses/InvalidParameterError'
         404:
@@ -449,7 +523,7 @@ paths:
 
       operationId: listContractLogs
       parameters:
-        - $ref: '#/components/parameters/contractIdPathParam'
+        - $ref: '#/components/parameters/contractIdOrAddressPathParam'
         - $ref: '#/components/parameters/logIndexQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
@@ -550,8 +624,8 @@ paths:
       description: Returns the estimated gas in tinybars per each transaction type. Default order is ASC. Currently only `ContractCall`, `ContractCreate` and `EthereumTransaction` transaction types are supported.
       operationId: getNetworkFees
       parameters:
-        - $ref: '#/components/parameters/timestampQueryParam'
         - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
           description: OK
@@ -574,8 +648,8 @@ paths:
       operationId: getNetworkNodes
       parameters:
         - $ref: '#/components/parameters/fileIdQueryParam'
-        - $ref: '#/components/parameters/nodeIdQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/nodeIdQueryParam'
         - $ref: '#/components/parameters/orderQueryParam'
       responses:
         200:
@@ -600,6 +674,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NetworkStakeResponse'
+        400:
+          $ref: '#/components/responses/InvalidParameterError'
         404:
           $ref: '#/components/responses/NotFoundError'
         500:
@@ -754,6 +830,13 @@ paths:
       operationId: listTopicMessagesById
       parameters:
         - $ref: '#/components/parameters/topicIdPathParam'
+        - name: encoding
+          in: query
+          example: base64
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParamDesc'
         - name: sequencenumber
           in: query
           example: 2
@@ -762,13 +845,6 @@ paths:
             minimum: 0
             type: integer
         - $ref: '#/components/parameters/timestampQueryParam'
-        - name: encoding
-          in: query
-          example: base64
-          schema:
-            type: string
-        - $ref: '#/components/parameters/limitQueryParam'
-        - $ref: '#/components/parameters/orderQueryParamDesc'
       responses:
         200:
           description: OK
@@ -837,12 +913,12 @@ paths:
       description: Returns a list of tokens on the network.
       operationId: listTokens
       parameters:
+        - $ref: '#/components/parameters/accountIdQueryParam'
+        - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParam'
         - $ref: '#/components/parameters/publicKeyQueryParam'
         - $ref: '#/components/parameters/tokenIdQueryParam'
         - $ref: '#/components/parameters/tokenTypeQueryParam'
-        - $ref: '#/components/parameters/limitQueryParam'
-        - $ref: '#/components/parameters/accountIdQueryParam'
-        - $ref: '#/components/parameters/orderQueryParam'
       responses:
         200:
           description: OK
@@ -990,12 +1066,12 @@ paths:
       operationId: listTokenBalancesById
       parameters:
         - $ref: '#/components/parameters/tokenIdPathParam'
-        - $ref: '#/components/parameters/accountIdQueryParam'
         - $ref: '#/components/parameters/accountBalanceQueryParam'
-        - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/accountIdQueryParam'
         - $ref: '#/components/parameters/accountPublicKeyQueryParam'
-        - $ref: '#/components/parameters/timestampQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
+        - $ref: '#/components/parameters/orderQueryParam'
+        - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
           description: OK
@@ -1017,6 +1093,7 @@ paths:
         - $ref: '#/components/parameters/accountIdQueryParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/serialNumberQueryParam'
       responses:
         200:
           description: OK
@@ -1059,6 +1136,7 @@ paths:
         - $ref: '#/components/parameters/serialNumberPathParam'
         - $ref: '#/components/parameters/limitQueryParam'
         - $ref: '#/components/parameters/orderQueryParamDesc'
+        - $ref: '#/components/parameters/timestampQueryParam'
       responses:
         200:
           description: OK
@@ -1101,11 +1179,11 @@ tags:
     description: The tokens object represents the information associated with a token entity and returns a list of token information.
 info:
   title: Hedera Mirror Node REST API
-  version: 0.66.1
+  version: 0.75.0
   license:
     name: Apache-2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
-  description: "The Mirror Node REST API offers the ability to query cryptocurrency transactions and account information from a Hedera managed mirror node.\n\nAvailable versions: [v1](/api/v1/docs). Base url: [/api/v1](/api/v1)"
+  description: "The Mirror Node REST API offers the ability to query cryptocurrency transactions and account information from a Hedera managed mirror node.\n\nBase url: [/api/v1](/api/v1)\n\nOpenAPI Spec: [/api/v1/docs/openapi.yml](/api/v1/docs/openapi.yml)"
   contact:
     name: Hedera Mirror Node Team
     email: mirrornode@hedera.com
@@ -1180,8 +1258,14 @@ components:
               type: string
               nullable: true
               format: binary
-              description: The contract bytecode in hex
+              description: The contract bytecode in hex during deployment
               example: "0x01021a1fdc9b"
+            runtime_bytecode:
+              type: string
+              nullable: true
+              format: binary
+              description: The contract bytecode in hex after deployment
+              example: "0x0302fa1ad39c"
     ContractsResponse:
       type: object
       properties:
@@ -1189,16 +1273,20 @@ components:
           $ref: '#/components/schemas/Contracts'
         links:
           $ref: '#/components/schemas/Links'
-    ContractResultResponse:
-      type: object
-      properties:
-        contracts:
-          $ref: '#/components/schemas/ContractResultDetails'
     ContractResultsResponse:
       type: object
       properties:
-        contracts:
+        results:
           $ref: '#/components/schemas/ContractResults'
+        links:
+          $ref: '#/components/schemas/Links'
+    ContractStateResponse:
+      type: object
+      properties:
+        state:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractState'
         links:
           $ref: '#/components/schemas/Links'
     ContractActionsResponse:
@@ -1246,11 +1334,6 @@ components:
           $ref: '#/components/schemas/NetworkNodes'
         links:
           $ref: '#/components/schemas/Links'
-    NetworkStakeResponse:
-      type: object
-      properties:
-        network_stake:
-          $ref: '#/components/schemas/NetworkStake'
     NetworkSupplyResponse:
       type: object
       properties:
@@ -1278,6 +1361,15 @@ components:
       properties:
         blocks:
           $ref: '#/components/schemas/Blocks'
+        links:
+          $ref: '#/components/schemas/Links'
+    StakingRewardsResponse:
+      type: object
+      properties:
+        rewards:
+          type: array
+          items:
+            $ref: '#/components/schemas/StakingReward'
         links:
           $ref: '#/components/schemas/Links'
     StateProofResponseFull:
@@ -1420,6 +1512,15 @@ components:
           $ref: '#/components/schemas/TimestampNullable'
         balances:
           $ref: '#/components/schemas/TokenDistribution'
+        links:
+          $ref: '#/components/schemas/Links'
+    TokenRelationshipResponse:
+      type: object
+      properties:
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenRelationship'
         links:
           $ref: '#/components/schemas/Links'
     TokensResponse:
@@ -1583,7 +1684,8 @@ components:
     AccountBalanceTransactions:
       allOf:
         - $ref: '#/components/schemas/AccountInfo'
-        - required:
+        - type: object
+          required:
             - transactions
             - links
           properties:
@@ -1738,14 +1840,14 @@ components:
           nullable: false
           type: integer
         call_operation_type:
-          description:  The type of the call operation
-          enum: [CALL, CALLCODE, CREATE, CREATE2, DELEGATECALL, STATICCALL, UNKNOWN]
+          description: The type of the call operation
+          enum: [ CALL, CALLCODE, CREATE, CREATE2, DELEGATECALL, STATICCALL, UNKNOWN ]
           example: CALL
           nullable: false
           type: string
         call_type:
           description: The type of the call
-          enum: [NO_ACTION, CALL, CREATE, PRECOMPILE, SYSTEM]
+          enum: [ NO_ACTION, CALL, CREATE, PRECOMPILE, SYSTEM ]
           example: CALL
           nullable: false
           type: string
@@ -1800,7 +1902,7 @@ components:
           type: string
         result_data_type:
           description: The type of the result data
-          enum: [OUTPUT, REVERT_REASON, ERROR]
+          enum: [ OUTPUT, REVERT_REASON, ERROR ]
           example: OUTPUT
           nullable: false
           type: string
@@ -1817,6 +1919,10 @@ components:
     ContractResult:
       type: object
       properties:
+        address:
+          description: The hex encoded evm address of contract
+          example: "0x25fe26adc577cc89172e6156c9e24f7b9751b762"
+          type: string
         amount:
           description: The number of tinybars sent to the function
           example: 10
@@ -1835,7 +1941,7 @@ components:
         contract_id:
           $ref: '#/components/schemas/EntityId'
         created_contract_ids:
-          description: The network's released supply of hbars in tinybars
+          description: The list of smart contracts that were created by the function call.
           items:
             $ref: '#/components/schemas/EntityId'
           nullable: true
@@ -1889,6 +1995,10 @@ components:
               nullable: true
               type: string
               example: '0xabcd'
+            address:
+              description: The hex encoded evm address of contract
+              example: "0x25fe26adc577cc89172e6156c9e24f7b9751b762"
+              type: string
             block_gas_used:
               description: The total amount of gas used in the block
               example: 2000
@@ -1999,6 +2109,33 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ContractResultLog'
+    ContractState:
+      type: object
+      required:
+        - address
+        - contract_id
+        - timestamp
+        - slot
+        - value
+      properties:
+        address:
+          $ref: '#/components/schemas/EvmAddress'
+        contract_id:
+          $ref: '#/components/schemas/EntityId'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        slot:
+          description: The hex encoded storage slot.
+          format: binary
+          example: '0x00000000000000000000000000000000000000000000000000000000000000fa'
+          nullable: false
+          type: string
+        value:
+          description: The hex encoded value to the slot. `0x` implies no value written.
+          example: '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925'
+          format: binary
+          nullable: false
+          type: string
     ContractResultStateChange:
       type: object
       properties:
@@ -2286,7 +2423,7 @@ components:
           format: int64
           type: integer
         node_cert_hash:
-          description: hex encoded hash of the node’s TLS certificate
+          description: hex encoded hash of the node's TLS certificate
           nullable: true
           type: string
         public_key:
@@ -2321,9 +2458,8 @@ components:
           type: integer
         staking_period:
           allOf:
-            - $ref: '#/components/schemas/TimestampRange'
+            - $ref: '#/components/schemas/TimestampRangeNullable'
             - description: The timestamp range of the staking period
-              nullable: true
         timestamp:
           $ref: '#/components/schemas/TimestampRange'
       example:
@@ -2367,7 +2503,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/NetworkFee'
-    NetworkStake:
+    NetworkStakeResponse:
       type: object
       required:
         - max_staking_reward_rate_per_hbar
@@ -2417,16 +2553,16 @@ components:
           type: integer
           format: int64
       example:
-        max_staking_reward_rate_per_hbar: 17808,
-        node_reward_fee_fraction: 1.0,
-        stake_total: 35000000000000000,
+        max_staking_reward_rate_per_hbar: 17808
+        node_reward_fee_fraction: 1.0
+        stake_total: 35000000000000000
         staking_period:
           from: '1655164800.000000000'
           to: '1655251200.000000000'
-        staking_period_duration: 1440,
-        staking_periods_stored: 365,
-        staking_reward_fee_fraction: 1.0,
-        staking_reward_rate: 100000000000,
+        staking_period_duration: 1440
+        staking_periods_stored: 365
+        staking_reward_fee_fraction: 1.0
+        staking_reward_rate: 100000000000
         staking_start_threshold: 25000000000000000
     Nft:
       type: object
@@ -2604,7 +2740,7 @@ components:
     ScheduleSignature:
       type: object
       properties:
-        consensus_timestmap:
+        consensus_timestamp:
           $ref: '#/components/schemas/Timestamp'
         public_key_prefix:
           type: string
@@ -2636,6 +2772,49 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ServiceEndpoint'
+    StakingReward:
+      type: object
+      properties:
+        account_id:
+          $ref: '#/components/schemas/EntityId'
+        amount:
+          description: The number of tinybars awarded
+          example: 10
+          format: int64
+          type: integer
+          nullable: false
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+      required:
+        - account_id
+        - amount
+        - timestamp
+      example:
+        account_id: 0.0.1000
+        amount: 10
+        timestamp: 1234567890.000000001
+    StakingRewardTransfer:
+      type: object
+      description: A staking reward transfer
+      required:
+        - account
+        - amount
+      properties:
+        account:
+          $ref: '#/components/schemas/EntityId'
+        amount:
+          description: The number of tinybars awarded
+          example: 10
+          format: int64
+          type: integer
+          nullable: false
+      example:
+        account_id: 0.0.1000
+        amount: 10
+    StakingRewardTransfers:
+      type: array
+      items:
+        $ref: '#/components/schemas/StakingRewardTransfer'
     Timestamp:
       type: string
       example: "1586567700.453054000"
@@ -2648,6 +2827,19 @@ components:
     TimestampRange:
       type: object
       description: A timestamp range an entity is valid for
+      properties:
+        from:
+          allOf:
+            - $ref: '#/components/schemas/Timestamp'
+            - description: The inclusive from timestamp in seconds
+        to:
+          allOf:
+            - $ref: '#/components/schemas/TimestampNullable'
+            - description: The exclusive to timestamp in seconds
+    TimestampRangeNullable:
+      type: object
+      description: A timestamp range an entity is valid for
+      nullable: true
       properties:
         from:
           allOf:
@@ -2727,7 +2919,9 @@ components:
           $ref: '#/components/schemas/EntityId'
         auto_renew_period:
           example: null
+          format: int64
           nullable: true
+          type: integer
         created_timestamp:
           $ref: '#/components/schemas/Timestamp'
         decimals:
@@ -2738,7 +2932,10 @@ components:
           example: true
           nullable: true
         expiry_timestamp:
-          $ref: '#/components/schemas/TimestampNullable'
+          example: 1234567890100000
+          format: int64
+          nullable: true
+          type: integer
         fee_schedule_key:
           $ref: '#/components/schemas/Key'
         freeze_default:
@@ -2792,6 +2989,50 @@ components:
           $ref: '#/components/schemas/Key'
         custom_fees:
           $ref: '#/components/schemas/CustomFees'
+    TokenRelationship:
+      type: object
+      properties:
+        automatic_association:
+          type: boolean
+          description: Specifies if the relationship is implicitly/explicitly associated.
+          example: true
+          nullable: false
+        balance:
+          format: int64
+          type: integer
+          description: For FUNGIBLE_COMMON, the balance that the account holds in the smallest denomination. For NON_FUNGIBLE_UNIQUE, the number of NFTs held by the account.
+          example: 5
+          nullable: false
+        created_timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        freeze_status:
+          type: string
+          description: The Freeze status of the account.
+          example: UNFROZEN
+          enum: [ NOT_APPLICABLE, FROZEN, UNFROZEN ]
+          nullable: false
+        kyc_status:
+          type: string
+          description: The KYC status of the account.
+          example: GRANTED
+          enum: [ NOT_APPLICABLE, GRANTED, REVOKED ]
+          nullable: false
+        token_id:
+          $ref: '#/components/schemas/EntityId'
+      required:
+        - automatic_association
+        - balance
+        - created_timestamp
+        - freeze_status
+        - kyc_status
+        - token_id
+      example:
+        automatic_association: true
+        balance: 5
+        created_timestamp: 123456789.000000001
+        freeze_status: UNFROZEN
+        kyc_status: GRANTED
+        token_id: 0.0.27335
     LogTopicQueryParam:
       type: array
       items:
@@ -2931,6 +3172,8 @@ components:
           type: string
         scheduled:
           type: boolean
+        staking_reward_transfers:
+          $ref: '#/components/schemas/StakingRewardTransfers'
         token_transfers:
           type: array
           items:
@@ -2986,6 +3229,11 @@ components:
         parent_consensus_timestamp: "1234567890.000000007"
         result: SUCCESS
         scheduled: false
+        staking_reward_transfers:
+          - account: 3
+            amount: 150
+          - account: 9
+            amount: 200
         transaction_hash: "vigzKe2J7fv4ktHBbNTSzQmKq7Lzdq1/lJMmHT+a2KgvdhAuadlvS4eKeqKjIRmW"
         transaction_id: 0.0.8-1234567890-000000006
         token_transfers:
@@ -3006,6 +3254,12 @@ components:
             is_approval: false
           - account: 0.0.98
             amount: 1
+            is_approval: false
+          - account: 0.0.800
+            amount: 150
+            is_approval: false
+          - account: 0.0.800
+            amount: 200
             is_approval: false
         valid_duration_seconds: 11
         valid_start_timestamp: "1234567890.000000006"
@@ -3080,6 +3334,11 @@ components:
         parent_consensus_timestamp: "1234567890.000000007"
         result: SUCCESS
         scheduled: false
+        staking_reward_transfers:
+          - account: 3
+            amount: 200
+          - account: 9
+            amount: 300
         transaction_hash: "vigzKe2J7fv4ktHBbNTSzQmKq7Lzdq1/lJMmHT+a2KgvdhAuadlvS4eKeqKjIRmW"
         transaction_id: 0.0.8-1234567890-000000006
         token_transfers:
@@ -3101,6 +3360,12 @@ components:
           - account: 0.0.98
             amount: 1
             is_approval: true
+          - account: 0.0.800
+            amount: 200
+            is_approval: false
+          - account: 0.0.800
+            amount: 300
+            is_approval: false
         valid_duration_seconds: 11
         valid_start_timestamp: "1234567890.000000006"
     TransactionDetails:
@@ -3210,11 +3475,8 @@ components:
         evmAddressWithShardAndRealm:
           value: 0.0.ac384c53f03855fa1b3616052f8ba32c6c2a2fec
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/AccountAlias'
-          - $ref: '#/components/schemas/EntityId'
-          - $ref: '#/components/schemas/EvmAddress'
-          - $ref: '#/components/schemas/EvmAddressWithShardRealm'
+        pattern: ^(\d{1,10}\.){0,2}(\d{1,10}|(0x)?[A-Fa-f0-9]{40}|(?:[A-Z2-7]{8})*(?:[A-Z2-7]{2}|[A-Z2-7]{4,5}|[A-Z2-7]{7,8}))$
+        type: string
     accountBalanceQueryParam:
       name: account.balance
       in: query
@@ -3311,7 +3573,7 @@ components:
     balanceQueryParam:
       name: balance
       in: query
-      description: Whether to include balance information or not
+      description: Whether to include balance information or not. If included, token balances are limited to at most 50 per account as outlined in HIP-367.
       example: true
       schema:
         type: boolean
@@ -3370,28 +3632,24 @@ components:
           summary: Example of id less than or equals operator
           value: lte:0.0.700
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/EntityIdQuery'
-          - $ref: '#/components/schemas/EvmAddressWithShardRealm'
-    contractIdPathParam:
+        pattern: ^((gte?|lte?|eq|ne)\:)?(\d{1,10}\.\d{1,10}\.)?\d{1,10}|(\d{1,10}\.){0,2}[A-Fa-f0-9]{40}$
+        type: string
+    contractIdOrAddressPathParam:
       name: contractIdOrAddress
       in: path
       required: true
-      description: The ID or hex encoded EVM address associated with this contract.
+      description: The ID or hex encoded EVM address (with or without 0x prefix) associated with this contract.
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/EntityId'
-          - $ref: '#/components/schemas/EvmAddressWithShardRealm'
+        pattern: ^(\d{1,10}\.){0,2}(\d{1,10}|(0x)?[A-Fa-f0-9]{40})$
+        type: string
     hashOrNumberPathParam:
       name: hashOrNumber
       in: path
       required: true
       description: Accepts both eth and hedera hash format or block number
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/HederaHash'
-          - $ref: '#/components/schemas/EthereumHash'
-          - $ref: '#/components/schemas/PositiveNumber'
+        pattern: ^(\d{1,10}|(0x)?([A-Fa-f0-9]{64}|[A-Fa-f0-9]{96}))$
+        type: string
     entityIdPathParam:
       name: entityId
       in: path
@@ -3447,9 +3705,8 @@ components:
       in: query
       description: Account ID or EVM address executing the contract
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/EntityId'
-          - $ref: '#/components/schemas/EvmAddress'
+        pattern: ^\d{1,10}\.\d{1,10}\.\d{1,10}|(0x)?[A-Fa-f0-9]{40}$
+        type: string
     logIndexQueryParam:
       name: index
       in: query
@@ -4000,6 +4257,35 @@ components:
         type: string
         pattern: ^(eq:)?(\d{1,19}|0x[a-fA-f0-9]+)$
         minimum: 0
+    slotQueryParam:
+      name: slot
+      in: query
+      description: The slot's number
+      examples:
+        noValue:
+          summary: --
+          value: ""
+        noOperator:
+          summary: Example of slot equals with no operator
+          value: 1
+        eqOperator:
+          summary: Example of slot equals operator
+          value: eq:2
+        gtOperator:
+          summary: Example of slot gt operator
+          value: gt:2
+        gteOperator:
+          summary: Example of slot gte operator
+          value: gte:2
+        ltOperator:
+          summary: Example of slot lt operator
+          value: lt:2
+        lteOperator:
+          summary: Example of slot lte operator
+          value: lte:2
+      schema:
+        type: string
+        pattern: ^((eq|gte?|lte?)\:)?(0x)?[0-9A-Fa-f]{1,64}$
     blockHashQueryParam:
       name: block.hash
       in: query
@@ -4056,9 +4342,8 @@ components:
       name: transactionIdOrHash
       in: path
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/EthereumHash'
-          - $ref: '#/components/schemas/TransactionIdStr'
+        pattern: ^(0x)?[A-Fa-f0-9]{64}|(\d{1,10})\.(\d{1,10})\.(\d{1,10})-(\d{1,19})-(\d{1,9})$
+        type: string
       required: true
       description: Transaction Id or a 32 byte hash with optional 0x prefix
       examples:
