@@ -32,6 +32,7 @@ export type MetricAlarmDefinition = {
   context: Operator;
   notification?: AlarmNotification;
   unit?: string;
+  threshold?: number | string;
 };
 
 /** The app model for a potentially-partial metric alarm */
