@@ -9,6 +9,7 @@ export type Operator = LeafOperator | BranchOperator;
 export enum NotifyOn {
   Always = "always",
   AlarmBreached = "alarmBreached",
+  InAlarm = "inAlarm",
 }
 
 export type AlarmNotification = {
