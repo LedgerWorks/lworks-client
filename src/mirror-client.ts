@@ -104,7 +104,6 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
       { retries: 4 }
     );
   } catch (err) {
-    console.error(err);
     track("Failed Mirror Call", accessToken, {
       timeElapsed: timeElapsed(startAt),
       url,
