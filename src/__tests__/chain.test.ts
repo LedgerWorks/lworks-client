@@ -4,6 +4,7 @@ describe("parseChain", () => {
   const testCases = [
     { value: "hedera", expected: Chain.Hedera },
     { value: "avalanche", expected: Chain.Avalanche },
+    { value: "ethereum", expected: Chain.Ethereum },
   ];
   testCases.forEach(({ value, expected }) => {
     it(`should parse chain value: ${value}`, () => {
