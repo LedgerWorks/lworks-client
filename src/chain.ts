@@ -3,6 +3,7 @@ import { knownLookup } from "./enums";
 export enum Chain {
   Hedera = "hedera",
   Avalanche = "avalanche",
+  Ethereum = "ethereum",
 }
 
 /**
