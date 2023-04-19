@@ -1,7 +1,7 @@
 import { Environment } from "./environment";
 import { Network } from "./networks";
 
-export const libraryVersion = "2.10.0";
+export const libraryVersion = "2.10.1";
 
 type Config = {
   disableTracking: boolean;

@@ -1,3 +1,4 @@
+import { Chain } from "../chain";
 import { Environment } from "../environment";
 import { Network } from "../networks";
 
@@ -9,6 +10,7 @@ export type BaseApiCallOptions = {
   headers?: Record<string, string>;
   method?: string;
   body?: unknown;
+  chain?: Chain;
 };
 
 export type AccessTokenApiCallOptions = BaseApiCallOptions & {
