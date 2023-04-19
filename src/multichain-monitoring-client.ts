@@ -217,7 +217,7 @@ export async function deleteAlarm(options: OwnerCallWithAlarmIdOptions): Promise
 /**
  * Get an unassembled alarm for an owner. This is an admin call that requires
  * elevated permissions
- * @param options The options to use when fetching the alarm
+ * @param options The options to use when fetching the alarms
  * @returns All unassembled alarms for the specified owner
  */
 export async function adminGetUnassembledAlarmsForOwner(
@@ -259,16 +259,20 @@ export async function adminDeleteAlarmsForOwner(options: AdminCallWithOwner): Pr
 }
 
 /**
- * Delete all alarms for an owner. This is an admin call that requires
+ * Get all alarms for an owner. This is an admin call that requires
  * elevated permissions
- * @param options The options to use when deleting the owner's alarm
- * @returns The alarm ids of all deleted alarms
+ * @param options The options to use when fetching the alarms
+ * @returns All managed alarms for the specified owner
  */
 export async function adminGetManagedAlarms(options: IamApiCallOptions): Promise<MetricAlarm[]> {
-  const { data: alarms } = await callMultichainApi<MetricAlarm[]>(`/api/v1/admin/managed-alarms`, {
-    ...options,
-    method: "GET",
-  });
+  const chainQuery = options.chain ? `?chain=${options.chain}` : "";
+  const { data: alarms } = await callMultichainApi<MetricAlarm[]>(
+    `/api/v1/admin/managed-alarms${chainQuery}`,
+    {
+      ...options,
+      method: "GET",
+    }
+  );
   return alarms;
 }
 
