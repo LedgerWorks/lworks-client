@@ -22,12 +22,12 @@ export function getHeadersWithIamSignature(
   region?: string,
   service = "execute-api"
 ): Record<string, string> {
-  const { hostname, pathname } = new URL(url);
+  const { hostname, pathname, search } = new URL(url);
   const signed = sign(
     {
       method: requestOptions.method ?? "GET",
       host: hostname,
-      path: pathname,
+      path: pathname + search,
       service,
       headers: requestOptions.headers,
       body: requestOptions.body,
