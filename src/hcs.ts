@@ -34,13 +34,15 @@ function getMessage({
   topicId,
   sequenceNumber,
   accessToken,
+  callMirrorDelegate,
 }: {
   network: Network;
   topicId: string;
   sequenceNumber: number;
   accessToken?: string;
+  callMirrorDelegate: typeof callMirror;
 }) {
-  return callMirror<HCSTopicMessage>(
+  return callMirrorDelegate<HCSTopicMessage>(
     `/api/v1/topics/${topicId}/messages/${sequenceNumber}`,
     withAccessToken({ network, accessToken })
   );
@@ -50,16 +52,18 @@ async function getAllMessages({
   network,
   topicId,
   accessToken,
+  callMirrorDelegate,
 }: {
   network: Network;
   topicId: string;
   accessToken?: string;
+  callMirrorDelegate: typeof callMirror;
 }) {
   const messages: Array<HCSTopicMessage> = [];
   let next = "";
   do {
     // eslint-disable-next-line no-await-in-loop
-    const results = await callMirror<HCSTopicMessagesResponse>(
+    const results = await callMirrorDelegate<HCSTopicMessagesResponse>(
       next || `/api/v1/topics/${topicId}/messages`,
       withAccessToken({ network, accessToken })
     );
@@ -82,13 +86,15 @@ export async function getAllHCSMessages({
   network = getNetwork(),
   accessToken,
   topicId,
+  callMirrorDelegate = callMirror,
 }: {
   network?: Network | null;
   accessToken?: string;
   topicId: string;
+  callMirrorDelegate?: typeof callMirror;
 }): ReturnType<typeof getAllMessages> {
   invariant(network, "Network not correctly configured or passed");
-  return getAllMessages({ network, topicId, accessToken });
+  return getAllMessages({ network, topicId, accessToken, callMirrorDelegate });
 }
 
 /**
@@ -102,14 +108,22 @@ export async function getCompleteHCSMessageBySequenceNumber({
   accessToken,
   topicId,
   sequenceNumber,
+  callMirrorDelegate = callMirror,
 }: {
   network?: Network | null;
   accessToken?: string;
   topicId: string;
   sequenceNumber: number;
+  callMirrorDelegate?: typeof callMirror;
 }) {
   invariant(network, "Network not correctly configured or passed");
-  const hcsResult = await getMessage({ topicId, sequenceNumber, network, accessToken });
+  const hcsResult = await getMessage({
+    topicId,
+    sequenceNumber,
+    network,
+    accessToken,
+    callMirrorDelegate,
+  });
   if (!hcsResult || !hcsResult.chunk_info) {
     return null;
   }
@@ -143,6 +157,7 @@ export async function getCompleteHCSMessageBySequenceNumber({
         topicId,
         sequenceNumber: currentSequenceNumber,
         network,
+        callMirrorDelegate,
       });
       invariant(result, "No returned result when getting next message in the sequence");
       invariant(
