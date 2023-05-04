@@ -25,11 +25,22 @@ type MirrorConfig = {
 };
 
 export type MirrorOptions = Partial<
-  Omit<MirrorConfig, "network" | "environment"> & {
+  Omit<MirrorConfig, "network"> & {
     network: Network | "mainnet" | "testnet";
-    environment?: Environment;
   }
 >;
+
+/**
+ * Returns a function to track calls when the environment is an LworksEnvironment. When the environment is public, we track nothing.
+ * @param environment
+ * @returns
+ */
+function trackerJacker(environment: Environment): typeof track {
+  if (environment === Environment.public) {
+    return () => Promise.resolve();
+  }
+  return track;
+}
 
 async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
   const startAt = Date.now();
@@ -43,6 +54,9 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
   const parsedUrl = new URL(url);
   const searchParams = new URLSearchParams(parsedUrl.search);
   const queryParams = Object.fromEntries(searchParams.entries());
+
+  const callTracker = trackerJacker(config.environment);
+
   logger.trace({ url, baseUrl }, "Mirror call");
   try {
     return await retry<T>(
@@ -69,7 +83,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             ? status.messages.at(0)?.message
             : "Unknown error response";
 
-          track(trackedEventName, accessToken, {
+          callTracker(trackedEventName, accessToken, {
             status: "failed",
             timeElapsed: timeElapsed(startAt),
             url,
@@ -88,7 +102,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
           }
           throw error;
         }
-        track(trackedEventName, accessToken, {
+        callTracker(trackedEventName, accessToken, {
           status: "success",
           timeElapsed: timeElapsed(startAt),
           url,
@@ -104,7 +118,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
       { retries: 4 }
     );
   } catch (err) {
-    track("Failed Mirror Call", accessToken, {
+    callTracker("Failed Mirror Call", accessToken, {
       timeElapsed: timeElapsed(startAt),
       url,
       pathname: parsedUrl.pathname,
@@ -125,8 +139,10 @@ export async function callMirror<T>(endpoint: string, options: MirrorOptions = {
   if (!endpoint) throw new Error("Endpoint is required");
 
   const { network } = ensureNetwork(options);
-  const { accessToken } = ensureAccessToken(network, options);
   const environment = ensureEnvironment(options);
+
+  const { accessToken } =
+    environment === Environment.public ? { accessToken: "" } : ensureAccessToken(network, options);
 
   return get<T>(endpoint, { accessToken, network, environment });
 }

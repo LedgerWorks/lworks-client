@@ -63,7 +63,7 @@ export function getNetwork() {
  * Assign default environment used when calling `callMirror` with only an endpoint
  * @param environment dev|stage|prod
  */
-export function setEnvironment(environment: Environment) {
+export function setEnvironment(environment: Environment | null) {
   config.environment = environment;
 }
 
