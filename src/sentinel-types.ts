@@ -6,6 +6,7 @@ export enum StreamsRuleType {
   TokenBurnsByTokenId = 2,
   TokenTransfersByTokenId = 3,
   ContractCallsByContractId = 4,
+  SourceAccountBasedSecurityRule = 5,
   AccountActivityByAccount = 6,
   MetricAlarmsByOwner = 7,
 }
@@ -19,15 +20,15 @@ export type StreamsRule = {
   ruleId: string;
   organizationId: string;
   userId: string;
-  ruleType: StreamsRuleType;
   chain: Chain | LegacyChainStrings;
+  ruleType: StreamsRuleType;
   predicateValue: string;
-  batchOptions?: StreamsRuleBatchOptions;
   ruleName?: string;
   actionWebhookUrl?: string;
   actionWebhookCustomHeaders?: Record<string, string>;
   actionStreamTopic?: string;
   actionWebSocketId?: string;
+  batchOptions?: StreamsRuleBatchOptions;
   disabled?: boolean;
   createdDt: string;
   updatedDt: string;
@@ -57,6 +58,7 @@ export enum StreamEventStatus {
   Pending,
   Skipped,
   Timeout,
+  GaveUp,
   Batching,
 }
 
@@ -65,6 +67,7 @@ export type NotificationEventMetadata = {
   eventId: string;
   status: StreamEventStatus;
   eventNumber: number;
+  totalAttempts?: number;
   dateTime: string;
   consensusDateTime?: string;
   streamsDateTime?: string;
@@ -72,6 +75,7 @@ export type NotificationEventMetadata = {
   destinationType?: NotifiableItemDestinationType;
   errorMessage?: string;
   timeToLive?: number;
+  description?: string;
   batchSize?: number;
   batchSpanSeconds?: number;
 };
