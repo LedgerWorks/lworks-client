@@ -23,7 +23,8 @@ export {
   adminUpsertAlarm,
 } from "./multichain-monitoring-client";
 export { Network, parseNetwork } from "./networks";
-export { Environment, parseEnvironment } from "./environment";
+export { Environment, parseEnvironment, parseLWorksEnvironment } from "./environment";
+export type { LWorksEnvironment } from "./environment";
 export { Chain, parseChain } from "./chain";
 export * as MirrorResponse from "./mirror-api-types";
 export * as SentinelTypes from "./sentinel-types";

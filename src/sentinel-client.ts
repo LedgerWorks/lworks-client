@@ -18,7 +18,7 @@ import {
 import { Network } from "./networks";
 import { track } from "./track";
 import { baseLogger } from "./utils/logger";
-import { LworksEnvironment } from "./environment";
+import { LWorksEnvironment } from "./environment";
 import { getSentinelUrl } from "./urls";
 import { getErrorMessageParser } from "./get-error-message-parser";
 
@@ -28,7 +28,7 @@ const trackedEventName = "Sentinel Call";
 
 type SentinelOptions = {
   network?: Network | "mainnet" | "testnet";
-  environment?: LworksEnvironment;
+  environment?: LWorksEnvironment;
   accessToken?: string;
 };
 
@@ -85,7 +85,6 @@ async function callSentinelApi<TResponse = unknown>(
   const startAt = Date.now();
   const { accessToken } = ensureAccessToken(config.network, config);
   const networkStack = config.network.toString();
-  const x = config.environment;
 
   const environment = ensureEnvironment(config);
 
