@@ -1,7 +1,7 @@
 import { Environment } from "./environment";
 import { Network } from "./networks";
 
-export const libraryVersion = "2.10.3";
+export const libraryVersion = "2.11.0";
 
 type Config = {
   disableTracking: boolean;
@@ -63,7 +63,7 @@ export function getNetwork() {
  * Assign default environment used when calling `callMirror` with only an endpoint
  * @param environment dev|stage|prod
  */
-export function setEnvironment(environment: Environment) {
+export function setEnvironment(environment: Environment | null) {
   config.environment = environment;
 }
 
