@@ -24,7 +24,7 @@ export async function callMirrorWithFallback<T>(
   } catch (e) {
     if (e instanceof MirrorResponseError && fallbackStatusCodes.includes(e.status)) {
       console.debug(`Falling back to public mirror due to: ${e.message}`);
-      return callMirror<T>(endpoint, { ...baseOptions, ...fallbackStatusCodes });
+      return callMirror<T>(endpoint, { ...baseOptions, ...fallbackOptions });
     }
     throw e;
   }
