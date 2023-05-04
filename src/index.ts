@@ -1,5 +1,6 @@
 export { configure, setAccessToken, setNetwork, setEnvironment, disableTracking } from "./config";
 export { callMirror } from "./mirror-client";
+export { callMirrorWithFallback } from "./mirror-client-with-fallback";
 export {
   createRule,
   deleteRuleById,

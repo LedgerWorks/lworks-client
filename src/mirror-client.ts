@@ -30,6 +30,15 @@ export type MirrorOptions = Partial<
   }
 >;
 
+export class MirrorResponseError extends Error {
+  readonly status: number;
+
+  constructor(status: number, url: string, errorResponseMessage: string | undefined) {
+    super(`${status} (${url}): ${errorResponseMessage}`);
+    this.status = status;
+  }
+}
+
 /**
  * Returns a function to track calls when the environment is an LworksEnvironment. When the environment is public, we track nothing.
  * @param environment
@@ -95,8 +104,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             httpStatus: resp.status,
             errorResponseMessage,
           });
-          // eslint-disable-next-line no-underscore-dangle
-          const error = new Error(`${resp.status} (${url}): ${errorResponseMessage}`);
+          const error = new MirrorResponseError(resp.status, url, errorResponseMessage);
           if (shouldBailRetry(resp)) {
             bail(error);
           }
