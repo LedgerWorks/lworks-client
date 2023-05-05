@@ -1,4 +1,5 @@
 export * from "./api-options";
-export * from "./metrics";
+export * from "../clients/types.ts/types";
 export * from "./requests";
 export * from "./responses";
+export * from "../clients/streams/types";

@@ -1,4 +1,4 @@
-import { MirrorOptions, callMirror } from "../mirror-client";
+import { MirrorOptions, callMirror } from "../clients/hedera-mirror/mirror-client";
 import { setEnvironment, setNetwork } from "../config";
 import { Network } from "../networks";
 import { Environment } from "../environment";
@@ -14,6 +14,8 @@ describe("mirror client", () => {
     process.env.LWORKS_TESTNET_TOKEN = originalTestnetToken;
     process.env.LWORKS_MAINNET_TOKEN = originalMainnetToken;
     process.env.LWORKS_TOKEN = originalToken;
+    delete process.env.LWORKS_ENVIRONMENT;
+    delete process.env.LWORKS_MIRROR_ENVIRONMENT;
   });
 
   function deleteEnvTokens(which: ("testnet" | "mainnet" | "generic")[]) {
@@ -50,6 +52,23 @@ describe("mirror client", () => {
     await verifyMirrorAccess({
       network: Network.Testnet,
       environment: Environment.public,
+    });
+  });
+
+  it("returns account balance for environment public testnet network", async () => {
+    deleteEnvTokens(["generic", "testnet", "mainnet"]);
+    process.env.LWORKS_ENVIRONMENT = "public";
+    await verifyMirrorAccess({
+      network: Network.Testnet,
+    });
+  });
+
+  it("returns account balance for mirror environment public testnet network", async () => {
+    deleteEnvTokens(["generic", "testnet", "mainnet"]);
+    process.env.LWORKS_ENVIRONMENT = "mainnet";
+    process.env.LWORKS_MIRROR_ENVIRONMENT = "public";
+    await verifyMirrorAccess({
+      network: Network.Testnet,
     });
   });
 

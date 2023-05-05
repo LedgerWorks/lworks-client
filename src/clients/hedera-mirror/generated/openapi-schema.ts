@@ -135,6 +135,13 @@ export type paths = {
      */
     get: operations["getByHashOrNumber"];
   };
+  "/api/v1/contracts/call": {
+    /**
+     * Invoke a smart contract 
+     * @description Returns a result from EVM execution such as cost-free execution of read-only smart contract queries, gas estimation, and transient simulation of read-write operations. If `estimate` field is set to true gas estimation is executed.
+     */
+    post: operations["contractsCall"];
+  };
   "/api/v1/contracts": {
     /**
      * List contract entities on network 
@@ -158,8 +165,8 @@ export type paths = {
   };
   "/api/v1/contracts/{contractIdOrAddress}/state": {
     /**
-     * The contract current state from a contract on the network 
-     * @description Returns a list of all contract's slots.
+     * The contract state from a contract on the network 
+     * @description Returns a list of all contract's slots. If no timestamp is provided, returns the current state.
      */
     get: operations["listContractState"];
   };
@@ -1135,9 +1142,80 @@ export type components = {
     Error: {
       _status?: {
         messages?: ({
+            /**
+             * Format: binary 
+             * @description Error message in hexadecimal 
+             * @example 0x3000
+             */
+            data?: string | null;
+            /**
+             * @description Detailed error message 
+             * @example Generic detailed error message
+             */
+            detail?: string | null;
+            /**
+             * @description Error message 
+             * @example Generic error message
+             */
             message?: string;
           })[];
       };
+    };
+    ContractCallRequest: {
+      /**
+       * @description Hexadecimal block number or the string "latest", "pending", "earliest". Defaults to "latest". 
+       * @example latest
+       */
+      block?: string | null;
+      /**
+       * Format: binary 
+       * @description Hexadecimal method signature and encoded parameters. 
+       * @example 0x0198489200000000000000000000000000000000000000000000000000000000000003ee
+       */
+      data?: string | null;
+      /**
+       * @description Whether gas estimation is called. Defaults to false. 
+       * @example true
+       */
+      estimate?: boolean | null;
+      /**
+       * Format: binary 
+       * @description The 20-byte hexadecimal EVM address the transaction is sent from. 
+       * @example 00000000000000000000000000000000000004e2
+       */
+      from?: string | null;
+      /**
+       * Format: int64 
+       * @description Gas provided for the transaction execution. Defaults to 120000000. 
+       * @example 120000000
+       */
+      gas?: number | null;
+      /**
+       * Format: int64 
+       * @description Gas price used for each paid gas. 
+       * @example 100000000
+       */
+      gasPrice?: number | null;
+      /**
+       * Format: binary 
+       * @description The 20-byte hexadecimal EVM address the transaction is directed to. 
+       * @example 0x00000000000000000000000000000000000003f4
+       */
+      to: string;
+      /**
+       * Format: int64 
+       * @description Value sent with this transaction. Defaults to 0. 
+       * @example 0
+       */
+      value?: number | null;
+    };
+    ContractCallResponse: {
+      /**
+       * Format: binary 
+       * @description Result in hexadecimal from executed contract call. 
+       * @example 0x94c4d54535f6e616d6500
+       */
+      result?: string;
     };
     /** @description A hex encoded hedera transaction hash. */
     HederaHash: string;
@@ -2145,6 +2223,11 @@ export type components = {
      * @example 1234567890.0000007
      */
     timestampPathParam: string;
+    /**
+     * @description The timestamp at which the contract state is 
+     * @example 1234567890.0000007
+     */
+    stateTimestampQueryParam: string;
     tokenInfoTimestampQueryParam: string;
     /** @description The first topic associated with a contract log. Requires a timestamp range also be populated. */
     logTopic0QueryParam: components["schemas"]["LogTopicQueryParam"];
@@ -2420,6 +2503,55 @@ export type operations = {
       404: components["responses"]["NotFoundError"];
     };
   };
+  contractsCall: {
+    /**
+     * Invoke a smart contract 
+     * @description Returns a result from EVM execution such as cost-free execution of read-only smart contract queries, gas estimation, and transient simulation of read-write operations. If `estimate` field is set to true gas estimation is executed.
+     */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ContractCallRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ContractCallResponse"];
+        };
+      };
+      /** @description Validation error */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Unsupported media type error */
+      415: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Too many requests */
+      429: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Generic error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Not implemented error */
+      501: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
   listContracts: {
     /**
      * List contract entities on network 
@@ -2468,8 +2600,8 @@ export type operations = {
   };
   listContractState: {
     /**
-     * The contract current state from a contract on the network 
-     * @description Returns a list of all contract's slots.
+     * The contract state from a contract on the network 
+     * @description Returns a list of all contract's slots. If no timestamp is provided, returns the current state.
      */
     responses: {
       /** @description OK */

@@ -1,6 +1,6 @@
 # LedgerWorks Client
 
-This library is intended to be used with the [Ledger Works'](https://lworks.io) Hedera Mirror REST API and the ledger event notification service Sentinel.
+This library is intended to be used with the [Ledger Works'](https://lworks.io) Hedera Mirror REST API and the ledger event notification service Sentinel. This library also supports the public Hedera Mirror REST API.
 
 To learn more about these services, see [Mirror Docs](https://docs.lworks.io/category/mirror-api) and [Sentinel Docs](https://docs.lworks.io/category/sentinel).
 
@@ -16,6 +16,8 @@ npm install lworks-client
 
 ## Mirror Usage
 
+### Lworks Mirror
+
 Once your access token is configured, you can call the mirror providing a network and endpoint (Endpoint documentation can be found [on the Hedera public mirror](https://mainnet-public.mirrornode.hedera.com/api/v1/docs/)).
 
 ```ts
@@ -24,7 +26,21 @@ const { callMirror, MirrorResponse } = require("lworks-client");
 await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
 (
   "/api/v1/transactions?limit=100",
-  { Network: Network.Mainnet }
+  { network: Network.Mainnet }
+)
+```
+
+### Public Hedera Mirror
+
+For those without access to the Lworks mirror, this library also supports the public hedera mirror.
+
+```ts
+const { callMirror, MirrorResponse } = require("lworks-client");
+
+await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
+(
+  "/api/v1/transactions?limit=100",
+  { network: Network.Mainnet, environment: Environment.public }
 )
 ```
 
@@ -80,6 +96,7 @@ type Config = {
   disableTracking: boolean;
   network: null | Network;
   accessToken: null | string;
+  environment: null | Environment;
 };
 ```
 
@@ -123,7 +140,7 @@ If you only plan on using a single network, you can set the network and the omit
 ```ts
 import { setNetwork } from "lworks-client";
 
-setNetwork("mainnet");
+setNetwork(Network.Mainnet);
 ```
 
 ```ts
@@ -133,6 +150,30 @@ configure({
   network: Network.Mainnet,
 });
 
+```
+
+### Configure Environment
+
+If you only plan on using a single environment, you can set the environment and the omit it on each call.
+
+```ts
+import { setEnvironment } from "lworks-client";
+
+setEnvironment(Environment.public);
+```
+
+```ts
+import { configure } from "lworks-client";
+
+configure({
+  environment: Environment.public,
+});
+
+```
+
+```ts
+process.env.LWORKS_ENVIRONMENT = 'prod' # Use prod for all services
+process.env.LWORKS_MIRROR_ENVIRONMENT = 'public' # Override environment for the mirror only.
 ```
 
 ### Configure anonymous metrics

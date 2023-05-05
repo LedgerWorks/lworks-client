@@ -1,9 +1,7 @@
 import invariant from "tiny-invariant";
 
-import { HCSTopicMessage, HCSTopicMessagesResponse } from "./mirror-api-types";
-import { callMirror } from "./mirror-client";
-import { getNetwork } from "./config";
-import { Network } from "./networks";
+import { HCSTopicMessage, HCSTopicMessagesResponse } from "./types";
+import { MirrorOptions, callMirror } from "./mirror-client";
 
 export type HasMessage = { message: string };
 
@@ -25,43 +23,37 @@ export function parseBase64Message<T>(messageContainer: HasMessage): T {
   return JSON.parse(decodedAsString) as T;
 }
 
-function withAccessToken({ network, accessToken }: { accessToken?: string; network: Network }) {
-  return { network, ...(accessToken ? { accessToken } : undefined) };
-}
-
 function getMessage({
-  network,
   topicId,
   sequenceNumber,
-  accessToken,
-}: {
-  network: Network;
+  callMirrorDelegate,
+  ...mirrorOptions
+}: MirrorOptions & {
   topicId: string;
   sequenceNumber: number;
-  accessToken?: string;
+  callMirrorDelegate: typeof callMirror;
 }) {
-  return callMirror<HCSTopicMessage>(
+  return callMirrorDelegate<HCSTopicMessage>(
     `/api/v1/topics/${topicId}/messages/${sequenceNumber}`,
-    withAccessToken({ network, accessToken })
+    mirrorOptions
   );
 }
 
 async function getAllMessages({
-  network,
   topicId,
-  accessToken,
-}: {
-  network: Network;
+  callMirrorDelegate,
+  ...mirrorOptions
+}: MirrorOptions & {
   topicId: string;
-  accessToken?: string;
+  callMirrorDelegate: typeof callMirror;
 }) {
   const messages: Array<HCSTopicMessage> = [];
   let next = "";
   do {
     // eslint-disable-next-line no-await-in-loop
-    const results = await callMirror<HCSTopicMessagesResponse>(
+    const results = await callMirrorDelegate<HCSTopicMessagesResponse>(
       next || `/api/v1/topics/${topicId}/messages`,
-      withAccessToken({ network, accessToken })
+      mirrorOptions
     );
     if (results.messages) {
       messages.push(...results.messages);
@@ -79,16 +71,14 @@ async function getAllMessages({
  * access credentials to use.
  */
 export async function getAllHCSMessages({
-  network = getNetwork(),
-  accessToken,
   topicId,
-}: {
-  network?: Network | null;
-  accessToken?: string;
+  callMirrorDelegate = callMirror,
+  ...mirrorOptions
+}: MirrorOptions & {
   topicId: string;
+  callMirrorDelegate?: typeof callMirror;
 }): ReturnType<typeof getAllMessages> {
-  invariant(network, "Network not correctly configured or passed");
-  return getAllMessages({ network, topicId, accessToken });
+  return getAllMessages({ topicId, callMirrorDelegate, ...mirrorOptions });
 }
 
 /**
@@ -98,18 +88,21 @@ export async function getAllHCSMessages({
  * optionally include the network and access credentials to use.
  */
 export async function getCompleteHCSMessageBySequenceNumber({
-  network = getNetwork(),
-  accessToken,
   topicId,
   sequenceNumber,
-}: {
-  network?: Network | null;
-  accessToken?: string;
+  callMirrorDelegate = callMirror,
+  ...mirrorOptions
+}: MirrorOptions & {
   topicId: string;
   sequenceNumber: number;
+  callMirrorDelegate?: typeof callMirror;
 }) {
-  invariant(network, "Network not correctly configured or passed");
-  const hcsResult = await getMessage({ topicId, sequenceNumber, network, accessToken });
+  const hcsResult = await getMessage({
+    topicId,
+    sequenceNumber,
+    callMirrorDelegate,
+    ...mirrorOptions,
+  });
   if (!hcsResult || !hcsResult.chunk_info) {
     return null;
   }
@@ -142,7 +135,8 @@ export async function getCompleteHCSMessageBySequenceNumber({
       const result = await getMessage({
         topicId,
         sequenceNumber: currentSequenceNumber,
-        network,
+        callMirrorDelegate,
+        ...mirrorOptions,
       });
       invariant(result, "No returned result when getting next message in the sequence");
       invariant(

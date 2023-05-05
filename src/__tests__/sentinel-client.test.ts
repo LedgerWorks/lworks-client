@@ -7,8 +7,9 @@ import {
   getRules,
   upsertRule,
   findRule,
-} from "../sentinel-client";
-import { StreamsRule, StreamsRuleType } from "../sentinel-types";
+  StreamsRule,
+  StreamsRuleType,
+} from "../clients/streams";
 import { setNetwork } from "../config";
 import { Network } from "../networks";
 import { Chain } from "../chain";

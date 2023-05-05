@@ -1,12 +1,12 @@
 import { Chain } from "../chain";
-import { LworksEnvironment } from "../environment";
+import { LWorksEnvironment } from "../environment";
 import { Network } from "../networks";
 
 import { AwsCredentials } from "./aws";
 
 export type BaseApiCallOptions = {
   network?: Network;
-  environment?: LworksEnvironment;
+  environment?: LWorksEnvironment;
   headers?: Record<string, string>;
   method?: string;
   body?: unknown;

@@ -1,19 +1,20 @@
 import fetch from "node-fetch";
 import retry from "async-retry";
 
-import { Network } from "./networks";
-import { track } from "./track";
-import { libraryVersion } from "./config";
+import { Network } from "../../networks";
+import { track } from "../../track";
+import { libraryVersion } from "../../config";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
   timeElapsed,
-} from "./client-helpers";
-import { baseLogger } from "./utils/logger";
-import { Environment } from "./environment";
-import { getMirrorUrl } from "./urls";
+} from "../client-helpers";
+import { baseLogger } from "../../utils/logger";
+import { Environment } from "../../environment";
+
+import { getMirrorUrl } from "./get-mirror-url";
 
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
@@ -29,6 +30,15 @@ export type MirrorOptions = Partial<
     network: Network | "mainnet" | "testnet";
   }
 >;
+
+export class MirrorResponseError extends Error {
+  readonly status: number;
+
+  constructor(status: number, url: string, errorResponseMessage: string | undefined) {
+    super(`${status} (${url}): ${errorResponseMessage}`);
+    this.status = status;
+  }
+}
 
 /**
  * Returns a function to track calls when the environment is an LworksEnvironment. When the environment is public, we track nothing.
@@ -95,8 +105,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             httpStatus: resp.status,
             errorResponseMessage,
           });
-          // eslint-disable-next-line no-underscore-dangle
-          const error = new Error(`${resp.status} (${url}): ${errorResponseMessage}`);
+          const error = new MirrorResponseError(resp.status, url, errorResponseMessage);
           if (shouldBailRetry(resp)) {
             bail(error);
           }
@@ -139,7 +148,10 @@ export async function callMirror<T>(endpoint: string, options: MirrorOptions = {
   if (!endpoint) throw new Error("Endpoint is required");
 
   const { network } = ensureNetwork(options);
-  const environment = ensureEnvironment(options);
+  const environment = ensureEnvironment({
+    ...options,
+    environmentLookup: "LWORKS_MIRROR_ENVIRONMENT",
+  });
 
   const { accessToken } =
     environment === Environment.public ? { accessToken: "" } : ensureAccessToken(network, options);
