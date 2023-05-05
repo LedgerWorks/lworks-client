@@ -13,7 +13,8 @@ import {
 } from "../client-helpers";
 import { baseLogger } from "../../utils/logger";
 import { Environment } from "../../environment";
-import { getMirrorUrl } from "../../urls";
+
+import { getMirrorUrl } from "./get-mirror-url";
 
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";

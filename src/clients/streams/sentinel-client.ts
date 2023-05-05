@@ -13,7 +13,7 @@ import { Network } from "../../networks";
 import { track } from "../../track";
 import { baseLogger } from "../../utils/logger";
 import { LWorksEnvironment } from "../../environment";
-import { getSentinelUrl } from "../../urls";
+import { getSentinelUrl } from "../urls";
 import { getErrorMessageParser } from "../../get-error-message-parser";
 
 import { StreamRulesQueryResult, StreamsRule, StreamsRuleType, StreamsRuleUpdate } from "./types";

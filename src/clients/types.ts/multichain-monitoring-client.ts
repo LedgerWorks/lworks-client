@@ -11,7 +11,7 @@ import {
   shouldBailRetry,
 } from "../client-helpers";
 import { baseLogger } from "../../utils/logger";
-import { getMultichainMetricsUrl } from "../../urls";
+import { getMultichainMetricsUrl } from "../urls";
 import { getErrorMessageParser } from "../../get-error-message-parser";
 import {
   AccessTokenApiCallOptions,
