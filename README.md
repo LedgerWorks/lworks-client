@@ -171,6 +171,11 @@ configure({
 
 ```
 
+```ts
+process.env.LWORKS_ENVIRONMENT = 'prod' # Use prod for all services
+process.env.LWORKS_MIRROR_ENVIRONMENT = 'public' # Override environment for the mirror only.
+```
+
 ### Configure anonymous metrics
 
 Disable anonymous metric collection by calling one of the following

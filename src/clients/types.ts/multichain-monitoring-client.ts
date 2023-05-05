@@ -3,16 +3,16 @@ import { randomUUID } from "node:crypto";
 import fetch from "node-fetch";
 import retry from "async-retry";
 
-import { libraryVersion } from "./config";
+import { libraryVersion } from "../../config";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
-} from "./client-helpers";
-import { baseLogger } from "./utils/logger";
-import { getMultichainMetricsUrl } from "./urls";
-import { getErrorMessageParser } from "./get-error-message-parser";
+} from "../client-helpers";
+import { baseLogger } from "../../utils/logger";
+import { getMultichainMetricsUrl } from "../../urls";
+import { getErrorMessageParser } from "../../get-error-message-parser";
 import {
   AccessTokenApiCallOptions,
   ApiSavableAlarm,
@@ -23,9 +23,9 @@ import {
   MetricAlarm,
   SignableRequest,
   StandardApiResult,
-} from "./types";
-import { getHeadersWithIamSignature } from "./utils/get-headers-with-iam-signature";
-import { AwsCredentials } from "./types/aws";
+} from "../../types";
+import { getHeadersWithIamSignature } from "../../utils/get-headers-with-iam-signature";
+import { AwsCredentials } from "../../types/aws";
 
 const logger = baseLogger.child({ client: "multichain-metrics" });
 

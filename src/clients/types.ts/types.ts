@@ -1,6 +1,6 @@
 import { RulesLogic, AdditionalOperation } from "json-logic-js";
 
-import { Chain } from "../chain";
+import { Chain } from "../../chain";
 
 export type LeafOperator = RulesLogic<AdditionalOperation>;
 export type BranchOperator = Record<string, RulesLogic<AdditionalOperation>>;

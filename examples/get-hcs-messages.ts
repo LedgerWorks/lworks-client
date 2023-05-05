@@ -1,4 +1,7 @@
-import { decodeBase64Message, getCompleteHCSMessageBySequenceNumber } from "../src/hcs";
+import {
+  decodeBase64Message,
+  getCompleteHCSMessageBySequenceNumber,
+} from "../src/clients/hedera-mirror/hcs";
 import { callMirror, getAllHCSMessages, Network, setNetwork } from "../src/index";
 
 setNetwork(Network.Testnet);

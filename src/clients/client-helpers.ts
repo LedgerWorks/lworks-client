@@ -1,10 +1,10 @@
 import { Response } from "node-fetch";
 
-import { getAccessToken, getEnvironment, getNetwork } from "./config";
-import { knownLookup } from "./enums";
-import { Environment, parseEnvironment } from "./environment";
-import { Network } from "./networks";
-import { baseLogger } from "./utils/logger";
+import { getAccessToken, getEnvironment, getNetwork } from "../config";
+import { knownLookup } from "../enums";
+import { Environment, parseEnvironment } from "../environment";
+import { Network } from "../networks";
+import { baseLogger } from "../utils/logger";
 
 function getToken(network: Network): string | undefined {
   const networkToken =
@@ -57,14 +57,24 @@ export function ensureNetwork(options?: { network?: Network | "mainnet" | "testn
   );
 }
 
-export function ensureEnvironment(options?: { environment?: Environment }): Environment {
-  if (options?.environment) return options.environment;
+export function ensureEnvironment(
+  options: Partial<{
+    environment: Environment;
+    environmentLookup: string;
+  }> = {}
+): Environment {
+  if (options.environment) return options.environment;
 
   const fromGlobal = getEnvironment();
   if (fromGlobal) return fromGlobal;
 
-  const fromEnvironmentVariable = process.env.LWORKS_ENVIRONMENT;
-  if (fromEnvironmentVariable) return parseEnvironment(fromEnvironmentVariable);
+  const fromOptionEnvironment = options.environmentLookup
+    ? process.env[options.environmentLookup]
+    : null;
+  if (fromOptionEnvironment) return parseEnvironment(fromOptionEnvironment);
+
+  const fromCommonEnvironment = process.env.LWORKS_ENVIRONMENT;
+  if (fromCommonEnvironment) return parseEnvironment(fromCommonEnvironment);
 
   return Environment.prod;
 }

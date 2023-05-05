@@ -1,26 +1,22 @@
 import fetch from "node-fetch";
 import retry from "async-retry";
 
-import {
-  StreamRulesQueryResult,
-  StreamsRule,
-  StreamsRuleType,
-  StreamsRuleUpdate,
-} from "./sentinel-types";
-import { libraryVersion } from "./config";
+import { libraryVersion } from "../../config";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
   timeElapsed,
-} from "./client-helpers";
-import { Network } from "./networks";
-import { track } from "./track";
-import { baseLogger } from "./utils/logger";
-import { LWorksEnvironment } from "./environment";
-import { getSentinelUrl } from "./urls";
-import { getErrorMessageParser } from "./get-error-message-parser";
+} from "../client-helpers";
+import { Network } from "../../networks";
+import { track } from "../../track";
+import { baseLogger } from "../../utils/logger";
+import { LWorksEnvironment } from "../../environment";
+import { getSentinelUrl } from "../../urls";
+import { getErrorMessageParser } from "../../get-error-message-parser";
+
+import { StreamRulesQueryResult, StreamsRule, StreamsRuleType, StreamsRuleUpdate } from "./types";
 
 const logger = baseLogger.child({ client: "sentinel" });
 const errorMessageParser = getErrorMessageParser(logger);

@@ -1,6 +1,7 @@
-import { Environment } from "./environment";
+import { Environment } from "../../environment";
+import { baseLogger } from "../../utils/logger";
+
 import { MirrorOptions, MirrorResponseError, callMirror } from "./mirror-client";
-import { baseLogger } from "./utils/logger";
 
 export type FallbackOptions = {
   fallbackStatusCodes: number[];

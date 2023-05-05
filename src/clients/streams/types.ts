@@ -1,4 +1,4 @@
-import { Chain, LegacyChainStrings } from "./chain";
+import { Chain, LegacyChainStrings } from "../../chain";
 
 export enum StreamsRuleType {
   HCSMessagesByTopicId = 0,

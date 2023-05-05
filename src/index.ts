@@ -1,6 +1,6 @@
 export { configure, setAccessToken, setNetwork, setEnvironment, disableTracking } from "./config";
-export { callMirror } from "./mirror-client";
-export { callMirrorWithFallback } from "./mirror-client-with-fallback";
+export { callMirror } from "./clients/hedera-mirror/mirror-client";
+export { callMirrorWithFallback } from "./clients/hedera-mirror/mirror-client-with-fallback";
 export {
   createRule,
   deleteRuleById,
@@ -9,7 +9,7 @@ export {
   getRules,
   upsertRule,
   queryRules,
-} from "./sentinel-client";
+} from "./clients/streams/sentinel-client";
 export {
   adminDeleteAlarmsForOwner,
   adminDisableAlarmsForOwner,
@@ -21,16 +21,16 @@ export {
   getUnassembledAlarm,
   upsertAlarm,
   adminUpsertAlarm,
-} from "./multichain-monitoring-client";
+} from "./clients/types.ts/multichain-monitoring-client";
 export { Network, parseNetwork } from "./networks";
 export { Environment, parseEnvironment, parseLWorksEnvironment } from "./environment";
 export type { LWorksEnvironment } from "./environment";
 export { Chain, parseChain } from "./chain";
-export * as MirrorResponse from "./mirror-api-types";
-export * as SentinelTypes from "./sentinel-types";
+export * as MirrorResponse from "./clients/hedera-mirror/types";
+export * as SentinelTypes from "./clients/streams/types";
 export * as LworksClientTypes from "./types";
 export {
   getAllHCSMessages,
   decodeBase64Message,
   getCompleteHCSMessageBySequenceNumber,
-} from "./hcs";
+} from "./clients/hedera-mirror/hcs";

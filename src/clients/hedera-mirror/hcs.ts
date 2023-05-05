@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
 
-import { HCSTopicMessage, HCSTopicMessagesResponse } from "./mirror-api-types";
+import { HCSTopicMessage, HCSTopicMessagesResponse } from "./types";
 import { MirrorOptions, callMirror } from "./mirror-client";
 
 export type HasMessage = { message: string };

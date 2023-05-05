@@ -1,19 +1,19 @@
 import fetch from "node-fetch";
 import retry from "async-retry";
 
-import { Network } from "./networks";
-import { track } from "./track";
-import { libraryVersion } from "./config";
+import { Network } from "../../networks";
+import { track } from "../../track";
+import { libraryVersion } from "../../config";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
   timeElapsed,
-} from "./client-helpers";
-import { baseLogger } from "./utils/logger";
-import { Environment } from "./environment";
-import { getMirrorUrl } from "./urls";
+} from "../client-helpers";
+import { baseLogger } from "../../utils/logger";
+import { Environment } from "../../environment";
+import { getMirrorUrl } from "../../urls";
 
 const logger = baseLogger.child({ client: "mirror" });
 const trackedEventName = "Mirror Call";
@@ -147,7 +147,10 @@ export async function callMirror<T>(endpoint: string, options: MirrorOptions = {
   if (!endpoint) throw new Error("Endpoint is required");
 
   const { network } = ensureNetwork(options);
-  const environment = ensureEnvironment(options);
+  const environment = ensureEnvironment({
+    ...options,
+    environmentLookup: "LWORKS_MIRROR_ENVIRONMENT",
+  });
 
   const { accessToken } =
     environment === Environment.public ? { accessToken: "" } : ensureAccessToken(network, options);

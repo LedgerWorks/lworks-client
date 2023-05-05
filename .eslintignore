@@ -1,4 +1,4 @@
 dist/
-src/generated
+src/clients/hedera-mirror/generated
 jest.config.js
 setup-jest.js
