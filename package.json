@@ -1,6 +1,6 @@
 {
   "name": "lworks-client",
-  "version": "2.12.3",
+  "version": "2.12.4-alpha",
   "description": "",
   "main": "dist/index.js",
   "repository": {
@@ -64,5 +64,9 @@
     "Hedera",
     "hashgraph",
     "web3"
-  ]
+  ],
+  "exports": {
+    "./features/*.js": "./src/features/*.js",
+    "./features/private-internal/*": null
+  }
 }

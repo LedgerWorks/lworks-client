@@ -1,10 +1,13 @@
 import { Environment } from "./environment";
 import { MirrorOptions, MirrorResponseError, callMirror } from "./mirror-client";
+import { baseLogger } from "./utils/logger";
 
 export type FallbackOptions = {
   fallbackStatusCodes: number[];
   fallbackOptions: MirrorOptions;
 };
+
+const logger = baseLogger.child({ client: "mirror-fallback" });
 
 /**
  * This is a helpful wrapper around the callMirror function. First, call the mirror with the specified options. If a 404 or other one of the optionally specified fallbackStatusCodes is returned, make the same call to the public mirror or optionally specified fallbackOptions.
@@ -23,7 +26,7 @@ export async function callMirrorWithFallback<T>(
     return await callMirror<T>(endpoint, baseOptions);
   } catch (e) {
     if (e instanceof MirrorResponseError && fallbackStatusCodes.includes(e.status)) {
-      console.debug(`Falling back to public mirror due to: ${e.message}`);
+      logger.debug(`Falling back to public mirror due to: ${e.message}`);
       return callMirror<T>(endpoint, { ...baseOptions, ...fallbackOptions });
     }
     throw e;
