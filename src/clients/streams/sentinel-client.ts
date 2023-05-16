@@ -26,6 +26,7 @@ type SentinelOptions = {
   network?: Network | "mainnet" | "testnet";
   environment?: LWorksEnvironment;
   accessToken?: string;
+  bailRetryStatuses?: number[];
 };
 
 type SentinelQueryOptions = SentinelOptions & {
@@ -138,7 +139,7 @@ async function callSentinelApi<TResponse = unknown>(
           const error = new Error(
             [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
           );
-          if (shouldBailRetry(resp)) {
+          if (shouldBailRetry(resp, config.bailRetryStatuses)) {
             bail(error);
           }
           throw error;

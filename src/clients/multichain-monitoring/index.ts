@@ -4,59 +4,35 @@ import fetch from "node-fetch";
 import retry from "async-retry";
 
 import { libraryVersion } from "../../config";
+import { baseLogger } from "../../utils/logger";
+import { getErrorMessageParser } from "../../get-error-message-parser";
+import { getHeadersWithIamSignature } from "../../utils/get-headers-with-iam-signature";
+import { AwsCredentials } from "../../types/aws";
+import { getMultichainMetricsUrl } from "../urls";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
 } from "../client-helpers";
-import { baseLogger } from "../../utils/logger";
-import { getMultichainMetricsUrl } from "../urls";
-import { getErrorMessageParser } from "../../get-error-message-parser";
+import { IamApiCallOptions, SignableRequest, StandardApiResult } from "../../types";
+
 import {
-  AccessTokenApiCallOptions,
-  ApiSavableAlarm,
+  AdminCallMultichainOptions,
+  AdminCallWithOwner,
+  AdminSaveAlarmRequest,
+  CallWithAlarmIdOptions,
+  MultichainApiOptions,
+  OwnerCallMultichainApiOptions,
+  OwnerCallSaveAlarmRequest,
+  OwnerCallWithAlarmIdOptions,
   AssembledMetricAlarm,
   DeleteOwnerAlarmsResponseData,
   DisableOwnerAlarmsResponseData,
-  IamApiCallOptions,
   MetricAlarm,
-  SignableRequest,
-  StandardApiResult,
-} from "../../types";
-import { getHeadersWithIamSignature } from "../../utils/get-headers-with-iam-signature";
-import { AwsCredentials } from "../../types/aws";
+} from "./types";
 
 const logger = baseLogger.child({ client: "multichain-metrics" });
-
-type CallWithAlarmIdOptions = {
-  alarmId: string;
-};
-
-type OwnerCallWithAlarmIdOptions = AccessTokenApiCallOptions & {
-  alarmId: string;
-};
-
-type AdminCallWithOwner = IamApiCallOptions & {
-  owner: string;
-};
-
-type SaveAlarmRequest = {
-  body: ApiSavableAlarm;
-};
-
-type OwnerCallSaveAlarmRequest = AccessTokenApiCallOptions & SaveAlarmRequest;
-type AdminSaveAlarmRequest = AdminCallWithOwner &
-  SaveAlarmRequest & {
-    alarmId?: string;
-  };
-
-type OwnerCallMultichainApiOptions =
-  | AccessTokenApiCallOptions
-  | OwnerCallWithAlarmIdOptions
-  | OwnerCallSaveAlarmRequest;
-type AdminCallMultichainOptions = IamApiCallOptions | AdminCallWithOwner | AdminSaveAlarmRequest;
-type MultichainApiOptions = OwnerCallMultichainApiOptions | AdminCallMultichainOptions;
 
 function isAdminCall(options: MultichainApiOptions): options is AdminCallMultichainOptions {
   const adminCallDiscriminator: keyof AdminCallMultichainOptions = "credentials";
@@ -129,7 +105,7 @@ export async function callMultichainApi<TResponse = unknown>(
           const error = new Error(
             [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
           );
-          if (shouldBailRetry(resp)) {
+          if (shouldBailRetry(resp, options.bailRetryStatuses)) {
             bail(error);
           }
           throw error;
@@ -294,3 +270,5 @@ export async function adminUpsertAlarm(
   });
   return metricAlarm;
 }
+
+export * from "./types";

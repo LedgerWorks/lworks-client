@@ -21,13 +21,14 @@ export {
   getUnassembledAlarm,
   upsertAlarm,
   adminUpsertAlarm,
-} from "./clients/types.ts/multichain-monitoring-client";
+} from "./clients/multichain-monitoring";
 export { Network, parseNetwork } from "./networks";
 export { Environment, parseEnvironment, parseLWorksEnvironment } from "./environment";
 export type { LWorksEnvironment } from "./environment";
 export { Chain, parseChain } from "./chain";
 export * as MirrorResponse from "./clients/hedera-mirror/types";
-export * as SentinelTypes from "./clients/streams/types";
+export * as StreamsTypes from "./clients/streams/types";
+export * as MultichainTypes from "./clients/multichain-monitoring/types";
 export * as LworksClientTypes from "./types";
 export {
   getAllHCSMessages,

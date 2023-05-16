@@ -1,7 +1,9 @@
 import { RulesLogic, AdditionalOperation } from "json-logic-js";
 
+import { AccessTokenApiCallOptions, IamApiCallOptions } from "../../types";
 import { Chain } from "../../chain";
 
+// Model types
 export type LeafOperator = RulesLogic<AdditionalOperation>;
 export type BranchOperator = Record<string, RulesLogic<AdditionalOperation>>;
 export type Operator = LeafOperator | BranchOperator;
@@ -99,6 +101,7 @@ export type DeleteOwnerAlarmsResponseData = {
   deletedAlarmIds: string[];
 };
 
+// Request types
 type NonSettableAlarmFields =
   | "alarmId"
   | "sort"
@@ -112,3 +115,42 @@ type NonSettableAlarmFields =
  * to save an alarm via the alarms API
  */
 export type ApiSavableAlarm = Omit<MetricAlarm, NonSettableAlarmFields>;
+
+export type CallWithAlarmIdOptions = {
+  alarmId: string;
+};
+
+export type OwnerCallWithAlarmIdOptions = AccessTokenApiCallOptions & {
+  alarmId: string;
+};
+
+export type AdminCallWithOwner = IamApiCallOptions & {
+  owner: string;
+};
+
+export type SaveAlarmRequest = {
+  body: ApiSavableAlarm;
+};
+
+export type OwnerCallSaveAlarmRequest = AccessTokenApiCallOptions & SaveAlarmRequest;
+export type AdminSaveAlarmRequest = AdminCallWithOwner &
+  SaveAlarmRequest & {
+    alarmId?: string;
+  };
+
+export type OwnerCallMultichainApiOptions =
+  | AccessTokenApiCallOptions
+  | OwnerCallWithAlarmIdOptions
+  | OwnerCallSaveAlarmRequest;
+export type AdminCallMultichainOptions =
+  | IamApiCallOptions
+  | AdminCallWithOwner
+  | AdminSaveAlarmRequest;
+
+type BaseCallOptions = {
+  bailRetryStatuses?: number[];
+};
+
+export type MultichainApiOptions =
+  | (OwnerCallMultichainApiOptions & BaseCallOptions)
+  | (AdminCallMultichainOptions & BaseCallOptions);
