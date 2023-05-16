@@ -21,7 +21,7 @@ export {
   getUnassembledAlarm,
   upsertAlarm,
   adminUpsertAlarm,
-} from "./clients/types.ts/multichain-monitoring-client";
+} from "./clients/multichain-monitoring";
 export { Network, parseNetwork } from "./networks";
 export { Environment, parseEnvironment, parseLWorksEnvironment } from "./environment";
 export type { LWorksEnvironment } from "./environment";

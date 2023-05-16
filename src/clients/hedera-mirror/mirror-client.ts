@@ -23,6 +23,7 @@ type MirrorConfig = {
   network: Network;
   environment: Environment;
   accessToken: string;
+  bailRetryStatuses?: number[];
 };
 
 export type MirrorOptions = Partial<
@@ -106,7 +107,7 @@ async function get<T>(endpoint: string, config: MirrorConfig): Promise<T> {
             errorResponseMessage,
           });
           const error = new MirrorResponseError(resp.status, url, errorResponseMessage);
-          if (shouldBailRetry(resp)) {
+          if (shouldBailRetry(resp, config.bailRetryStatuses)) {
             bail(error);
           }
           throw error;

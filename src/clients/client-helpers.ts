@@ -17,7 +17,7 @@ function getToken(network: Network): string | undefined {
   const tokenValue = networkToken ?? fallbackToken ?? getAccessToken() ?? undefined;
 
   if (tokenValue === networkToken) {
-    baseLogger.trace("using LWORKS_<network>_TOKEN");
+    baseLogger.trace({ network }, "using LWORKS_<network>_TOKEN");
   } else if (tokenValue === fallbackToken) {
     baseLogger.trace("using LWORKS_TOKEN");
   } else if (tokenValue) {
@@ -83,6 +83,12 @@ export function timeElapsed(startedAt: number): number {
   return Date.now() - startedAt;
 }
 
-export function shouldBailRetry(response: Response) {
-  return response.status === 400 || response.status === 401 || response.status === 404;
+// Bad request, unauthorized, not found should bail retries by default
+const defaultBailStatuses = [400, 401, 404];
+
+export function shouldBailRetry(
+  response: Response,
+  bailRetryStatuses: number[] = defaultBailStatuses
+) {
+  return bailRetryStatuses.includes(response.status);
 }
