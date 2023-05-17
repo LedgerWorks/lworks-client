@@ -34,5 +34,6 @@ export * as LworksClientTypes from "./types";
 export {
   getAllHCSMessages,
   decodeBase64Message,
+  parseBase64Message,
   getCompleteHCSMessageBySequenceNumber,
 } from "./clients/hedera-mirror/hcs";
