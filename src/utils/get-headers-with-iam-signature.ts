@@ -1,4 +1,4 @@
-import { URL } from "node:url";
+import { parse as parseUrl } from "url";
 
 import { sign } from "aws4";
 
@@ -22,12 +22,18 @@ export function getHeadersWithIamSignature(
   region?: string,
   service = "execute-api"
 ): Record<string, string> {
-  const { hostname, pathname, search } = new URL(url);
+  const { hostname, path } = parseUrl(url);
+  if (!hostname) {
+    throw new Error(`Hostname could not be parsed for url ${url}`);
+  }
+  if (!path) {
+    throw new Error(`Path could not be parsed for url ${url}`);
+  }
   const signed = sign(
     {
       method: requestOptions.method ?? "GET",
       host: hostname,
-      path: pathname + search,
+      path,
       service,
       headers: requestOptions.headers,
       body: requestOptions.body,
