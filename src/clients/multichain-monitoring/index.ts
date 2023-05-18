@@ -1,7 +1,6 @@
-import { randomUUID } from "node:crypto";
-
 import fetch from "node-fetch";
 import retry from "async-retry";
+import { v4 as uuid } from "uuid";
 
 import { libraryVersion } from "../../config";
 import { baseLogger } from "../../utils/logger";
@@ -262,7 +261,7 @@ export async function adminGetManagedAlarms(options: IamApiCallOptions): Promise
 export async function adminUpsertAlarm(
   options: AdminSaveAlarmRequest
 ): Promise<AssembledMetricAlarm> {
-  const alarmId = isCallWithAlarmIdOptions(options) ? options.alarmId : randomUUID();
+  const alarmId = isCallWithAlarmIdOptions(options) ? options.alarmId : uuid();
   const endpoint = `/api/v1/admin/owners/${options.owner}/alarms/${alarmId}`;
   const { data: metricAlarm } = await callMultichainApi<AssembledMetricAlarm>(endpoint, {
     ...options,
