@@ -157,5 +157,10 @@ export async function callMirror<T>(endpoint: string, options: MirrorOptions = {
   const { accessToken } =
     environment === Environment.public ? { accessToken: "" } : ensureAccessToken(network, options);
 
-  return get<T>(endpoint, { accessToken, network, environment });
+  return get<T>(endpoint, {
+    accessToken,
+    network,
+    environment,
+    bailRetryStatuses: options.bailRetryStatuses,
+  });
 }
