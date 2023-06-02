@@ -37,12 +37,25 @@ export type MetricAlarmDefinition = {
   threshold?: number | string;
 };
 
+/** The definition for an individual field override on an alarm */
+type OverrideDefinition = {
+  label: string;
+  description?: string;
+  type: string;
+  valueTransformation?: Operator;
+  fieldToOverride: string;
+  required: boolean;
+};
+
+/** A set of field override definitions on an alarm */
+export type OverrideDefinitions = Record<string, OverrideDefinition>;
+
 /** The app model for a potentially-partial metric alarm */
 export type MetricAlarm = {
   alarmId: string;
   sort: string;
   owner: string;
-  name: string;
+  name?: string;
   entity?: string;
   chain?: Chain;
   definition?: Partial<MetricAlarmDefinition>;
@@ -51,6 +64,7 @@ export type MetricAlarm = {
   timeToLive?: number;
   tags?: Record<string, string>;
   extendedAlarmId?: string;
+  overrideDefinitions?: OverrideDefinitions;
   createdDate: Date;
   updatedDate: Date;
   deletedDate?: Date;
