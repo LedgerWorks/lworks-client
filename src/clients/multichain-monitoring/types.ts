@@ -37,18 +37,35 @@ export type MetricAlarmDefinition = {
   threshold?: number | string;
 };
 
-/** The definition for an individual field override on an alarm */
-type OverrideDefinition = {
+export type OverrideValue = string | number;
+
+export type OverrideDefinition = {
   label: string;
   description?: string;
   type: string;
-  valueTransformation?: Operator;
+  onSaveTransformation?: Operator;
+  onReadTransformation?: Operator;
   fieldToOverride: string;
   required: boolean;
 };
 
-/** A set of field override definitions on an alarm */
 export type OverrideDefinitions = Record<string, OverrideDefinition>;
+
+/** Allows representing both an actual override value and the transformed
+ * version of the value using the onReadTransform function. If no
+ * onReadTransform supplied, both values will be the same
+ */
+export type AssembledOverrideValue = {
+  raw: OverrideValue;
+  transformed: OverrideValue;
+};
+
+type AssembledOverrideDefinition = OverrideDefinition & {
+  defaultValue?: AssembledOverrideValue;
+  currentValue?: AssembledOverrideValue;
+};
+
+export type AssembledOverrideDefinitions = Record<string, AssembledOverrideDefinition>;
 
 /** The app model for a potentially-partial metric alarm */
 export type MetricAlarm = {
@@ -74,10 +91,15 @@ export type MetricAlarm = {
  * The app model for an alarm that has been fully assembled by combining
  * the alarm's properties with any inherited properties from the 'extendedAlarmId'
  */
-export type AssembledMetricAlarm = Omit<MetricAlarm, "entity" | "chain" | "definition"> & {
+export type AssembledMetricAlarm = Omit<
+  MetricAlarm,
+  "entity" | "chain" | "definition" | "name" | "overrideDefinitions"
+> & {
+  name: string;
   entity: string;
   chain: Chain;
   definition: MetricAlarmDefinition;
+  overrideDefinitions: AssembledOverrideDefinitions;
 };
 
 export enum AlarmState {
