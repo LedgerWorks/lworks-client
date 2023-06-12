@@ -44,7 +44,7 @@ async function deleteRulesForNetwork(network: "mainnet" | "testnet") {
 }
 
 jest.setTimeout(30_000);
-describe.skip("sentinel client", () => {
+describe("sentinel client", () => {
   afterAll(async () => {
     await Promise.all([deleteRulesForNetwork("mainnet"), deleteRulesForNetwork("testnet")]);
   });
