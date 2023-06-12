@@ -9,6 +9,7 @@ export type BranchOperator = Record<string, RulesLogic<AdditionalOperation>>;
 export type Operator = LeafOperator | BranchOperator;
 
 export enum NotifyOn {
+  Never = "never",
   Always = "always",
   AlarmBreached = "alarmBreached",
   InAlarm = "inAlarm",
@@ -24,29 +25,36 @@ export type AlarmNotification = {
   };
 };
 
-export type MetricAlarmDefinition = {
-  startTime: string;
-  endTime: string;
-  interval: string;
+export type OverrideValue = string | number;
+
+/**
+ * The alarm definition that results from assembling an alarm with any
+ * extended alarm & defaulted definition fields
+ */
+type AssembledMetricAlarmDefinition = {
+  startTime?: string;
+  endTime?: string;
+  interval?: string;
+  variables: Record<string, OverrideValue>;
   data: Record<string, Operator>;
-  datapoint: Operator;
-  evaluation: Operator;
+  datapoint?: Operator;
+  evaluation?: Operator;
   context: Operator;
   notification?: AlarmNotification;
-  unit?: string;
   threshold?: number | string;
+  unit?: string;
 };
-
-export type OverrideValue = string | number;
 
 export type OverrideDefinition = {
   label: string;
   description?: string;
   type: string;
+  multiline?: boolean;
   onSaveTransformation?: Operator;
   onReadTransformation?: Operator;
   fieldToOverride: string;
   required: boolean;
+  sortOrder?: number;
 };
 
 export type OverrideDefinitions = Record<string, OverrideDefinition>;
@@ -60,28 +68,41 @@ export type AssembledOverrideValue = {
   transformed: OverrideValue;
 };
 
-type AssembledOverrideDefinition = OverrideDefinition & {
+export type AssembledOverrideDefinition = Omit<OverrideDefinition, "multiline" | "sortOrder"> & {
+  multiline: boolean;
+  // Sort order dictates where overrides show up in forms; lower numbers show up before higher ones
+  sortOrder: number;
   defaultValue?: AssembledOverrideValue;
   currentValue?: AssembledOverrideValue;
 };
 
 export type AssembledOverrideDefinitions = Record<string, AssembledOverrideDefinition>;
 
-/** The app model for a potentially-partial metric alarm */
-export type MetricAlarm = {
+type BaseMetricAlarm = {
   alarmId: string;
   sort: string;
   owner: string;
   name?: string;
   entity?: string;
   chain?: Chain;
-  definition?: Partial<MetricAlarmDefinition>;
+  definition?: Partial<AssembledMetricAlarmDefinition>;
   description?: string;
   disabled?: boolean;
   timeToLive?: number;
   tags?: Record<string, string>;
   extendedAlarmId?: string;
   overrideDefinitions?: OverrideDefinitions;
+};
+
+/** The database model for a potentially-partial metric alarm */
+export type MetricAlarmDbModel = BaseMetricAlarm & {
+  createdDate: string;
+  updatedDate?: string; // Defaults to created date in app model
+  deletedDate?: string;
+};
+
+/** The app model for a potentially-partial metric alarm */
+export type MetricAlarm = BaseMetricAlarm & {
   createdDate: Date;
   updatedDate: Date;
   deletedDate?: Date;
@@ -90,16 +111,43 @@ export type MetricAlarm = {
 /**
  * The app model for an alarm that has been fully assembled by combining
  * the alarm's properties with any inherited properties from the 'extendedAlarmId'
+ * and default alarm values
  */
 export type AssembledMetricAlarm = Omit<
   MetricAlarm,
-  "entity" | "chain" | "definition" | "name" | "overrideDefinitions"
+  "name" | "definition" | "overrideDefinitions" | "tags"
 > & {
   name: string;
+  definition: AssembledMetricAlarmDefinition;
+  overrideDefinitions: AssembledOverrideDefinitions;
+  tags: Record<string, string>;
+};
+
+/**
+ * An alarm definition that can be saved to our database
+ */
+export type EvaluatableAlarmDefinition = Omit<
+  AssembledMetricAlarmDefinition,
+  "interval" | "datapoint" | "evaluation" | "startTime" | "endTime"
+> & {
+  interval: string;
+  datapoint: Operator;
+  evaluation: Operator;
+  startTime: string;
+  endTime: string;
+};
+
+/**
+ * The app model for an alarm that has enough information to be evaluated
+ * when triggered
+ */
+export type EvaluatableMetricAlarm = Omit<
+  AssembledMetricAlarm,
+  "entity" | "chain" | "definition"
+> & {
   entity: string;
   chain: Chain;
-  definition: MetricAlarmDefinition;
-  overrideDefinitions: AssembledOverrideDefinitions;
+  definition: EvaluatableAlarmDefinition;
 };
 
 export enum AlarmState {

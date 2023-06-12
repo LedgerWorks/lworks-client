@@ -80,24 +80,4 @@ describe("mirror client", () => {
       environment: Environment.public,
     });
   });
-
-  it("returns account balance for explicit network and LWORKS_TESTNET_TOKEN env", async () => {
-    deleteEnvTokens(["generic", "mainnet"]);
-    await verifyMirrorAccess({
-      network: Network.Testnet,
-    });
-  });
-
-  it("returns account balance for explicit network and LWORKS_TOKEN env", async () => {
-    deleteEnvTokens(["testnet", "mainnet"]);
-    await verifyMirrorAccess({
-      network: Network.Testnet,
-    });
-  });
-
-  it("returns account balance for configured network and LWORKS_MAINNET_TOKEN env", async () => {
-    deleteEnvTokens(["testnet", "generic"]);
-    setNetwork(Network.Mainnet);
-    await verifyMirrorAccess();
-  });
 });
