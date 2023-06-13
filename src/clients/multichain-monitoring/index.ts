@@ -14,7 +14,7 @@ import {
   ensureNetwork,
   shouldBailRetry,
 } from "../client-helpers";
-import { IamApiCallOptions, SignableRequest, StandardApiResult } from "../../types";
+import { SignableRequest, StandardApiResult } from "../../types";
 
 import {
   AdminCallMultichainOptions,
@@ -29,6 +29,7 @@ import {
   DeleteOwnerAlarmsResponseData,
   DisableOwnerAlarmsResponseData,
   MetricAlarm,
+  AdminManagedAlarmsRequest,
 } from "./types";
 
 const logger = baseLogger.child({ client: "multichain-metrics" });
@@ -239,10 +240,16 @@ export async function adminDeleteAlarmsForOwner(options: AdminCallWithOwner): Pr
  * @param options The options to use when fetching the alarms
  * @returns All managed alarms for the specified owner
  */
-export async function adminGetManagedAlarms(options: IamApiCallOptions): Promise<MetricAlarm[]> {
-  const chainQuery = options.chain ? `?chain=${options.chain}` : "";
+export async function adminGetManagedAlarms(
+  options: AdminManagedAlarmsRequest
+): Promise<MetricAlarm[]> {
+  const chainQueryPart = options.chain ? `chain=${options.chain}` : "";
+  const tagKeyValuePairs = options.tags ? Object.entries(options.tags) : [];
+  const tagsQueryParts = tagKeyValuePairs.map(([key, value]) => `tags=${key}::${value}`);
+  const allQueryParts = [chainQueryPart, ...tagsQueryParts];
+  const queryString = allQueryParts.length ? `?${allQueryParts.join("&")}` : "";
   const { data: alarms } = await callMultichainApi<MetricAlarm[]>(
-    `/api/v1/admin/managed-alarms${chainQuery}`,
+    `/api/v1/admin/managed-alarms${queryString}`,
     {
       ...options,
       method: "GET",
