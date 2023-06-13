@@ -212,6 +212,10 @@ export type AdminCallWithOwner = IamApiCallOptions & {
   owner: string;
 };
 
+export type AdminManagedAlarmsRequest = IamApiCallOptions & {
+  tags?: Record<string, string>;
+};
+
 export type SaveAlarmRequest = {
   body: ApiSavableAlarm;
 };
