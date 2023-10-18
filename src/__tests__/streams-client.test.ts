@@ -44,7 +44,7 @@ async function deleteRulesForNetwork(network: "mainnet" | "testnet") {
 }
 
 jest.setTimeout(30_000);
-describe("sentinel client", () => {
+describe("streams client", () => {
   afterAll(async () => {
     await Promise.all([deleteRulesForNetwork("mainnet"), deleteRulesForNetwork("testnet")]);
   });
@@ -67,7 +67,7 @@ describe("sentinel client", () => {
         actionWebhookUrl,
         chain: Chain.Hedera,
       },
-      { network: "testnet" }
+      { network: "testnet", waitForPropagation: true }
     );
     const updatedRules = await getRulesForTestRun({ network: Network.Testnet });
     expect(result.length + 1).toEqual(updatedRules.length);
@@ -95,7 +95,7 @@ describe("sentinel client", () => {
         actionWebhookUrl,
         chain: Chain.Hedera,
       },
-      { network: "testnet" }
+      { network: "testnet", waitForPropagation: true }
     );
     let updatedRules = await getRulesForTestRun({ network: Network.Testnet });
     expect(result.length + 1).toEqual(updatedRules.length);
@@ -109,7 +109,7 @@ describe("sentinel client", () => {
         actionWebhookUrl,
         chain: Chain.Hedera,
       },
-      { ruleId: createdRule.ruleId, network: "testnet" }
+      { ruleId: createdRule.ruleId, network: "testnet", waitForPropagation: true }
     );
 
     updatedRules = await getRulesForTestRun({ network: Network.Testnet });
@@ -129,12 +129,12 @@ describe("sentinel client", () => {
         actionWebhookUrl,
         chain: "hedera",
       },
-      { network: "testnet" }
+      { network: "testnet", waitForPropagation: true }
     );
     let updatedRules = await getRulesForTestRun({ network: Network.Testnet });
     expect(result.length + 1).toEqual(updatedRules.length);
 
-    await deleteRuleById(createdRule.ruleId, { network: "testnet" });
+    await deleteRuleById(createdRule.ruleId, { network: "testnet", waitForPropagation: true });
     updatedRules = await getRulesForTestRun({ network: Network.Testnet });
     expect(result.length).toEqual(updatedRules.length);
   });
@@ -155,7 +155,7 @@ describe("sentinel client", () => {
               actionWebhookUrl: `${actionWebhookUrl}?i=1`,
               chain: "hedera",
             },
-            { network: "testnet" }
+            { network: "testnet", waitForPropagation: true }
           )
         )
       );

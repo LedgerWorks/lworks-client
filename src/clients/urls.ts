@@ -11,7 +11,7 @@ function throwIfPublic(environment: Environment) {
   }
 }
 
-export function getSentinelUrl(environment: Environment, network: Network): string {
+export function getStreamsUrl(environment: Environment, network: Network): string {
   throwIfPublic(environment);
   const environmentPrefix = getEnvironmentPrefix(environment);
   return `https://${network}.streams.${environmentPrefix}api.lworks.io`;

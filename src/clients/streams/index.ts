@@ -1,2 +1,2 @@
 export * from "./types";
-export * from "./sentinel-client";
+export * from "./client";
