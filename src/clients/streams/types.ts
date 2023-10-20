@@ -8,7 +8,7 @@ export enum StreamsRuleType {
   ContractCallsByContractId = 4,
   SourceAccountBasedSecurityRule = 5,
   AccountActivityByAccount = 6,
-  MetricAlarmsByOwner = 7,
+  MetricAlarmsByAlarmId = 7,
 }
 
 export type StreamsRuleBatchOptions = {
