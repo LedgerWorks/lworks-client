@@ -1,10 +1,10 @@
 # LedgerWorks Client
 
-This library is intended to be used with the [Ledger Works'](https://lworks.io) Hedera Mirror REST API and the ledger event notification service Sentinel. This library also supports the public Hedera Mirror REST API.
+This library is intended to be used with the [Ledger Works'](https://lworks.io) Streams API, TimeSeries API, and Hedera Mirror REST API.
 
-To learn more about these services, see [Mirror Docs](https://docs.lworks.io/category/mirror-api) and [Sentinel Docs](https://docs.lworks.io/category/sentinel).
+To learn more about these services, see [LWorks Docs](https://docs.lworks.io).
 
-The client  uses `node-fetch` with automatic retry logic provided by `async-retry` and custom authentication handling. [Sign up](https://app.lworks.io/signup) for a free account if you don't have an existing access key. By default, this library will provide anonymous usage data back to LedgerWorks.
+The client  uses `node-fetch` with automatic retry logic provided by `async-retry` and custom authentication handling. By default, this library will provide anonymous usage data back to LedgerWorks.
 
 Support and questions should be directed to [our discord](https://discord.gg/Rph3nbEEFA).
 
@@ -14,45 +14,15 @@ Support and questions should be directed to [our discord](https://discord.gg/Rph
 npm install lworks-client
 ```
 
-## Mirror Usage
-
-### Lworks Mirror
-
-Once your access token is configured, you can call the mirror providing a network and endpoint (Endpoint documentation can be found [on the Hedera public mirror](https://mainnet-public.mirrornode.hedera.com/api/v1/docs/)).
+## Call Streams
 
 ```ts
-const { callMirror, MirrorResponse } = require("lworks-client");
-
-await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
-(
-  "/api/v1/transactions?limit=100",
-  { network: Network.Mainnet }
-)
-```
-
-### Public Hedera Mirror
-
-For those without access to the Lworks mirror, this library also supports the public hedera mirror.
-
-```ts
-const { callMirror, MirrorResponse } = require("lworks-client");
-
-await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
-(
-  "/api/v1/transactions?limit=100",
-  { network: Network.Mainnet, environment: Environment.public }
-)
-```
-
-## Call Sentinel
-
-```ts
-import { queryRules, getRuleById, deleteRuleById SentinelTypes, getRuleById } from "lworks-client";
+import { queryRules, getRuleById, deleteRuleById, StreamTypes, getRuleById } from "lworks-client";
 
 // Query all rules targeting HCS Topic activity
 const result = await queryRules({
   network: Network.Testnet,
-  ruleType: SentinelTypes.StreamsRuleType.HCSMessagesByTopicId,
+  ruleType: StreamTypes.StreamsRuleType.HCSMessagesByTopicId,
 });
 
 let rules = result.rules;
@@ -60,7 +30,7 @@ let rules = result.rules;
 if(result.next) {
   const result2 = await queryRules({
     network: Network.Testnet,
-    ruleType: SentinelTypes.StreamsRuleType.HCSMessagesByTopicId,
+    ruleType: StreamTypes.StreamsRuleType.HCSMessagesByTopicId,
     next: result1.next,
   });
 
@@ -83,6 +53,24 @@ if(result.next) {
     }
   }
 }
+```
+
+## Mirror Usage
+
+### Lworks Mirror
+
+The LedgerWorks mirror is not longer a full archive node. It only holds a brief window of history.
+
+For this reason, you should only use the client with the public API for reliable queries.
+
+```ts
+const { callMirror, MirrorResponse } = require("lworks-client");
+
+await callMirror<MirrorResponse.Schemas["TransactionsResponse"]>
+(
+  "/api/v1/transactions?limit=100",
+  { network: Network.Mainnet, environment: Environment.public }
+)
 ```
 
 ## Options

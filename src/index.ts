@@ -10,7 +10,7 @@ export {
   getRules,
   upsertRule,
   queryRules,
-} from "./clients/streams/sentinel-client";
+} from "./clients/streams/client";
 export {
   adminDeleteAlarmsForOwner,
   adminDisableAlarmsForOwner,

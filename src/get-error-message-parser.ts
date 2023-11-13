@@ -6,7 +6,7 @@ type Logger = ReturnType<typeof createLogger>;
 async function parseResponseErrorMessage(response: Response, logger: Logger) {
   try {
     const responseBody = await response.json();
-    // Sentinel code-level errors
+    // Streams code-level errors
     if ("error" in responseBody) {
       return responseBody.error as string;
     }
