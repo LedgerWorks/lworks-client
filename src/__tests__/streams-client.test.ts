@@ -107,7 +107,6 @@ describe("streams client", () => {
         ruleType: StreamsRuleType.HCSMessagesByTopicId,
         ruleName: updatedName,
         actionWebhookUrl,
-        chain: Chain.Hedera,
       },
       { ruleId: createdRule.ruleId, network: "testnet", waitForPropagation: true }
     );
@@ -117,6 +116,7 @@ describe("streams client", () => {
 
     const foundRule = await getRuleById(createdRule.ruleId, { network: "testnet" });
     expect(foundRule).toHaveProperty("ruleName", updatedName);
+    expect(foundRule?.chain).toBeUndefined();
   });
 
   it("can delete a rule", async () => {

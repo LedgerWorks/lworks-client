@@ -20,7 +20,7 @@ export type StreamsRule = {
   ruleId: string;
   organizationId: string;
   userId: string;
-  chain: Chain | LegacyChainStrings;
+  chain?: Chain | LegacyChainStrings;
   ruleType: StreamsRuleType;
   predicateValue: string;
   ruleName?: string;
