@@ -7,6 +7,7 @@ export enum Chain {
   Kava = "kava",
   Evmos = "evmos",
   Flare = "flare",
+  Arbitrum = "arbitrum",
 }
 
 /**
