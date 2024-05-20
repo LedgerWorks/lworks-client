@@ -9,6 +9,7 @@ export enum Chain {
   Flare = "flare",
   Arbitrum = "arbitrum",
   Polygon = "polygon",
+  Offchain = "offchain",
 }
 
 /**
