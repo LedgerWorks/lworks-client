@@ -1,7 +1,7 @@
 import { Environment } from "./environment";
 import { Network } from "./networks";
 
-export const libraryVersion = "5.5.0";
+export const libraryVersion = "6.0.0";
 
 type Config = {
   network: null | Network;
