@@ -92,6 +92,8 @@ export type NotificationEventAuditRecord = {
   eventNumber: number;
   parentEventId: string;
   auditDateTime: string;
+  consensusDateTime?: string;
+  streamsDateTime?: string;
   destination?: string;
   destinationType?: NotifiableItemDestinationType;
   errorMessage?: string;
