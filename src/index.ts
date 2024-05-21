@@ -1,4 +1,4 @@
-export { configure, setAccessToken, setNetwork, setEnvironment, disableTracking } from "./config";
+export { configure, setAccessToken, setNetwork, setEnvironment } from "./config";
 export { callMirror } from "./clients/hedera-mirror/mirror-client";
 export { callMirrorWithFallback } from "./clients/hedera-mirror/mirror-client-with-fallback";
 export { getMirrorUrl } from "./clients/hedera-mirror/get-mirror-url";

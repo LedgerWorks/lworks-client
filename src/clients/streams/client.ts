@@ -6,14 +6,12 @@ import { libraryVersion } from "../../config";
 import { LWorksEnvironment } from "../../environment";
 import { getErrorMessageParser } from "../../get-error-message-parser";
 import { Network } from "../../networks";
-import { track } from "../../track";
 import { baseLogger } from "../../utils/logger";
 import {
   ensureAccessToken,
   ensureEnvironment,
   ensureNetwork,
   shouldBailRetry,
-  timeElapsed,
 } from "../client-helpers";
 import { getStreamsUrl } from "../urls";
 
@@ -21,7 +19,6 @@ import { StreamRulesQueryResult, StreamsRule, StreamsRuleType, StreamsRuleUpdate
 
 const logger = baseLogger.child({ client: "streams" });
 const errorMessageParser = getErrorMessageParser(logger);
-const trackedEventName = "Streams Call";
 
 type StreamsOptions = Partial<{
   network: Network | "mainnet" | "testnet";
@@ -94,7 +91,6 @@ async function callStreamsApi<TResponse = unknown>(
   endpoint: string,
   config: CallStreamsConfig
 ): Promise<StreamsApiResult<TResponse>> {
-  const startAt = Date.now();
   const { accessToken } = ensureAccessToken(config.network, config);
   const networkStack = config.network.toString();
 
@@ -102,9 +98,6 @@ async function callStreamsApi<TResponse = unknown>(
 
   const baseUrl = getStreamsUrl(environment, config.network);
   const url = `${baseUrl}${endpoint}`;
-  const parsedUrl = new URL(url);
-  const searchParams = new URLSearchParams(parsedUrl.search);
-  const queryParams = Object.fromEntries(searchParams.entries());
   let attempts = 0;
   const response = await retry(
     async (bail) => {
@@ -136,20 +129,6 @@ async function callStreamsApi<TResponse = unknown>(
           "Failed"
         );
 
-        track(trackedEventName, accessToken, {
-          status: "failed",
-          method: config.method,
-          timeElapsed: timeElapsed(startAt),
-          url,
-          pathname: parsedUrl.pathname,
-          queryParams,
-          endpoint,
-          networkStack,
-          attempts,
-          httpStatus: resp.status,
-          errorResponseMessage: errorMessage,
-        });
-
         const error = new Error(
           [`${resp.status} (${url})`, errorMessage].filter(Boolean).join(": ")
         );
@@ -169,17 +148,7 @@ async function callStreamsApi<TResponse = unknown>(
         },
         "Successful"
       );
-      track(trackedEventName, accessToken, {
-        status: "success",
-        timeElapsed: timeElapsed(startAt),
-        url,
-        pathname: parsedUrl.pathname,
-        queryParams,
-        endpoint,
-        networkStack,
-        attempts,
-        httpStatus: resp.status,
-      });
+
       return responseBody as StreamsApiResult<TResponse>;
     },
     { retries: 4 }

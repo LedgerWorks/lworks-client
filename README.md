@@ -4,7 +4,7 @@ This library is intended to be used with the [Ledger Works'](https://lworks.io) 
 
 To learn more about these services, see [LWorks Docs](https://docs.lworks.io).
 
-The client  uses `node-fetch` with automatic retry logic provided by `async-retry` and custom authentication handling. By default, this library will provide anonymous usage data back to LedgerWorks.
+The client  uses `node-fetch` with automatic retry logic provided by `async-retry` and custom authentication handling.
 
 Support and questions should be directed to [our discord](https://discord.gg/Rph3nbEEFA).
 
@@ -81,7 +81,6 @@ This global options has the following type
 
 ```ts
 type Config = {
-  disableTracking: boolean;
   network: null | Network;
   accessToken: null | string;
   environment: null | Environment;
@@ -162,24 +161,4 @@ configure({
 ```ts
 process.env.LWORKS_ENVIRONMENT = 'prod' # Use prod for all services
 process.env.LWORKS_MIRROR_ENVIRONMENT = 'public' # Override environment for the mirror only.
-```
-
-### Configure anonymous metrics
-
-Disable anonymous metric collection by calling one of the following
-
-```ts
-import { configure } from "lworks-client";
-
-configure({
-  disableTracking: true,
-});
-```
-
-or
-
-```ts
-import { disableTracking } from "lworks-client";
-
-disableTracking();
 ```
