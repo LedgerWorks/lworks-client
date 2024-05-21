@@ -1,17 +1,15 @@
 import { Environment } from "./environment";
 import { Network } from "./networks";
 
-export const libraryVersion = "5.5.0";
+export const libraryVersion = "6.0.0";
 
 type Config = {
-  disableTracking: boolean;
   network: null | Network;
   environment: null | Environment;
   accessToken: null | string;
 };
 
 const config: Config = {
-  disableTracking: false,
   network: null,
   environment: null,
   accessToken: null,
@@ -23,25 +21,6 @@ const config: Config = {
  */
 export function configure(options: Partial<Config>) {
   Object.assign(config, options);
-}
-
-/**
- * Gets the status of metrics collection, defaults to true
- * @returns boolean indicating if usage metrics are disabled
- */
-export function getDisabledTracking() {
-  return config.disableTracking;
-}
-
-/**
- * Disable anonymous usage metrics collection
- */
-export function disableTracking() {
-  config.disableTracking = true;
-}
-
-export function enableTracking() {
-  config.disableTracking = false;
 }
 
 /**
