@@ -1,11 +1,7 @@
 {
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts"],
   "compilerOptions": {
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext", "DOM"],
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

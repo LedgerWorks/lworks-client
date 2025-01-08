@@ -1,4 +1,3 @@
-import { Response } from "node-fetch";
 import createLogger from "pino";
 
 type Logger = ReturnType<typeof createLogger>;

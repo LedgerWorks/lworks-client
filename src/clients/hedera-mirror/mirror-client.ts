@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import retry from "async-retry";
 
 import { Network } from "../../networks";

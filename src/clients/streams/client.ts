@@ -1,5 +1,4 @@
 import retry from "async-retry";
-import fetch from "node-fetch";
 import invariant from "tiny-invariant";
 
 import { libraryVersion } from "../../config";
