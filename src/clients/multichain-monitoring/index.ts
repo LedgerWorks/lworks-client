@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import retry from "async-retry";
 import { v4 as uuid } from "uuid";
 

@@ -1,5 +1,3 @@
-import { Response } from "node-fetch";
-
 import { getAccessToken, getEnvironment, getNetwork } from "../config";
 import { knownLookup } from "../enums";
 import { Environment, parseEnvironment } from "../environment";
