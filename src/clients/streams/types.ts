@@ -1,12 +1,30 @@
 import { Chain, LegacyChainStrings } from "../../chain";
 
 export enum StreamsRuleType {
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   HCSMessagesByTopicId = 0,
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   TokenMintsByTokenId = 1,
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   TokenBurnsByTokenId = 2,
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   TokenTransfersByTokenId = 3,
   ContractCallsByContractId = 4,
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   SourceAccountBasedSecurityRule = 5,
+  /**
+   * @deprecated - this stream type is no longer supported
+   */
   AccountActivityByAccount = 6,
   MetricAlarmsByAlarmId = 7,
 }
